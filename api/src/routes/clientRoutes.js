@@ -87,6 +87,7 @@ const clientController = require("../controllers/clientController");
  */
 
 router.post("/add", clientController.addClient);
+
 /**
  * @swagger
  * /api/client/get:
@@ -113,5 +114,40 @@ router.post("/add", clientController.addClient);
  */
 
 router.get("/get", clientController.getClient); // เส้นทางสำหรับดึงข้อมูลของ Client
+
+/**
+ * @swagger
+ * /api/client/update/{client_id}:
+ *   put:
+ *     summary: Update an existing client
+ *     tags: [Client]
+ *     parameters:
+ *       - in: path
+ *         name: client_id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The ID of the client to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Client'
+ *     responses:
+ *       200:
+ *         description: Client updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Error updating client
+ */
+
+router.put("/update/:client_id", clientController.updateClient); // เส้นทางสำหรับอัปเดตข้อมูลของ Client
 
 module.exports = router;
