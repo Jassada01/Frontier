@@ -17,11 +17,17 @@ const clientController = require("../controllers/clientController");
  *           type: string
  *         name:
  *           type: string
+ *         name_eng:
+ *           type: string
  *         branch:
+ *           type: string
+ *         branch_eng:
  *           type: string
  *         address:
  *           type: string
  *         billing_address:
+ *           type: string
+ *         billing_address_eng:
  *           type: string
  *         tax_id:
  *           type: string
@@ -44,6 +50,11 @@ const clientController = require("../controllers/clientController");
  *         line_token:
  *           type: string
  *           description: Token for LINE integration
+ *         default_language:
+ *           type: string
+ *           default: "TH"
+ *         default_payment_method:
+ *           type: string
  *         is_active:
  *           type: boolean
  *           default: true
@@ -100,6 +111,11 @@ router.post("/add", clientController.addClient);
  *         schema:
  *           type: integer
  *         description: The ID of the client
+ *       - in: query
+ *         name: active
+ *         schema:
+ *           type: boolean
+ *         description: Filter clients by active status
  *     responses:
  *       200:
  *         description: Client information retrieved successfully

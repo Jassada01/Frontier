@@ -1,0 +1,23 @@
+const db = require("../config/dbConfig");
+
+exports.getProvinces = (req, res) => {
+  const { province_id } = req.query;
+
+  let query = `SELECT * FROM provinces`;
+  let params = [];
+
+  if (province_id) {
+    query += ` WHERE id = ?`;
+    params.push(province_id);
+  }
+
+  db.query(query, params, (err, results) => {
+    if (err) {
+      res
+        .status(500)
+        .send({ message: "Error retrieving province information", error: err });
+      return;
+    }
+    res.send(results);
+  });
+};

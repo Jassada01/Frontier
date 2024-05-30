@@ -4,9 +4,12 @@ exports.addClient = (req, res) => {
   const {
     client_code,
     name,
+    name_eng,
     branch,
+    branch_eng,
     address,
     billing_address,
+    billing_address_eng,
     tax_id,
     contact_person,
     phone,
@@ -17,6 +20,8 @@ exports.addClient = (req, res) => {
     attribute4,
     attribute5,
     line_token,
+    default_language,
+    default_payment_method,
     is_active,
     remark,
   } = req.body;
@@ -25,9 +30,12 @@ exports.addClient = (req, res) => {
     `INSERT INTO client (
       client_code,
       name,
+      name_eng,
       branch,
+      branch_eng,
       address,
       billing_address,
+      billing_address_eng,
       tax_id,
       contact_person,
       phone,
@@ -38,15 +46,20 @@ exports.addClient = (req, res) => {
       attribute4,
       attribute5,
       line_token,
+      default_language,
+      default_payment_method,
       is_active,
       remark
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       client_code,
       name,
+      name_eng,
       branch,
+      branch_eng,
       address,
       billing_address,
+      billing_address_eng,
       tax_id,
       contact_person,
       phone,
@@ -57,6 +70,8 @@ exports.addClient = (req, res) => {
       attribute4,
       attribute5,
       line_token,
+      default_language || "TH",
+      default_payment_method,
       is_active || 1,
       remark,
     ],
@@ -76,14 +91,19 @@ exports.addClient = (req, res) => {
 };
 
 exports.getClient = (req, res) => {
-  const { client_id } = req.query;
+  const { client_id, active } = req.query;
 
-  let query = `SELECT * FROM client`;
+  let query = `SELECT * FROM client WHERE 1=1`;
   let params = [];
 
   if (client_id) {
-    query += ` WHERE client_id = ?`;
+    query += ` AND client_id = ?`;
     params.push(client_id);
+  }
+
+  if (active !== undefined) {
+    query += ` AND is_active = ?`;
+    params.push(active === "true" ? 1 : 0);
   }
 
   db.query(query, params, (err, results) => {
@@ -102,9 +122,12 @@ exports.updateClient = (req, res) => {
   const {
     client_code,
     name,
+    name_eng,
     branch,
+    branch_eng,
     address,
     billing_address,
+    billing_address_eng,
     tax_id,
     contact_person,
     phone,
@@ -115,6 +138,8 @@ exports.updateClient = (req, res) => {
     attribute4,
     attribute5,
     line_token,
+    default_language,
+    default_payment_method,
     is_active,
     remark,
   } = req.body;
@@ -123,9 +148,12 @@ exports.updateClient = (req, res) => {
     `UPDATE client SET 
       client_code = ?,
       name = ?,
+      name_eng = ?,
       branch = ?,
+      branch_eng = ?,
       address = ?,
       billing_address = ?,
+      billing_address_eng = ?,
       tax_id = ?,
       contact_person = ?,
       phone = ?,
@@ -136,15 +164,20 @@ exports.updateClient = (req, res) => {
       attribute4 = ?,
       attribute5 = ?,
       line_token = ?,
+      default_language = ?,
+      default_payment_method = ?,
       is_active = ?,
       remark = ?
     WHERE client_id = ?`,
     [
       client_code,
       name,
+      name_eng,
       branch,
+      branch_eng,
       address,
       billing_address,
+      billing_address_eng,
       tax_id,
       contact_person,
       phone,
@@ -155,15 +188,15 @@ exports.updateClient = (req, res) => {
       attribute4,
       attribute5,
       line_token,
+      default_language,
+      default_payment_method,
       is_active || 1,
       remark,
-      client_id
+      client_id,
     ],
     (err, results) => {
       if (err) {
-        res
-          .status(500)
-          .send({ message: "Error updating client", error: err });
+        res.status(500).send({ message: "Error updating client", error: err });
         return;
       }
       res.send({
