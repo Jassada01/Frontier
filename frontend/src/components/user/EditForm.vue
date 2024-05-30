@@ -88,6 +88,8 @@
 import { reactive, ref, onMounted } from 'vue';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import CONFIG from '../../config/config';
+
 
 const props = defineProps({
     userId: {
@@ -125,7 +127,7 @@ const uploadImage = async (event) => {
     isUploading.value = true;
 
     try {
-        const response = await axios.post('http://localhost:3000/api/upload', formData);
+        const response = await axios.post(`${CONFIG.API_SERVER}/api/upload`, formData);
         form.location_image_url = response.data.fileUrl;
     } catch (error) {
         console.error('Error:', error);
@@ -138,7 +140,7 @@ const uploadImage = async (event) => {
 const fetchUserData = async () => {
     if (props.userId) {
         try {
-            const response = await axios.get(`http://localhost:3000/api/users/user/${props.userId}`);
+            const response = await axios.get(`${CONFIG.API_SERVER}/api/users/user/${props.userId}`);
             const userData = response.data;
             //console.log(userData);
             Object.assign(form, userData);
@@ -156,7 +158,7 @@ const updateUser = async () => {
             ...form,
             active: form.active ? 1 : 0
         };
-        await axios.put(`http://localhost:3000/api/users/user/${updateForm.id}`, updateForm);
+        await axios.put(`${CONFIG.API_SERVER}/api/users/user/${updateForm.id}`, updateForm);
         Swal.fire('Success', 'บันทึกการแก้ไขสำเร็จ', 'success');
     } catch (error) {
         console.error('Error:', error);
@@ -187,7 +189,7 @@ const confirmResetPassword = async () => {
     }
 
     try {
-        await axios.post(`http://localhost:3000/api/users/user/${form.id}/reset-password`, { newPassword: newPassword.value });
+        await axios.post(`${CONFIG.API_SERVER}/api/users/user/${form.id}/reset-password`, { newPassword: newPassword.value });
         Swal.fire('Success', 'รีเซ็ตรหัสผ่านสำเร็จ', 'success');
         closeResetPasswordModal();
     } catch (error) {

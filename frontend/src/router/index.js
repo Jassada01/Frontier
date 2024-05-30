@@ -4,9 +4,20 @@ import Login from '../views/Login/login-view.vue'
 import UserManagement from '../views/User/user-management.vue'
 import UserIndex from '../views/User/user-index.vue'
 import ClientManagement from '../views/Client/client-management.vue'
+import ClientIndex from '../views/Client/client-Index.vue'
+import AgentManagement from '../views/Agent/agent-management.vue'
+import AgentIndex from '../views/Agent/agent-index.vue'
+import ZoneManagement from '../views/Zone/zone-management.vue'
+import ZoneIndex from '../views/Zone/zone-index.vue'
+import TruckCompanyManagement from '../views/TruckCompanies/truckCompany-management.vue'
+import TruckCompanyIndex from '../views/TruckCompanies/truckCompany-index.vue'
+import DriverManagement from '../views/Driver/driver-management.vue'
+import DriverIndex from '../views/Driver/driver-index.vue'
+import YardManagement from '../views/Yard/yard-management.vue' // นำเข้า YardManagement
+import YardIndex from '../views/Yard/yard-index.vue' // นำเข้า YardIndex
 
 const routes = [
-  // Home and Login 
+  // Home and Login
   {
     path: '/',
     name: 'Home',
@@ -36,7 +47,7 @@ const routes = [
     component: UserIndex
   },
 
-  // Client Master 
+  // Client Management
   {
     path: '/Client',
     name: 'CreateClient',
@@ -47,7 +58,103 @@ const routes = [
     name: 'EditClient',
     component: ClientManagement,
     props: true
+  },
+  {
+    path: '/ClientIndex',
+    name: 'ClientIndex',
+    component: ClientIndex
+  },
+
+  // Agent Management
+  {
+    path: '/Agent',
+    name: 'CreateAgent',
+    component: AgentManagement
+  },
+  {
+    path: '/Agent/:id',
+    name: 'EditAgent',
+    component: AgentManagement,
+    props: true
+  },
+  {
+    path: '/AgentIndex',
+    name: 'AgentIndex',
+    component: AgentIndex
+  },
+
+  // Zone Management
+  {
+    path: '/Zone',
+    name: 'CreateZone',
+    component: ZoneManagement
+  },
+  {
+    path: '/Zone/:id',
+    name: 'EditZone',
+    component: ZoneManagement,
+    props: true
+  },
+  {
+    path: '/ZoneIndex',
+    name: 'ZoneIndex',
+    component: ZoneIndex
+  },
+
+  // Truck Company Management
+  {
+    path: '/TruckCompany',
+    name: 'CreateTruckCompany',
+    component: TruckCompanyManagement
+  },
+  {
+    path: '/TruckCompany/:id',
+    name: 'EditTruckCompany',
+    component: TruckCompanyManagement,
+    props: true
+  },
+  {
+    path: '/TruckCompanyIndex',
+    name: 'TruckCompanyIndex',
+    component: TruckCompanyIndex
+  },
+
+  // Driver Management
+  {
+    path: '/Driver',
+    name: 'CreateDriver',
+    component: DriverManagement
+  },
+  {
+    path: '/Driver/:id',
+    name: 'EditDriver',
+    component: DriverManagement,
+    props: true
+  },
+  {
+    path: '/DriverIndex',
+    name: 'DriverIndex',
+    component: DriverIndex
+  },
+
+  // Yard Management
+  {
+    path: '/Yard',
+    name: 'CreateYard',
+    component: YardManagement
+  },
+  {
+    path: '/Yard/:id',
+    name: 'EditYard',
+    component: YardManagement,
+    props: true
+  },
+  {
+    path: '/YardIndex',
+    name: 'YardIndex',
+    component: YardIndex
   }
+  
 ]
 
 const router = createRouter({

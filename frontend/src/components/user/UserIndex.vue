@@ -50,12 +50,13 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import CONFIG from '../../config/config';
 
 const users = ref([]);
 
 onMounted(async () => {
     try {
-        const response = await axios.get('http://localhost:3000/api/users/getAllUsers');
+        const response = await axios.get(`${CONFIG.API_SERVER}/api/users/getAllUsers`);
         users.value = response.data;
     } catch (error) {
         console.error('Error fetching users:', error);

@@ -2,6 +2,7 @@
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import { ref } from 'vue';
+import CONFIG from '../config/config';
 
 
 export const displayName = ref('');
@@ -12,7 +13,7 @@ export const language = ref('');
 export const checkLoginStatus = async () => {
   const router = useRouter();
   try {
-    const response = await axios.get('http://localhost:3000/api/users/status', {
+    const response = await axios.get(`${CONFIG.API_SERVER}/api/users/status`, {
       withCredentials: true
     });
     if (response.status === 200) {

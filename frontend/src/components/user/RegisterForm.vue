@@ -49,6 +49,7 @@
 <script setup>
 import { reactive, ref } from 'vue';
 import axios from 'axios';
+import CONFIG from '../../config/config';
 
 const form = reactive({
     username: '',
@@ -74,7 +75,7 @@ const uploadImage = async (event) => {
     isUploading.value = true;
 
     try {
-        const response = await axios.post('http://localhost:3000/api/upload', formData);
+        const response = await axios.post(`${CONFIG.API_SERVER}/api/upload`, formData);
         form.location_image_url = response.data.fileUrl;
     } catch (error) {
         console.error('Error:', error);
@@ -86,7 +87,7 @@ const uploadImage = async (event) => {
 
 const registerUser = async () => {
     try {
-        const response = await axios.post('http://localhost:3000/api/users/register', form);
+        const response = await axios.post(`${CONFIG.API_SERVER}/api/users/register`, form);
         alert('สมัครสมาชิกสำเร็จ');
     } catch (error) {
         console.error('Error:', error);
