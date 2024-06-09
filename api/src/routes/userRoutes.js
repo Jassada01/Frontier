@@ -1,7 +1,7 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const userController = require('../controllers/userController');
-const authenticateJWT = require('../middleware/auth');
+const userController = require("../controllers/userController");
+const authenticateJWT = require("../middleware/auth");
 
 /**
  * @swagger
@@ -31,12 +31,16 @@ const authenticateJWT = require('../middleware/auth');
  *         location_image_url:
  *           type: string
  *           description: The location image URL of the user
+ *         sign_img_path:
+ *           type: string
+ *           description: The path of the user's signature image
  *       example:
  *         username: johndoe
  *         displayName: John
  *         password: secret123
  *         position: Manager
  *         location_image_url: https://example.com/image.jpg
+ *         sign_img_path: /path/to/signature.png
  */
 
 /**
@@ -66,7 +70,7 @@ const authenticateJWT = require('../middleware/auth');
  *       500:
  *         description: Some server error
  */
-router.post('/register', userController.register);
+router.post("/register", userController.register);
 
 /**
  * @swagger
@@ -100,7 +104,7 @@ router.post('/register', userController.register);
  *       500:
  *         description: Some server error
  */
-router.post('/login', userController.login);
+router.post("/login", userController.login);
 
 /**
  * @swagger
@@ -123,7 +127,7 @@ router.post('/login', userController.login);
  *       401:
  *         description: User is not logged in
  */
-router.get('/status', authenticateJWT, (req, res) => {
+router.get("/status", authenticateJWT, (req, res) => {
   // ใน middleware authenticateJWT ได้ส่ง response แล้ว
   // ไม่จำเป็นต้องส่ง response ซ้ำในที่นี้
 });
@@ -159,6 +163,8 @@ router.get('/status', authenticateJWT, (req, res) => {
  *                     type: string
  *                   language:
  *                     type: string
+ *                   sign_img_path:
+ *                     type: string
  *                   attr1:
  *                     type: string
  *                   attr2:
@@ -184,7 +190,7 @@ router.get('/status', authenticateJWT, (req, res) => {
  *       500:
  *         description: Some server error
  */
-router.get('/getAllUsers', userController.getAllUsers);
+router.get("/getAllUsers", userController.getAllUsers);
 
 /**
  * @swagger
@@ -222,6 +228,8 @@ router.get('/getAllUsers', userController.getAllUsers);
  *                   type: string
  *                 language:
  *                   type: string
+ *                 sign_img_path:
+ *                   type: string
  *                 attr1:
  *                   type: string
  *                 attr2:
@@ -249,7 +257,7 @@ router.get('/getAllUsers', userController.getAllUsers);
  *       500:
  *         description: Some server error
  */
-router.get('/user/:id', userController.getUserById); // เส้นทางสำหรับดึงข้อมูลผู้ใช้ตาม ID
+router.get("/user/:id", userController.getUserById); // เส้นทางสำหรับดึงข้อมูลผู้ใช้ตาม ID
 
 /**
  * @swagger
@@ -281,6 +289,8 @@ router.get('/user/:id', userController.getUserById); // เส้นทางส
  *                 type: string
  *               active:
  *                 type: integer
+ *               sign_img_path:
+ *                 type: string
  *     responses:
  *       200:
  *         description: User updated successfully
@@ -296,7 +306,7 @@ router.get('/user/:id', userController.getUserById); // เส้นทางส
  *       500:
  *         description: Some server error
  */
-router.put('/user/:id', userController.updateUserById); // เส้นทางสำหรับอัพเดตข้อมูลผู้ใช้ตาม ID
+router.put("/user/:id", userController.updateUserById); // เส้นทางสำหรับอัพเดตข้อมูลผู้ใช้ตาม ID
 
 /**
  * @swagger
@@ -336,6 +346,6 @@ router.put('/user/:id', userController.updateUserById); // เส้นทาง
  *       500:
  *         description: Some server error
  */
-router.post('/user/:id/reset-password', userController.updatePasswordById); // เส้นทางสำหรับรีเซ็ตรหัสผ่านของผู้ใช้ตาม ID
+router.post("/user/:id/reset-password", userController.updatePasswordById); // เส้นทางสำหรับรีเซ็ตรหัสผ่านของผู้ใช้ตาม ID
 
 module.exports = router;

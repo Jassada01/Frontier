@@ -1,17 +1,17 @@
 <template>
     <div class="truck-company-table p-4 overflow-x-auto">
         <div class="flex justify-between items-center mb-4">
-            <h1 class="text-2xl font-bold">รายชื่อบริษัทรถบรรทุก</h1>
+            <h1 class="text-2xl font-bold">รายชื่อบริษัทหัวลาก</h1>
             <router-link to="/TruckCompany">
                 <button class="btn btn-primary">
-                    <i class="fa fa-plus-square mr-2"></i> เพิ่มบริษัทรถบรรทุก
+                    <i class="fa fa-plus-square mr-2"></i> เพิ่มบริษัทหัวลาก
                 </button>
             </router-link>
         </div>
         <table class="table table-auto table-zebra">
             <thead>
                 <tr>
-                    <th class="p-4">ชื่อบริษัท</th>
+                    <th class="p-4">บริษัทหัวลาก</th>
                     <th class="p-4">ชื่อย่อ</th>
                     <th class="p-4">ที่อยู่</th>
                     <th class="p-4">ผู้ติดต่อ</th>

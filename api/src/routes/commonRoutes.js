@@ -22,4 +22,18 @@ const commonController = require("../controllers/commonController");
  */
 router.get("/getProvince", commonController.getProvinces);
 
+/**
+ * @swagger
+ * /api/common/getConditions:
+ *   get:
+ *     summary: Get list of active conditions
+ *     tags: [Common]
+ *     responses:
+ *       200:
+ *         description: A list of active conditions
+ *       500:
+ *         description: Error retrieving conditions
+ */
+router.get("/getConditions", commonController.getConditions);
+
 module.exports = router;

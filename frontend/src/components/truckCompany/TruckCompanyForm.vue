@@ -58,7 +58,7 @@ const createTruckCompany = async () => {
     try {
         truckCompany.value.active = truckCompany.value.active ? 1 : 0
         const response = await axios.post(`${CONFIG.API_SERVER}/api/truck_companies/add`, truckCompany.value)
-        Swal.fire('Success', 'สร้างข้อมูลบริษัทบรรทุกสำเร็จ', 'success').then(() => {
+        Swal.fire('Success', 'สร้างข้อมูลบริษัทหัวลากสำเร็จ', 'success').then(() => {
             emit('formSubmitted');
             router.push({ path: `/TruckCompany/${response.data.company_id}` });
         })
@@ -94,12 +94,12 @@ onMounted(() => {
 <template>
     <div class="bg-base-200 mx-auto mt-10 p-6 rounded-lg shadow-md">
         <h2 class="text-2xl font-bold mb-4 text-center">
-            {{ isEditMode ? 'แก้ไขบริษัทรถบรรทุก' : 'สร้างบริษัทรถบรรทุกใหม่' }}
+            {{ isEditMode ? 'แก้ไขบริษัทหัวลาก' : 'สร้างบริษัทหัวลากใหม่' }}
         </h2>
         <form @submit.prevent>
             <div class="mb-4 flex items-center">
                 <label class="block pe-5 text-end mb-2 w-1/3 text-sm" for="company_name">
-                    ชื่อบริษัท <span class="text-error">*</span>
+                    บริษัทหัวลาก <span class="text-error">*</span>
                 </label>
                 <input v-model="truckCompany.company_name" class="input input-bordered w-2/3 text-sm" type="text"
                     id="company_name" autocomplete="off" required />

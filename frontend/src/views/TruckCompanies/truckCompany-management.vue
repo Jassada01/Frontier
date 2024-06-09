@@ -7,8 +7,8 @@ import Breadcrumbs from '../../components/Breadcrumbs.vue';
 
 const breadcrumbsData = [
     { name: "Home", icon: "fa-home", link: "/" },
-    { name: "รายการบริษัทรถบรรทุก", icon: "fa-truck", link: "/TruckCompanyIndex" },
-    { name: "บริษัทรถบรรทุก", icon: "fa-building", link: "" },
+    { name: "รายการบริษัทหัวลาก", icon: "fa-truck", link: "/TruckCompanyIndex" },
+    { name: "บริษัทหัวลาก", icon: "fa-building", link: "" },
 ];
 
 const route = useRoute();

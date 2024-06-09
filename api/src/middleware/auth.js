@@ -11,6 +11,7 @@ const authenticateJWT = (req, res, next) => {
       }
       req.user = user;
       res.send({
+        user_id: user.user_id,
         display_name: user.display_name,
         position: user.position,
         language: user.language,

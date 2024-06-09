@@ -29,17 +29,26 @@ onMounted(async () => {
         <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-lg bg-base-100 rounded-box w-52">
           <li>
             <details>
+              <summary><i class="fa fa-tasks"></i> ใบงาน</summary>
+              <ul class="p-2">
+                <li><router-link to="/EIRIndex"><i class="fa fa-file-alt"></i> EIR</router-link></li>
+              </ul>
+            </details>
+          </li>
+          <li>
+            <details>
               <summary><i class="fa fa-folder"></i> ตั้งค่า Master</summary>
               <ul class="p-2">
                 <li><router-link to="/ClientIndex"><i class="fa fa-users"></i> รายชื่อลูกค้า</router-link></li>
                 <li><router-link to="/AgentIndex"><i class="fa fa-ferry"></i> รายชื่อเอเย่นต์</router-link></li>
                 <li><router-link to="/YardIndex"><i class="fa fa-warehouse"></i> รายชื่อลาน</router-link></li>
+                <li><router-link to="/PriceIndex"><i class="fa fa-tags"></i> รายการค่าบริการ</router-link></li>
                 <!-- เพิ่มลาน -->
                 <li><router-link to="/ZoneIndex"><i class="fa fa-map-marked-alt"></i> รายการโซน</router-link></li>
                 <li>
                   <a><i class="fa fa-truck"></i> ข้อมูลรถบรรทุก</a>
                   <ul>
-                    <li><router-link to="/TruckCompanyIndex"><i class="fa fa-building"></i> บริษัทรถ</router-link></li>
+                    <li><router-link to="/TruckCompanyIndex"><i class="fa fa-building"></i> บริษัทหัวลาก</router-link></li>
                     <li><router-link to="/DriverIndex"><i class="fa fa-id-card"></i> คนขับ</router-link></li>
                   </ul>
                 </li>
@@ -63,18 +72,28 @@ onMounted(async () => {
       <router-link to="/"><a class="btn btn-ghost normal-case text-xl">{{ systemName }}</a></router-link>
       <div class="dropdown dropdown-end">
         <div tabindex="0" role="button" class="btn btn-ghost">
+          <span class="cursor-pointer"><i class="fa fa-tasks"></i> ใบงาน</span>
+        </div>
+        <ul tabindex="0" class="mt-1 z-[1] p-2 shadow-lg menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
+          <li><router-link to="/EIRIndex"><i class="fa fa-file-alt"></i> EIR</router-link></li>
+        </ul>
+      </div>
+
+      <div class="dropdown dropdown-end">
+        <div tabindex="0" role="button" class="btn btn-ghost">
           <span class="cursor-pointer"><i class="fa fa-folder"></i> ตั้งค่า Master</span>
         </div>
         <ul tabindex="0" class="mt-1 z-[1] p-2 shadow-lg menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
           <li><router-link to="/ClientIndex"><i class="fa fa-users"></i> รายชื่อลูกค้า</router-link></li>
           <li><router-link to="/AgentIndex"><i class="fa fa-ferry"></i> รายชื่อเอเย่นต์</router-link></li>
           <li><router-link to="/YardIndex"><i class="fa fa-warehouse"></i> รายชื่อลาน</router-link></li>
+          <li><router-link to="/PriceIndex"><i class="fa fa-tags"></i> รายการค่าบริการ</router-link></li>
           <!-- เพิ่มลาน -->
           <li><router-link to="/ZoneIndex"><i class="fa fa-map-marked-alt"></i> รายการโซน</router-link></li>
           <li>
             <a><i class="fa fa-truck"></i> ข้อมูลรถบรรทุก</a>
             <ul>
-              <li><router-link to="/TruckCompanyIndex"><i class="fa fa-building"></i> บริษัทรถ</router-link></li>
+              <li><router-link to="/TruckCompanyIndex"><i class="fa fa-building"></i> บริษัทหัวลาก</router-link></li>
               <li><router-link to="/DriverIndex"><i class="fa fa-id-card"></i> คนขับ</router-link></li>
             </ul>
           </li>

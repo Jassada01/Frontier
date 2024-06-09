@@ -10,15 +10,21 @@ const agentRoutes = require("./routes/agentRoutes");
 const zoneRoutes = require("./routes/zoneRoutes");
 const truckCompanyRoutes = require("./routes/truckCompanyRoutes");
 const commonRoutes = require("./routes/commonRoutes");
-const driverRoutes = require("./routes/driverRoutes"); // เพิ่มการนำเข้า driverRoutes
-const yardsRoutes = require("./routes/yardsRoutes"); // เพิ่มการนำเข้า driverRoutes
+const driverRoutes = require("./routes/driverRoutes");
+const yardsRoutes = require("./routes/yardsRoutes");
+const equipmentInterchangeReceiptRoutes = require("./routes/equipmentInterchangeReceiptRoutes");
+const priceRoutes = require("./routes/priceRoutes"); // เพิ่มบรรทัดนี้
+const priceListCustomRoutes = require("./routes/priceListCustomRoutes"); // เพิ่มบรรทัดนี้
+const eirMatchRoutes = require("./routes/eirMatchRoutes"); // เพิ่มบรรทัดนี้
+
+
 
 const app = express();
 
 // ใช้ CORS middleware
 app.use(
   cors({
-    origin: "http://localhost:5173", // แทนที่ด้วย origin ของคุณ
+    origin: true, // เพิ่ม origin ของ IP address
     credentials: true, // เพื่ออนุญาตการส่งคุกกี้
   })
 );
@@ -32,8 +38,13 @@ app.use("/api/agents", agentRoutes);
 app.use("/api/zones", zoneRoutes);
 app.use("/api/truck_companies", truckCompanyRoutes);
 app.use("/api/common", commonRoutes);
-app.use("/api/drivers", driverRoutes); // เพิ่มการใช้งาน driverRoutes
-app.use("/api/yards", yardsRoutes); // เพิ่มการใช้งาน driverRoutes
+app.use("/api/drivers", driverRoutes);
+app.use("/api/yards", yardsRoutes);
+app.use("/api/EIR", equipmentInterchangeReceiptRoutes);
+app.use("/api/prices", priceRoutes); // เพิ่มบรรทัดนี้
+app.use("/api/price_custom", priceListCustomRoutes); // เพิ่มบรรทัดนี้
+app.use("/api/eir_match", eirMatchRoutes); // เพิ่มบรรทัดนี้
+
 
 const port = process.env.PORT || 3000;
 

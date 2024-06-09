@@ -45,6 +45,7 @@ exports.login = (req, res) => {
         // สร้าง JWT token
         const token = jwt.sign(
           {
+            user_id: results[0].id,
             display_name: results[0].display_name,
             position: results[0].position,
             language: results[0].language,
@@ -83,7 +84,7 @@ exports.getAllUsers = (req, res) => {
 exports.getUserById = (req, res) => {
   const userId = req.params.id;
   db.query(
-    "SELECT id, username, display_name, position, password_expire, location_image_url, language, attr1, attr2, attr3, attr4, attr5, active, create_user, create_datetime, update_user, update_datetime FROM users WHERE id = ?",
+    "SELECT id, username, display_name, position, password_expire, location_image_url, language, sign_img_path, attr1, attr2, attr3, attr4, attr5, active, create_user, create_datetime, update_user, update_datetime FROM users WHERE id = ?",
     [userId],
     (err, results) => {
       if (err) {
@@ -102,12 +103,26 @@ exports.getUserById = (req, res) => {
 // อัพเดตข้อมูลผู้ใช้ตาม ID
 exports.updateUserById = (req, res) => {
   const userId = req.params.id;
-  const { display_name, position, location_image_url, language, active } =
-    req.body;
+  const {
+    display_name,
+    position,
+    location_image_url,
+    language,
+    active,
+    sign_img_path,
+  } = req.body;
 
   db.query(
-    "UPDATE users SET display_name = ?, position = ?, location_image_url = ?, language = ?, active = ? WHERE id = ?",
-    [display_name, position, location_image_url, language, active, userId],
+    "UPDATE users SET display_name = ?, position = ?, location_image_url = ?, language = ?, active = ?, sign_img_path = ? WHERE id = ?",
+    [
+      display_name,
+      position,
+      location_image_url,
+      language,
+      active,
+      sign_img_path,
+      userId,
+    ],
     (err, results) => {
       if (err) {
         res.status(500).send({ message: "Error updating user", error: err });

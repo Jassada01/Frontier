@@ -21,3 +21,20 @@ exports.getProvinces = (req, res) => {
     res.send(results);
   });
 };
+
+exports.getConditions = (req, res) => {
+  let query = `SELECT * FROM conditions WHERE active = 1`;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      res
+        .status(500)
+        .send({
+          message: "Error retrieving condition information",
+          error: err,
+        });
+      return;
+    }
+    res.send(results);
+  });
+};

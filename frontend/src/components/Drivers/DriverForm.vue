@@ -22,8 +22,8 @@ const driver = ref({
     province: null,
     truck_company_id: null,
     truck_company_name: '',
-    driver_image_path: 'https://storage.googleapis.com/giraffepark-bdb1d.appspot.com/driver_2nk.png',
-    truck_image_path: 'https://storage.googleapis.com/giraffepark-bdb1d.appspot.com/truck_z0e.png',
+    driver_image_path: 'https://storage.googleapis.com/giraffepark-bdb1d.appspot.com/Driver_default_elk.png',
+    truck_image_path: 'https://storage.googleapis.com/giraffepark-bdb1d.appspot.com/Truck_default_c1d.png',
     is_active: true
 })
 

@@ -1,3 +1,4 @@
+/*
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home/home-view.vue'
 import Login from '../views/Login/login-view.vue'
@@ -13,8 +14,10 @@ import TruckCompanyManagement from '../views/TruckCompanies/truckCompany-managem
 import TruckCompanyIndex from '../views/TruckCompanies/truckCompany-index.vue'
 import DriverManagement from '../views/Driver/driver-management.vue'
 import DriverIndex from '../views/Driver/driver-index.vue'
-import YardManagement from '../views/Yard/yard-management.vue' // นำเข้า YardManagement
-import YardIndex from '../views/Yard/yard-index.vue' // นำเข้า YardIndex
+import YardManagement from '../views/Yard/yard-management.vue'
+import YardIndex from '../views/Yard/yard-index.vue'
+import EquipmentInterchangeReceiptManagement from '../views/EIR/EIR-management.vue'
+//import EquipmentInterchangeReceiptIndex from '../views/EquipmentInterchangeReceipt/equipmentInterchangeReceipt-index.vue'
 
 const routes = [
   // Home and Login
@@ -153,8 +156,79 @@ const routes = [
     path: '/YardIndex',
     name: 'YardIndex',
     component: YardIndex
+  },
+
+  // Equipment Interchange Receipt Management
+  {
+    path: '/EquipmentInterchangeReceipt',
+    name: 'CreateEquipmentInterchangeReceipt',
+    component: EquipmentInterchangeReceiptManagement
+  },
+  {
+    path: '/EquipmentInterchangeReceipt/:id',
+    name: 'EditEquipmentInterchangeReceipt',
+    component: EquipmentInterchangeReceiptManagement,
+    props: true
+  },
+  /*
+  {
+    path: '/EquipmentInterchangeReceiptIndex',
+    name: 'EquipmentInterchangeReceiptIndex',
+    component: EquipmentInterchangeReceiptIndex
   }
-  
+
+]
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes
+})
+
+export default router
+  */
+import { createRouter, createWebHistory } from 'vue-router'
+import Home from '../views/Home/home-view.vue'
+import Login from '../views/Login/login-view.vue'
+import userRoutes from './userRoutes'
+import clientRoutes from './clientRoutes'
+import agentRoutes from './agentRoutes'
+import zoneRoutes from './zoneRoutes'
+import truckCompanyRoutes from './truckCompanyRoutes'
+import driverRoutes from './driverRoutes'
+import yardRoutes from './yardRoutes'
+import EIRRoutes from './EIRRoutes'
+import priceRoutes from './priceRoutes'; // เพิ่มบรรทัดนี้
+
+
+const routes = [
+  // Home and Login
+  {
+    path: '/',
+    name: 'Home',
+    component: Home
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: Login
+  },
+  // User Management
+  ...userRoutes,
+  // Client Management
+  ...clientRoutes,
+  // Agent Management
+  ...agentRoutes,
+  // Zone Management
+  ...zoneRoutes,
+  // Truck Company Management
+  ...truckCompanyRoutes,
+  // Driver Management
+  ...driverRoutes,
+  // Yard Management
+  ...yardRoutes,
+  // EIR Management
+  ...EIRRoutes,
+  ...priceRoutes // เพิ่มบรรทัดนี้
 ]
 
 const router = createRouter({
