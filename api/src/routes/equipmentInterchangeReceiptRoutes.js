@@ -400,4 +400,54 @@ router.get(
   equipmentInterchangeReceiptController.getFilteredEquipmentInterchangeReceipts
 );
 
+/**
+ * @swagger
+ * /api/EIR/createInvoiceManual:
+ *   post:
+ *     summary: Create invoice without initial item
+ *     tags: [EquipmentInterchangeReceipt]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               equipmentId:
+ *                 type: integer
+ *               date:
+ *                 type: string
+ *                 format: date-time
+ *               agent_id:
+ *                 type: integer
+ *               yard_id:
+ *                 type: integer
+ *               size_type:
+ *                 type: string
+ *               entry_type:
+ *                 type: string
+ *                 enum: [IN, OUT]
+ *     responses:
+ *       201:
+ *         description: Invoice created successfully without initial item details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 equipment_interchange_receipt_id:
+ *                   type: integer
+ *                 invoice_id:
+ *                   type: integer
+ *       500:
+ *         description: Error creating invoice
+ */
+router.post(
+  "/createInvoiceManual",
+  equipmentInterchangeReceiptController.createInvoiceWithoutInitialItem
+);
+
+
 module.exports = router;

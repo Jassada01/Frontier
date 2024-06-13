@@ -36,4 +36,39 @@ router.get("/getProvince", commonController.getProvinces);
  */
 router.get("/getConditions", commonController.getConditions);
 
+/**
+ * @swagger
+ * /api/common/getProductPrices:
+ *   get:
+ *     summary: Get product prices
+ *     tags: [Common]
+ *     parameters:
+ *       - in: query
+ *         name: agent_id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The ID of the agent
+ *       - in: query
+ *         name: yards_id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The ID of the yard
+ *       - in: query
+ *         name: size
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The size of the product
+ *     responses:
+ *       200:
+ *         description: A list of product prices
+ *       400:
+ *         description: Missing required query parameters
+ *       500:
+ *         description: Error retrieving product prices
+ */
+router.get("/getProductPrices", commonController.getProductPrices);
+
 module.exports = router;

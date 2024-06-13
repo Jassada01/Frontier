@@ -13,9 +13,10 @@ const commonRoutes = require("./routes/commonRoutes");
 const driverRoutes = require("./routes/driverRoutes");
 const yardsRoutes = require("./routes/yardsRoutes");
 const equipmentInterchangeReceiptRoutes = require("./routes/equipmentInterchangeReceiptRoutes");
-const priceRoutes = require("./routes/priceRoutes"); // เพิ่มบรรทัดนี้
-const priceListCustomRoutes = require("./routes/priceListCustomRoutes"); // เพิ่มบรรทัดนี้
-const eirMatchRoutes = require("./routes/eirMatchRoutes"); // เพิ่มบรรทัดนี้
+const priceRoutes = require("./routes/priceRoutes"); 
+const priceListCustomRoutes = require("./routes/priceListCustomRoutes"); 
+const eirMatchRoutes = require("./routes/eirMatchRoutes"); 
+const invoiceRoutes = require("./routes/invoiceRoutes"); 
 
 
 
@@ -41,9 +42,10 @@ app.use("/api/common", commonRoutes);
 app.use("/api/drivers", driverRoutes);
 app.use("/api/yards", yardsRoutes);
 app.use("/api/EIR", equipmentInterchangeReceiptRoutes);
-app.use("/api/prices", priceRoutes); // เพิ่มบรรทัดนี้
-app.use("/api/price_custom", priceListCustomRoutes); // เพิ่มบรรทัดนี้
-app.use("/api/eir_match", eirMatchRoutes); // เพิ่มบรรทัดนี้
+app.use("/api/prices", priceRoutes); 
+app.use("/api/price_custom", priceListCustomRoutes); 
+app.use("/api/eir_match", eirMatchRoutes); 
+app.use("/api/invoices", invoiceRoutes); 
 
 
 const port = process.env.PORT || 3000;

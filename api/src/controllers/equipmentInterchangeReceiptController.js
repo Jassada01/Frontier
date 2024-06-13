@@ -126,44 +126,15 @@ exports.addEquipmentInterchangeReceipt = async (req, res) => {
 
         try {
           await Promise.all(conditionQueries);
-
-          // Generate Invoice
-          const invoice_no = await getRunningNo("INV", "GRT", new Date(date));
-
-          // Insert into invoice_header
-          const invoiceQuery = `
-            INSERT INTO invoice_header (invoice_no, eir_id)
-            VALUES (?, ?)
-          `;
-
-          db.query(
-            invoiceQuery,
-            [invoice_no, equipmentId],
-            async (err, result) => {
-              if (err) {
-                res.status(500).send({
-                  message: "Error adding invoice header",
-                  error: err,
-                });
-                return;
-              }
-
-              // Update invoice_header with additional data
-              try {
-                await updateInvoiceHeader(equipmentId);
-                res.status(201).send({
-                  message:
-                    "Equipment, conditions, and invoice added successfully",
-                  equipment_interchange_receipt_id: equipmentId,
-                  invoice_id: result.insertId,
-                });
-              } catch (updateErr) {
-                res.status(500).send({
-                  message: "Error updating invoice header",
-                  error: updateErr,
-                });
-              }
-            }
+          await createInvoice(
+            equipmentId,
+            date,
+            agent_id,
+            yard_id,
+            size_type,
+            entry_type,
+            true,
+            res
           );
         } catch (err) {
           res.status(500).send(err);
@@ -173,6 +144,112 @@ exports.addEquipmentInterchangeReceipt = async (req, res) => {
   } catch (error) {
     res.status(500).send({
       message: "Error generating running number",
+      error: error.message,
+    });
+  }
+};
+
+const createInvoice = async (
+  equipmentId,
+  date,
+  agent_id,
+  yard_id,
+  size_type,
+  entry_type,
+  initialItem = true,
+  res
+) => {
+  try {
+    const invoice_no = await getRunningNo("INV", "GRT", new Date(date));
+
+    const invoiceQuery = `
+      INSERT INTO invoice_header (invoice_no, eir_id)
+      VALUES (?, ?)
+    `;
+
+    db.query(invoiceQuery, [invoice_no, equipmentId], async (err, result) => {
+      if (err) {
+        res.status(500).send({
+          message: "Error adding invoice header",
+          error: err,
+        });
+        return;
+      }
+
+      const invoiceId = result.insertId;
+
+      try {
+        await updateInvoiceHeader(equipmentId);
+
+        if (initialItem) {
+          const insertInvoiceDetailQuery = `
+              INSERT INTO invoice_detail(invoice_header_id, price_list_id, description, description_eng, quantity, unit_price, amount, remark)
+              SELECT ?, a.price_list_id, b.name_th, b.name_eng, 1, 
+                     IFNULL(c.price, b.price) AS price, IFNULL(c.price, b.price) as amt,
+                     CASE
+                         WHEN c.price IS NOT NULL THEN "ราคาอ้างอิงจากลาน"
+                         ELSE ""
+                     END AS remark
+              FROM default_service_template a 
+              LEFT JOIN price_list b ON a.price_list_id = b.id
+              LEFT JOIN price_list_custom c ON b.id = c.main_price_list_id AND c.agent_id = ? AND c.yards_id = ? AND c.size = ?
+              WHERE a.entry_type = ?
+            `;
+
+          db.query(
+            insertInvoiceDetailQuery,
+            [invoiceId, agent_id, yard_id, size_type, entry_type],
+            async (err, result) => {
+              if (err) {
+                res.status(500).send({
+                  message: "Error inserting invoice details",
+                  error: err,
+                });
+                return;
+              }
+
+              try {
+                await updateInvoiceTotal(invoiceId);
+                res.status(201).send({
+                  message:
+                    "Equipment, conditions, and invoice added successfully with invoice details",
+                  equipment_interchange_receipt_id: equipmentId,
+                  invoice_id: invoiceId,
+                });
+              } catch (updateTotalErr) {
+                res.status(500).send({
+                  message: "Error updating invoice totals",
+                  error: updateTotalErr,
+                });
+              }
+            }
+          );
+        } else {
+          try {
+            await updateInvoiceTotal(invoiceId);
+            res.status(201).send({
+              message:
+                "Equipment and invoice added successfully without initial item details",
+              equipment_interchange_receipt_id: equipmentId,
+              invoice_id: invoiceId,
+            });
+          } catch (updateTotalErr) {
+            res.status(500).send({
+              message: "Error updating invoice totals",
+              error: updateTotalErr,
+            });
+          }
+        }
+      } catch (updateErr) {
+        res.status(500).send({
+          message: "Error updating invoice header",
+          error: updateErr,
+        });
+      }
+    });
+  } catch (error) {
+    res.status(500).send({
+      message: "Error generating running number for invoice",
       error: error.message,
     });
   }
@@ -214,6 +291,8 @@ const updateInvoiceHeader = (equipmentId) => {
           invoice_header.total_with_holding_tax = 0,
           invoice_header.total_discount = 0,
           invoice_header.net_total = 0,
+          invoice_header.grand_total = 0,
+          invoice_header.payment_total = 0,
           invoice_header.status_id = statuses.id,
           invoice_header.status = statuses.status_name_th,
           invoice_header.create_user = equipment_interchange_receipt.create_user,
@@ -231,6 +310,45 @@ const updateInvoiceHeader = (equipmentId) => {
   });
 };
 
+const updateInvoiceTotal = (invoice_id) => {
+  return new Promise((resolve, reject) => {
+    const updateInvoiceQuery = `
+      UPDATE invoice_header
+      LEFT JOIN (
+          SELECT a.id AS invoice_header_id, IFNULL(SUM(b.amount), 0) AS TOTAL_PRICE
+          FROM invoice_header a 
+LEFT JOIN invoice_detail b ON a.id = b.invoice_header_id
+          WHERE a.id = ?
+          GROUP BY a.id
+      ) INVDETAIL ON invoice_header.id = INVDETAIL.invoice_header_id
+      SET 
+        invoice_header.total_amount = INVDETAIL.TOTAL_PRICE,
+        invoice_header.net_total = INVDETAIL.TOTAL_PRICE - invoice_header.total_discount,
+        invoice_header.vat_amount = ROUND((INVDETAIL.TOTAL_PRICE - invoice_header.total_discount) * 0.07, 2),
+        invoice_header.grand_total = (INVDETAIL.TOTAL_PRICE - invoice_header.total_discount) + ROUND(((INVDETAIL.TOTAL_PRICE - invoice_header.total_discount) * 0.07), 2),
+        invoice_header.total_with_holding_tax = ROUND((invoice_header.wht_status / 100) * (INVDETAIL.TOTAL_PRICE - invoice_header.total_discount), 2),
+        invoice_header.payment_total = (INVDETAIL.TOTAL_PRICE - invoice_header.total_discount) + ROUND(((INVDETAIL.TOTAL_PRICE - invoice_header.total_discount) * 0.07), 2) - IFNULL(ROUND((invoice_header.wht_status / 100) * (INVDETAIL.TOTAL_PRICE - invoice_header.total_discount), 2), 0)
+      WHERE invoice_header.id = ?
+    `;
+
+    db.query(updateInvoiceQuery, [invoice_id, invoice_id], (err, result) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(result);
+      }
+    });
+  });
+};
+
+
+exports.createInvoiceWithoutInitialItem = async (req, res) => {
+  const { equipmentId, date, agent_id, yard_id, size_type, entry_type } = req.body;
+  await createInvoice(equipmentId, date, agent_id, yard_id, size_type, entry_type, false, res);
+};
+
+
+
 exports.getEquipmentInterchangeReceipts = (req, res) => {
   const { id, entry_type, status_id, start_date, end_date } = req.query;
 
@@ -243,6 +361,14 @@ exports.getEquipmentInterchangeReceipts = (req, res) => {
             user_u.display_name AS update_user_name,
             s.status_name_th,
             s.status_name_en,
+            CASE
+                WHEN eir_mva.eir_in IS NULL THEN eir_mvb.eir_in_no
+                ELSE eir_mva.eir_out_no
+            END AS match_eir,
+            CASE
+                WHEN eir_mva.eir_in IS NULL THEN eir_mvb.eir_in_dt
+                ELSE eir_mva.eir_out_dt
+            END AS match_eir_dt,
             ecm.condition_name_en,
             ecm.condition_name_th,
             ecm.position_x,
@@ -253,6 +379,8 @@ exports.getEquipmentInterchangeReceipts = (req, res) => {
         LEFT JOIN users user_u ON eir.update_user = user_u.id 
         LEFT JOIN statuses s ON eir.status_id = s.id
         LEFT JOIN conditions ecm ON ec.condition_id = ecm.id
+        LEFT JOIN eir_match_view eir_mva ON eir.id = eir_mva.eir_in
+        LEFT JOIN eir_match_view eir_mvb ON eir.id = eir_mvb.eir_out
         WHERE 1=1
     `;
   let params = [];
@@ -334,6 +462,8 @@ exports.getEquipmentInterchangeReceipts = (req, res) => {
           create_user_name: row.create_user_name,
           update_user: row.update_user,
           update_user_name: row.update_user_name,
+          match_eir: row.match_eir,
+          match_eir_dt: row.match_eir_dt,
           conditions: [],
         };
       }

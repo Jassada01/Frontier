@@ -13,6 +13,7 @@
             <table id="eirTable" class="table  table-zebra">
                 <thead>
                     <tr>
+                        <th class="p-4"></th>
                         <th class="p-4">ประเภท</th>
                         <th class="p-4">ตุ้ Drop</th>
                         <th class="p-4">เลขที่ EIR</th>
@@ -25,13 +26,22 @@
                         <th class="p-4">ทะเบียน</th>
                         <th class="p-4">ชื่อคนขับ</th>
                         <th class="p-4">ลาน</th>
+                        <th class="p-4">Match EIR</th>
                         <th class="p-4">สถานะ</th>
-                        <th class="p-4"></th>
 
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="eir in eirs" :key="eir.id">
+                        <td class="p-4">
+                            <div class="grid justify-items-center">
+                                <router-link :to="`/EIR/${eir.id}`">
+                                    <button class="btn btn-circle">
+                                        <i class="fa fa-pencil-alt"></i>
+                                    </button>
+                                </router-link>
+                            </div>
+                        </td>
                         <td class="p-4">
                             <div class="grid justify-items-center">
                                 <span :class="eir.entry_type === 'IN' ? 'badge badge-success' : 'badge badge-error'">
@@ -54,19 +64,11 @@
                         <td class="p-4">{{ eir.truck_license }}</td>
                         <td class="p-4">{{ eir.driver_name }}</td>
                         <td class="p-4">{{ eir.yard }}</td>
+                        <td class="p-4  whitespace-nowrap">{{ eir.match_eir }}</td>
                         <td class="p-4">
                             <div
                                 :class="eir.status_name_th === 'ใช้งาน' ? 'badge badge-primary badge-outline whitespace-nowrap' : 'badge badge-error badge-outline whitespace-nowrap'">
                                 {{ eir.status_name_th }}
-                            </div>
-                        </td>
-                        <td class="p-4">
-                            <div class="grid justify-items-center">
-                                <router-link :to="`/EIR/${eir.id}`">
-                                    <button class="btn btn-circle">
-                                        <i class="fa fa-pencil-alt"></i>
-                                    </button>
-                                </router-link>
                             </div>
                         </td>
                     </tr>
@@ -100,24 +102,46 @@ const formatDate = (date) => {
     return moment(date).format('D/M/YYYY H:mm');
 };
 
-const goToEIR = (id) => {
-    router.push(`/EIR/${id}`);
-};
 
 onMounted(async () => {
     try {
         const response = await axios.get(`${CONFIG.API_SERVER}/api/EIR/get`);
         eirs.value = response.data;
+        console.log(eirs.value);
+
+        // Extend DataTables sorting for dates
+        $.fn.dataTable.moment = function (format, locale) {
+            var types = $.fn.dataTable.ext.type;
+            
+            // Add type detection
+            types.detect.unshift(function (d) {
+                return moment(d, format, locale, true).isValid() ?
+                    'moment-' + format :
+                    null;
+            });
+            
+            // Add sorting method - use an integer for the sorting
+            types.order['moment-' + format + '-pre'] = function (d) {
+                return moment(d, format, locale, true).unix();
+            };
+        };
+        
+        // Call the function with the format used in your data
+        $.fn.dataTable.moment('D/M/YYYY H:mm');
 
         // Initialize DataTables
         setTimeout(() => {
-            $('#eirTable').DataTable();
+            $('#eirTable').DataTable({
+                pageLength: 100,  // Set the number of rows to display per page
+                order: [[4, 'desc']]  // Order by the fifth column (index 4) in descending order
+            });
         }, 0);
 
     } catch (error) {
         console.error('Error fetching EIRs:', error);
     }
 });
+
 </script>
 
 <style scoped>

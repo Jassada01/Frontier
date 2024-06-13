@@ -1,6 +1,6 @@
 <template>
     <div>
-        <li @click="generatePDF"><a><i class="fa-solid fa-file-pdf"></i> Print</a></li>
+        <li @click="generatePDF"><a><i class="fa-solid fa-file-pdf"></i> Print EIR</a></li>
     </div>
 </template>
 
