@@ -1,3 +1,4 @@
+// controllers/userController.js
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const db = require("../config/dbConfig");
@@ -64,6 +65,12 @@ exports.login = (req, res) => {
       }
     }
   );
+};
+
+// การล็อกเอาท์
+exports.logout = (req, res) => {
+  res.clearCookie("token");
+  res.send({ message: "Logged out successfully" });
 };
 
 // ดึงข้อมูลผู้ใช้ทั้งหมด

@@ -207,7 +207,7 @@ const fetchClients = async () => {
         const response = await axios.get(`${CONFIG.API_SERVER}/api/client/get?active=true`);
         clients.value = response.data.map(client => ({
             client_id: client.client_id,
-            client_code: client.client_code,
+            client_code: client.name,
             label: `${client.client_code} - ${client.name}`
         }));
     } catch (error) {
@@ -490,7 +490,7 @@ async function fetchInvoiceByEirId(eirId) {
     try {
         const response = await axios.get(`${CONFIG.API_SERVER}/api/invoices/getInvoiceByEirId?eir_id=${eirId}`);
         invoiceList.value = response.data;
-        console.log(invoiceList.value);
+        // console.log(invoiceList.value);
     } catch (error) {
         console.error('Error fetching invoice data:', error);
     }
@@ -596,11 +596,11 @@ onMounted(async () => {
                 <div class="badge badge-primary badge-xs"></div> ใบ
                 EIR
             </a>
-            <a v-for="(invoice) in invoiceList" :key="invoice.invoice_id" role="tab" class="tab inline text-secondary"
+            <a v-for="(invoice) in invoiceList"  :key="invoice.invoice_id" role="tab" class="tab inline text-secondary"
                 :class="{ 'tab-active': activeTab === invoice.invoice_id }" @click="activeTab = invoice.invoice_id">
                 <div :class="getBadgeClass(invoice.status_id)" class="badge badge-xs"></div> {{ invoice.invoice_no }}
             </a>
-            <a role="tab" class="tab inline text-neutral-content" @click="createNewInvoice">
+            <a  v-if="isEditMode" role="tab" class="tab inline text-neutral-content" @click="createNewInvoice">
                 <i class="fa-solid fa-circle-plus"></i> สร้าง Invoice เพิ่ม
             </a>
         </div>
@@ -609,7 +609,7 @@ onMounted(async () => {
                 <h2 class="text-2xl font-bold text-center flex-grow">
                     {{ isEditMode ? 'แก้ไขข้อมูล EIR' : 'สร้างข้อมูลใหม่' }}
                 </h2>
-                <div class="dropdown dropdown-end">
+                <div  v-if="isEditMode" class="dropdown dropdown-end">
                     <div tabindex="0" role="button" class="btn btn-ghost m-1 "><i class="fa-solid fa-bars"></i>
                     </div>
                     <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
@@ -623,7 +623,7 @@ onMounted(async () => {
             </div>
             <form @submit.prevent>
                 <!-- กลุ่มที่ 1 -->
-                <div class="glass box mb-6 p-4 border rounded-lg">
+                <div class=" box mb-6 p-4 border rounded-lg">
                     <div class="flex w-full flex-wrap -mx-2">
                         <div class="w-full md:w-1/4 px-2 mb-4">
                             <label class="block mb-2 text-sm" for="receipt_no"> EIR No. <span
@@ -845,7 +845,7 @@ onMounted(async () => {
                                 @update:modelValue="handleZoneSelection" class="text-sm" placeholder="เลือกโซน">
                             </multiselect>
                         </div>
-                        <div v-if="selectedZone" class="w-full md:w-2/3 px-2 mb-4">
+                        <div v-if="selectedZone && selectedZone.path_map" class="w-full md:w-2/3 px-2 mb-4">
                             <label class="block mb-2 text-sm" for="path_map"> แผนที่ </label>
                             <img :src="selectedZone.path_map" alt="แผนที่" class="w-full h-auto rounded-md" />
                         </div>

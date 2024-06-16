@@ -1,6 +1,6 @@
 <script setup>
 import Navbar from '../../components/Navbar.vue';
-import EIRIndex from '../../components/EIR/EIRIndex.vue';
+import InvoiceIndex from '../../components/EIR/InvoiceIndex.vue';
 import { ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import Breadcrumbs from '../../components/Breadcrumbs.vue';
@@ -22,7 +22,7 @@ const eirId = computed(() => route.params.id ? Number(route.params.id) : null);
 
         <div class="flex-grow flex justify-center p-4">
             <div class="w-full">
-                <EIRIndex />
+                <InvoiceIndex />
             </div>
         </div>
     </div>

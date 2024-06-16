@@ -71,7 +71,8 @@ const generatePDF = () => {
         // Info Line 1
         doc.text(data.value.agent_code, 105, 212); // 200 + 12
         doc.text(data.value.container, 265, 212); // 200 + 12
-        doc.text(data.value.container_color, 470, 212); // 200 + 12
+        doc.text(data.value.booking_bl, 470, 212); // 243 + 12
+        
 
         // Info Line 2
         doc.text(data.value.client_code, 105, 234); // 222 + 12
@@ -79,9 +80,8 @@ const generatePDF = () => {
         doc.text(formatNumberValue(data.value.tare), 470, 234); // 222 + 12
 
         // Info Line 3
-        doc.text(data.value.booking_bl, 105, 255); // 243 + 12
-        doc.text(data.value.seal_no, 235, 255); // 243 + 12
-        doc.text(data.value.vessel, 360, 255); // 243 + 12
+        doc.text(data.value.seal_no, 105, 255); // 243 + 12
+        doc.text(data.value.vessel, 265, 255); // 243 + 12
         doc.text(data.value.voyage, 470, 255); // 243 + 12
 
         // Driver Info 1
@@ -100,6 +100,9 @@ const generatePDF = () => {
             doc.addImage(checkSVGBase64, 'PNG', condition.position_x, condition.position_y, 15, 15);
         });
 
+        // Color
+        doc.setFontSize(10);
+        doc.text(data.value.container_color, 90, 670, { align: "center" }, { maxWidth: 50 }); // 200 + 12
         // Remark
         doc.setFontSize(12);
         doc.text(data.value.remark, 250, 481, { maxWidth: 200 });

@@ -1,22 +1,3 @@
-<script setup>
-import { ref, onMounted } from 'vue';
-import { checkLoginStatus, displayName, position, image, language } from '../utils/auth';
-import '@fortawesome/fontawesome-free/css/all.css';
-import CONFIG from '../config/config';
-
-const systemName = CONFIG.SYSTEM_NAME;  // เข้าถึง environment variable
-const userImage = ref('');
-const userName = ref('');
-const userPosition = ref('');
-
-onMounted(async () => {
-  await checkLoginStatus();
-  userImage.value = image.value;
-  userName.value = displayName.value;
-  userPosition.value = position.value;
-});
-</script>
-
 <template>
   <div class="navbar bg-base-100 shadow-lg">
     <div class="navbar-start lg:hidden">
@@ -31,7 +12,13 @@ onMounted(async () => {
             <details>
               <summary><i class="fa fa-tasks"></i> ใบงาน</summary>
               <ul class="p-2">
-                <li><router-link to="/EIRIndex"><i class="fa fa-file-alt"></i> EIR</router-link></li>
+                <li>
+                  <router-link to="/EIRIndex"><i class="fa fa-file-alt"></i> EIR</router-link>
+                </li>
+
+                <li>
+                  <router-link to="/InvoiceIndex"><i class="fa-solid fa-file-invoice"></i> Invoice</router-link>
+                </li>
               </ul>
             </details>
           </li>
@@ -39,17 +26,31 @@ onMounted(async () => {
             <details>
               <summary><i class="fa fa-folder"></i> ตั้งค่า Master</summary>
               <ul class="p-2">
-                <li><router-link to="/ClientIndex"><i class="fa fa-users"></i> รายชื่อลูกค้า</router-link></li>
-                <li><router-link to="/AgentIndex"><i class="fa fa-ferry"></i> รายชื่อเอเย่นต์</router-link></li>
-                <li><router-link to="/YardIndex"><i class="fa fa-warehouse"></i> รายชื่อลาน</router-link></li>
-                <li><router-link to="/PriceIndex"><i class="fa fa-tags"></i> รายการค่าบริการ</router-link></li>
+                <li>
+                  <router-link to="/ClientIndex"><i class="fa fa-users"></i> รายชื่อลูกค้า</router-link>
+                </li>
+                <li>
+                  <router-link to="/AgentIndex"><i class="fa fa-ferry"></i> รายชื่อเอเย่นต์</router-link>
+                </li>
+                <li>
+                  <router-link to="/YardIndex"><i class="fa fa-warehouse"></i> รายชื่อลาน</router-link>
+                </li>
+                <li>
+                  <router-link to="/PriceIndex"><i class="fa fa-tags"></i> รายการค่าบริการ</router-link>
+                </li>
                 <!-- เพิ่มลาน -->
-                <li><router-link to="/ZoneIndex"><i class="fa fa-map-marked-alt"></i> รายการโซน</router-link></li>
+                <li>
+                  <router-link to="/ZoneIndex"><i class="fa fa-map-marked-alt"></i> รายการโซน</router-link>
+                </li>
                 <li>
                   <a><i class="fa fa-truck"></i> ข้อมูลรถบรรทุก</a>
                   <ul>
-                    <li><router-link to="/TruckCompanyIndex"><i class="fa fa-building"></i> บริษัทหัวลาก</router-link></li>
-                    <li><router-link to="/DriverIndex"><i class="fa fa-id-card"></i> คนขับ</router-link></li>
+                    <li>
+                      <router-link to="/TruckCompanyIndex"><i class="fa fa-building"></i> บริษัทหัวลาก</router-link>
+                    </li>
+                    <li>
+                      <router-link to="/DriverIndex"><i class="fa fa-id-card"></i> คนขับ</router-link>
+                    </li>
                   </ul>
                 </li>
               </ul>
@@ -59,8 +60,9 @@ onMounted(async () => {
             <details>
               <summary><i class="fa fa-cogs"></i> จัดการระบบ</summary>
               <ul class="p-2">
-                <li><router-link to="/UserIndex"><i class="fa fa-user-cog"></i> ผู้ใช้งาน</router-link></li>
-                <li><a><i class="fa fa-database"></i> ข้อมูลพื้นฐานระบบ</a></li>
+                <li>
+                  <router-link to="/UserIndex"><i class="fa fa-user-cog"></i> ผู้ใช้งาน</router-link>
+                </li>
               </ul>
             </details>
           </li>
@@ -75,7 +77,12 @@ onMounted(async () => {
           <span class="cursor-pointer"><i class="fa fa-tasks"></i> ใบงาน</span>
         </div>
         <ul tabindex="0" class="mt-1 z-[1] p-2 shadow-lg menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
-          <li><router-link to="/EIRIndex"><i class="fa fa-file-alt"></i> EIR</router-link></li>
+          <li>
+            <router-link to="/EIRIndex"><i class="fa fa-file-alt"></i> EIR</router-link>
+          </li>
+          <li>
+            <router-link to="/InvoiceIndex"><i class="fa-solid fa-file-invoice"></i> Invoice</router-link>
+          </li>
         </ul>
       </div>
 
@@ -84,17 +91,31 @@ onMounted(async () => {
           <span class="cursor-pointer"><i class="fa fa-folder"></i> ตั้งค่า Master</span>
         </div>
         <ul tabindex="0" class="mt-1 z-[1] p-2 shadow-lg menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
-          <li><router-link to="/ClientIndex"><i class="fa fa-users"></i> รายชื่อลูกค้า</router-link></li>
-          <li><router-link to="/AgentIndex"><i class="fa fa-ferry"></i> รายชื่อเอเย่นต์</router-link></li>
-          <li><router-link to="/YardIndex"><i class="fa fa-warehouse"></i> รายชื่อลาน</router-link></li>
-          <li><router-link to="/PriceIndex"><i class="fa fa-tags"></i> รายการค่าบริการ</router-link></li>
+          <li>
+            <router-link to="/ClientIndex"><i class="fa fa-users"></i> รายชื่อลูกค้า</router-link>
+          </li>
+          <li>
+            <router-link to="/AgentIndex"><i class="fa fa-ferry"></i> รายชื่อเอเย่นต์</router-link>
+          </li>
+          <li>
+            <router-link to="/YardIndex"><i class="fa fa-warehouse"></i> รายชื่อลาน</router-link>
+          </li>
+          <li>
+            <router-link to="/PriceIndex"><i class="fa fa-tags"></i> รายการค่าบริการ</router-link>
+          </li>
           <!-- เพิ่มลาน -->
-          <li><router-link to="/ZoneIndex"><i class="fa fa-map-marked-alt"></i> รายการโซน</router-link></li>
+          <li>
+            <router-link to="/ZoneIndex"><i class="fa fa-map-marked-alt"></i> รายการโซน</router-link>
+          </li>
           <li>
             <a><i class="fa fa-truck"></i> ข้อมูลรถบรรทุก</a>
             <ul>
-              <li><router-link to="/TruckCompanyIndex"><i class="fa fa-building"></i> บริษัทหัวลาก</router-link></li>
-              <li><router-link to="/DriverIndex"><i class="fa fa-id-card"></i> คนขับ</router-link></li>
+              <li>
+                <router-link to="/TruckCompanyIndex"><i class="fa fa-building"></i> บริษัทหัวลาก</router-link>
+              </li>
+              <li>
+                <router-link to="/DriverIndex"><i class="fa fa-id-card"></i> คนขับ</router-link>
+              </li>
             </ul>
           </li>
         </ul>
@@ -104,8 +125,9 @@ onMounted(async () => {
           <span class="cursor-pointer"><i class="fa fa-cogs"></i> จัดการระบบ</span>
         </div>
         <ul tabindex="0" class="mt-1 z-[1] p-2 shadow-lg menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
-          <li><router-link to="/UserIndex"><i class="fa fa-user-cog"></i> ผู้ใช้งาน</router-link></li>
-          <li><a><i class="fa fa-database"></i> ข้อมูลพื้นฐานระบบ</a></li>
+          <li>
+            <router-link to="/UserIndex"><i class="fa fa-user-cog"></i> ผู้ใช้งาน</router-link>
+          </li>
         </ul>
       </div>
     </div>
@@ -120,22 +142,47 @@ onMounted(async () => {
           </div>
         </div>
         <ul tabindex="0" class="mt-1 z-[1] p-2 shadow-lg menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
-          <li class="p-2 text-center">
-            <div class="font-bold">{{ userName }}</div>
-            <div class="text-sm text-gray-400">{{ userPosition }}</div>
-          </li>
-          <div class="divider"></div>
+          <router-link to="/UserProfile">
+            <li class="text-center">
+              <div class="font-bold">{{ userName }} <span class="text-sm text-gray-400">{{ userPosition }}</span></div>
+
+            </li>
+          </router-link>
           <li>
-            <a><i class="fa fa-user"></i> Profile</a>
+            <a @click="handleLogout"><i class="fa fa-sign-out-alt"></i> Logout</a>
           </li>
-          <li><a><i class="fa fa-cog"></i> Settings</a></li>
-          <li><a><i class="fa fa-sign-out-alt"></i> Logout</a></li>
         </ul>
       </div>
     </div>
   </div>
 </template>
 
+
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { checkLoginStatus, displayName, position, image, language, logout } from '../utils/auth'
+import '@fortawesome/fontawesome-free/css/all.css'
+import CONFIG from '../config/config'
+
+const systemName = CONFIG.SYSTEM_NAME // เข้าถึง environment variable
+const userImage = ref('');
+const userName = ref('');
+const userPosition = ref('');
+
+const router = useRouter();
+
+onMounted(async () => {
+  await checkLoginStatus(router)
+  userImage.value = image.value;
+  userName.value = displayName.value;
+  userPosition.value = position.value;
+})
+
+const handleLogout = () => {
+  logout(router);
+}
+</script>
 <style scoped>
 .group-hover\:block {
   display: block;

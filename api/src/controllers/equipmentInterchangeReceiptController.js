@@ -179,7 +179,7 @@ const createInvoice = async (
       const invoiceId = result.insertId;
 
       try {
-        await updateInvoiceHeader(equipmentId);
+        await updateInvoiceHeader(equipmentId, invoiceId) ;
 
         if (initialItem) {
           const insertInvoiceDetailQuery = `
@@ -255,7 +255,7 @@ const createInvoice = async (
   }
 };
 
-const updateInvoiceHeader = (equipmentId) => {
+const updateInvoiceHeader = (equipmentId, invoiceId) => {
   return new Promise((resolve, reject) => {
     const updateInvoiceQuery = `
       UPDATE invoice_header
@@ -293,14 +293,15 @@ const updateInvoiceHeader = (equipmentId) => {
           invoice_header.net_total = 0,
           invoice_header.grand_total = 0,
           invoice_header.payment_total = 0,
+          invoice_header.note = CONCAT(equipment_interchange_receipt.receipt_no,' : ', equipment_interchange_receipt.yard),
           invoice_header.status_id = statuses.id,
           invoice_header.status = statuses.status_name_th,
           invoice_header.create_user = equipment_interchange_receipt.create_user,
           invoice_header.update_user = equipment_interchange_receipt.update_user
-      WHERE invoice_header.eir_id = ?
+      WHERE invoice_header.eir_id = ? and invoice_header.id = ?
     `;
 
-    db.query(updateInvoiceQuery, [equipmentId], (err, result) => {
+    db.query(updateInvoiceQuery, [equipmentId, invoiceId], (err, result) => {
       if (err) {
         reject(err);
       } else {

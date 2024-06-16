@@ -113,6 +113,9 @@
                                 2, maximumFractionDigits: 2
                         }) }}</span>
                     </div>
+                    <div v-if="grandTotal>=1000 & !includeWithholdingTax" class="flex justify-end mt-2">
+                        <span class="text-error">ยอดรวมทั้งสิ้นเกิน 1,000 บาท แต่ไม่ได้ทำการหัก ณ. ที่จ่าย</span>
+                    </div>
                     <div class="flex justify-between mt-2">
                         <span>ยอดชำระ</span>
                         <span>{{ paymentAmount.toLocaleString('en-US', {

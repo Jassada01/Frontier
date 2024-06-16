@@ -13,3 +13,7 @@ export default {
     <LoginForm />
   </div>
 </template>
+
+<style>
+/* สามารถเพิ่ม CSS ที่กำหนดเองได้ที่นี่ */
+</style>

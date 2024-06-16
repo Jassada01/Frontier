@@ -1,5 +1,6 @@
 import UserManagement from '../views/User/user-management.vue'
 import UserIndex from '../views/User/user-index.vue'
+import UserProfile from '../views/User/user-profile.vue'
 
 const userRoutes = [
   {
@@ -17,6 +18,11 @@ const userRoutes = [
     path: '/UserIndex',
     name: 'UserIndex',
     component: UserIndex
+  },
+  {
+    path: '/UserProfile',
+    name: 'UserProfile',
+    component: UserProfile
   }
 ]
 

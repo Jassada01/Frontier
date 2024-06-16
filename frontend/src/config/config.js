@@ -2,7 +2,8 @@ const CONFIG = {
   SYSTEM_NAME: 'Giraffe Container', // System Name
   APP_PORT: 5127, //App port
   //API_SERVER: 'http://localhost:3000', // API Server
-  API_SERVER: 'http://192.168.1.34:3000', // API Server
+  API_SERVER: 'https://giraffe-container.app', // REAL
+  //API_SERVER: 'http://192.168.1.47:3000', // API Server
 
   // Master Variable
   CONTAINE_SIZE: [

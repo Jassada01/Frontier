@@ -19,6 +19,18 @@ const invoiceController = require("../controllers/invoiceController");
  *         schema:
  *           type: integer
  *         description: The EIR ID associated with the invoice
+ *       - in: query
+ *         name: start_date
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: The start date for filtering invoices
+ *       - in: query
+ *         name: end_date
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: The end date for filtering invoices
  *     responses:
  *       200:
  *         description: An invoice with details
@@ -170,8 +182,6 @@ const invoiceController = require("../controllers/invoiceController");
  *         description: Error retrieving invoice
  */
 router.get("/get", invoiceController.getInvoice);
-
-
 
 /**
  * @swagger
@@ -332,9 +342,7 @@ router.get("/get", invoiceController.getInvoice);
  *       500:
  *         description: Error updating invoice
  */
-router.put('/update/:id', invoiceController.updateInvoice);
-
-
+router.put("/update/:id", invoiceController.updateInvoice);
 
 /**
  * @swagger
@@ -375,6 +383,5 @@ router.put('/update/:id', invoiceController.updateInvoice);
  *         description: Error retrieving invoices
  */
 router.get("/getInvoiceByEirId", invoiceController.getInvoiceByEirId);
-
 
 module.exports = router;

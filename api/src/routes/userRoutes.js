@@ -348,4 +348,7 @@ router.put("/user/:id", userController.updateUserById); // เส้นทาง
  */
 router.post("/user/:id/reset-password", userController.updatePasswordById); // เส้นทางสำหรับรีเซ็ตรหัสผ่านของผู้ใช้ตาม ID
 
+router.post('/logout', userController.logout); // เพิ่ม route สำหรับ logout
+
+
 module.exports = router;

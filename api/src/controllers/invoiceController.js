@@ -1,21 +1,27 @@
 const db = require("../config/dbConfig");
 
 exports.getInvoice = (req, res) => {
-  const { id, eir_id } = req.query;
+  const { id, eir_id, start_date, end_date } = req.query;
 
-  let query = `SELECT * FROM invoice_header WHERE 1=1`;
+  let query = `SELECT a.*, b.receipt_no FROM invoice_header a Left join equipment_interchange_receipt b ON a.eir_id = b.id WHERE 1=1`;
   let params = [];
 
   if (id) {
-    query += ` AND id = ?`;
+    query += ` AND a.id = ?`;
     params.push(id);
   }
 
   if (eir_id) {
-    query += ` AND eir_id = ?`;
+    query += ` AND a.eir_id = ?`;
     params.push(eir_id);
   }
-  console.log(query);
+
+  if (start_date && end_date) {
+    query += ` AND a.invoice_date BETWEEN ? AND ?`;
+    params.push(start_date, end_date);
+  }
+
+  // console.log(query);
   db.query(query, params, (err, headerResults) => {
     if (err) {
       res
@@ -286,11 +292,15 @@ exports.getInvoiceByEirId = (req, res) => {
   db.query(query, [eir_id], (err, results) => {
     if (err) {
       console.error("Error retrieving invoices by eir_id:", err);
-      return res.status(500).send({ message: "Error retrieving invoices", error: err });
+      return res
+        .status(500)
+        .send({ message: "Error retrieving invoices", error: err });
     }
 
     if (results.length === 0) {
-      return res.status(404).send({ message: "No invoices found for the provided eir_id" });
+      return res
+        .status(404)
+        .send({ message: "No invoices found for the provided eir_id" });
     }
 
     res.send(results);
