@@ -1,23 +1,19 @@
 <script setup>
 import Navbar from '../../components/Navbar.vue'
-import { ref } from 'vue'
-
-// ตัวอย่างการใช้งาน ref เพื่อเก็บค่า displayName และ position
-const userDisplayName = ref('');
-const userPosition = ref('');
+import AgentCard from '../../components/home/AgentCard.vue'
 </script>
 
 <template>
   <div>
-    <Navbar/>
+    <Navbar />
 
     <div class="p-10">
-      <h1 class="text-3xl">Welcome Home!</h1>
-      <p>This is the home page.</p>
-      <!-- แสดงชื่อและตำแหน่งของผู้ใช้ -->
-      <p v-if="userDisplayName.length > 0 && userPosition.length > 0">
-        Logged in as: {{ userDisplayName }} - {{ userPosition }}
-      </p>
+      <h1 class="text-3xl font-bold mb-6">Welcome Home!</h1>
+      <AgentCard />
     </div>
   </div>
 </template>
+
+<style scoped>
+/* คุณสามารถเพิ่ม CSS ที่นี่หากต้องการปรับแต่งเพิ่มเติม */
+</style>

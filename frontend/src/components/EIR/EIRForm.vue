@@ -376,13 +376,24 @@ const cancelReceipt = () => {
         cancelButtonColor: '#CCC',
         confirmButtonText: 'ใช่, ยกเลิกใบEIR',
         cancelButtonText: 'ไม่ยกเลิก'
-    }).then((result) => {
+    }).then(async (result) => {
         if (result.isConfirmed) {
-            equipmentInterchangeReceipt.value.status_id = 2;
-            updateReceipt();
+            try {
+                await axios.delete(`${CONFIG.API_SERVER}/api/eir_match/delete`, {
+                    data: {
+                        eir_id: equipmentInterchangeReceipt.value.id,
+                        type: equipmentInterchangeReceipt.value.entry_type
+                    }
+                });
+                equipmentInterchangeReceipt.value.status_id = 2;
+                updateReceipt();
+            } catch (error) {
+                handleError(error, 'Error deleting EIR match');
+            }
         }
     });
 };
+
 
 
 const createNewInvoice = () => {
@@ -533,6 +544,15 @@ onMounted(async () => {
             Swal.fire('ใบ EIR นี้ยกเลิกแล้ว', '', 'warning');
         }
         await fetchUserData();
+
+        // ตั้งค่า activeTab ตาม query parameter
+        const query = router.currentRoute.value.query;
+        if (query.inv) {
+            const targetInvoice = invoiceList.value.find(invoice => invoice.invoice_no === query.inv);
+            if (targetInvoice) {
+                activeTab.value = targetInvoice.invoice_id;
+            }
+        }
     }
     else {
         const initialData = router.currentRoute.value.query.initialData
@@ -581,6 +601,7 @@ onMounted(async () => {
 
 
 
+
 </script>
 
 <template>
@@ -589,27 +610,27 @@ onMounted(async () => {
             <span class="loading loading-spinner loading-lg"></span>
         </div>
 
-
         <div role="tablist" class="tabs  tabs-bordered flex justify-start">
             <a role="tab" class="tab inline text-primary" :class="{ 'tab-active': activeTab === 0 }"
                 @click="activeTab = 0">
                 <div class="badge badge-primary badge-xs"></div> ใบ
                 EIR
             </a>
-            <a v-for="(invoice) in invoiceList"  :key="invoice.invoice_id" role="tab" class="tab inline text-secondary"
+            <a v-for="(invoice) in invoiceList" :key="invoice.invoice_id" role="tab" class="tab inline text-secondary"
                 :class="{ 'tab-active': activeTab === invoice.invoice_id }" @click="activeTab = invoice.invoice_id">
                 <div :class="getBadgeClass(invoice.status_id)" class="badge badge-xs"></div> {{ invoice.invoice_no }}
             </a>
-            <a  v-if="isEditMode" role="tab" class="tab inline text-neutral-content" @click="createNewInvoice">
+            <a v-if="isEditMode" role="tab" class="tab inline text-neutral-content" @click="createNewInvoice">
                 <i class="fa-solid fa-circle-plus"></i> สร้าง Invoice เพิ่ม
             </a>
         </div>
+
         <div v-show="activeTab === 0" class="bg-base-100 border-base-300 rounded-box p-6">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-2xl font-bold text-center flex-grow">
                     {{ isEditMode ? 'แก้ไขข้อมูล EIR' : 'สร้างข้อมูลใหม่' }}
                 </h2>
-                <div  v-if="isEditMode" class="dropdown dropdown-end">
+                <div v-if="isEditMode" class="dropdown dropdown-end">
                     <div tabindex="0" role="button" class="btn btn-ghost m-1 "><i class="fa-solid fa-bars"></i>
                     </div>
                     <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">

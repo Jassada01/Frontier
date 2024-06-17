@@ -71,4 +71,35 @@ router.get("/getConditions", commonController.getConditions);
  */
 router.get("/getProductPrices", commonController.getProductPrices);
 
+/**
+ * @swagger
+ * /api/common/agentEirCount:
+ *   get:
+ *     summary: Get agent EIR count
+ *     tags: [Agent EIR Count]
+ *     responses:
+ *       200:
+ *         description: Agent EIR count retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   agent_id:
+ *                     type: integer
+ *                   agent_code:
+ *                     type: string
+ *                   size_type:
+ *                     type: string
+ *                   CNT:
+ *                     type: integer
+ *       500:
+ *         description: Error retrieving agent EIR count
+ */
+router.get("/agentEirCount", commonController.getAgentEirCount);
+
+
+
 module.exports = router;

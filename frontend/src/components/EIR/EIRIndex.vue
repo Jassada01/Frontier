@@ -17,14 +17,20 @@
       </div>
       <div class="form-control mr-4">
         <label class="cursor-pointer label">
-          <input type="checkbox" id="dropContainerFilter" class="checkbox checkbox-accent" />
+          <input type="checkbox" id="dropContainerFilter" class="checkbox checkbox-info" />
           <span class="label-text ml-2">แสดงเฉพาะ Drop</span>
+        </label>
+      </div>
+      <div class="form-control mr-4">
+        <label class="cursor-pointer label">
+          <input type="checkbox" id="matchEirFilter" class="checkbox checkbox-info" />
+          <span class="label-text ml-2">แสดงเฉพาะไม่มี Match EIR</span>
         </label>
       </div>
       <div class="form-control">
         <label class="cursor-pointer label">
-          <input type="checkbox" id="matchEirFilter" class="checkbox checkbox-accent" />
-          <span class="label-text ml-2">แสดงเฉพาะไม่มี Match EIR</span>
+          <input type="checkbox" id="activeStatusFilter" class="checkbox checkbox-info" checked />
+          <span class="label-text ml-2">แสดงเฉพาะที่ใช้งาน</span>
         </label>
       </div>
     </div>
@@ -32,7 +38,6 @@
       <table id="eirTable" class="table table-zebra">
         <thead>
           <tr>
-            <th class="p-4"></th>
             <th class="p-4">ประเภท</th>
             <th class="p-4">ตุ้ Drop</th>
             <th class="p-4">เลขที่ EIR</th>
@@ -52,18 +57,7 @@
           <tr v-for="eir in eirs" :key="eir.id">
             <td class="p-4">
               <div class="grid justify-items-center">
-                <router-link :to="`/EIR/${eir.id}`">
-                  <button class="btn btn-circle">
-                    <i class="fa fa-pencil-alt"></i>
-                  </button>
-                </router-link>
-              </div>
-            </td>
-            <td class="p-4">
-              <div class="grid justify-items-center">
-                <span
-                  :class="eir.entry_type === 'IN' ? 'badge badge-success' : 'badge badge-error'"
-                >
+                <span :class="eir.entry_type === 'IN' ? 'badge badge-success' : 'badge badge-error'">
                   {{ eir.entry_type }}
                 </span>
               </div>
@@ -73,7 +67,7 @@
                 <div v-if="eir.drop_container" class="badge badge-primary badge-outline">Drop</div>
               </div>
             </td>
-            <td class="p-4 whitespace-nowrap">{{ eir.receipt_no }}</td>
+            <td class="p-4 whitespace-nowrap text-primary"><router-link :to="`/EIR/${eir.id}`">{{ eir.receipt_no }}</router-link></td>
             <td class="p-4 whitespace-nowrap">{{ formatDate(eir.date) }}</td>
             <td class="p-4">{{ eir.agent_code }}</td>
             <td class="p-4">{{ eir.client_code }}</td>
@@ -88,13 +82,10 @@
               </div>
             </td>
             <td class="p-4">
-              <div
-                :class="
-                  eir.status_name_th === 'ใช้งาน'
-                    ? 'badge badge-primary badge-outline whitespace-nowrap'
-                    : 'badge badge-error badge-outline whitespace-nowrap'
-                "
-              >
+              <div :class="eir.status_name_th === 'ใช้งาน'
+                  ? 'badge badge-primary badge-outline whitespace-nowrap'
+                  : 'badge badge-error badge-outline whitespace-nowrap'
+                ">
                 {{ eir.status_name_th }}
               </div>
             </td>
@@ -152,31 +143,43 @@ onMounted(async () => {
     setTimeout(() => {
       const table = $('#eirTable').DataTable({
         pageLength: 100, // Set the number of rows to display per page
-        order: [[4, 'desc']] // Order by the fifth column (index 4) in descending order
+        order: [[3, 'desc']] // Order by the fifth column (index 4) in descending order
       })
 
       // Add event listener for the entry type filter
       $('#entryTypeFilter').on('change', function () {
-        table.column(1).search(this.value).draw()
+        table.column(0).search(this.value).draw()
       })
 
       // Add event listener for the drop container filter
       $('#dropContainerFilter').on('change', function () {
         if (this.checked) {
-          table.column(2).search('Drop').draw()
+          table.column(1).search('Drop').draw()
         } else {
-          table.column(2).search('').draw()
+          table.column(1).search('').draw()
         }
       })
 
       // Add event listener for the match EIR filter
       $('#matchEirFilter').on('change', function () {
         if (this.checked) {
-          table.column(12).search('^((?!M).)*$', true, false).draw()
+          table.column(11).search('^((?!M).)*$', true, false).draw()
+        } else {
+          table.column(11).search('').draw()
+        }
+      })
+
+      // Add event listener for the active status filter
+      $('#activeStatusFilter').on('change', function () {
+        if (this.checked) {
+          table.column(12).search('ใช้งาน').draw()
         } else {
           table.column(12).search('').draw()
         }
       })
+
+      // Apply initial filter for active status
+      table.column(12).search('ใช้งาน').draw()
     }, 0)
   } catch (error) {
     console.error('Error fetching EIRs:', error)

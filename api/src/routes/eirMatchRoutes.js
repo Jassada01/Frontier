@@ -67,6 +67,10 @@ router.post("/add", eirMatchController.addEirMatch);
  *                     type: integer
  *                   is_active:
  *                     type: boolean
+ *                   eir_in_no:
+ *                     type: string
+ *                   eir_out_no:
+ *                     type: string
  *       400:
  *         description: Invalid entry_type
  *       500:
@@ -107,5 +111,35 @@ router.get("/get", eirMatchController.getEirMatch);
  *         description: Error updating EIR match
  */
 router.put("/update/:match_id", eirMatchController.updateEirMatch);
+
+/**
+ * @swagger
+ * /api/eir_match/delete:
+ *   delete:
+ *     summary: Delete an EIR match
+ *     tags: [EIR Match]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               eir_id:
+ *                 type: integer
+ *                 description: The ID of the EIR
+ *               type:
+ *                 type: string
+ *                 enum: [IN, OUT]
+ *                 description: The entry type (IN or OUT)
+ *     responses:
+ *       200:
+ *         description: EIR match deleted successfully
+ *       400:
+ *         description: Invalid type
+ *       500:
+ *         description: Error deleting EIR match
+ */
+router.delete("/delete", eirMatchController.deleteEirMatch);
 
 module.exports = router;

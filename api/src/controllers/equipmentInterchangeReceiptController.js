@@ -44,9 +44,9 @@ exports.addEquipmentInterchangeReceipt = async (req, res) => {
   } else if (entry_type === "OUT" && !drop_container) {
     p_running_prefix = "EIR-OUT";
   } else if (entry_type === "IN" && drop_container) {
-    p_running_prefix = "EIR-D-IN";
+    p_running_prefix = "EIR-IND";
   } else if (entry_type === "OUT" && drop_container) {
-    p_running_prefix = "EIR-D-OUT";
+    p_running_prefix = "EIR-OUTD";
   }
 
   try {

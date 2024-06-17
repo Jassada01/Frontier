@@ -2,6 +2,12 @@
     <div class="invoice-table p-4 overflow-x-auto">
         <div class="flex justify-between items-center mb-4">
             <h1 class="text-2xl font-bold">รายการใบแจ้งหนี้</h1>
+            <div class="form-control">
+                <label class="cursor-pointer label">
+                    <input type="checkbox" id="activeStatusFilter" class="checkbox checkbox-info" checked />
+                    <span class="label-text ml-2">แสดงเฉพาะที่ใช้งาน</span>
+                </label>
+            </div>
         </div>
         <table id="invoiceTable" class="display table table-zebra">
             <thead>
@@ -22,7 +28,11 @@
             </thead>
             <tbody>
                 <tr v-for="invoice in invoices" :key="invoice.id">
-                    <td class="p-4 whitespace-nowrap">{{ invoice.invoice_no }}</td>
+                    <td class="p-4 whitespace-nowrap">
+                        <router-link :to="`/EIR/${invoice.eir_id}?inv=${invoice.invoice_no}`">
+                            <a class="text-primary">{{ invoice.invoice_no }}</a>
+                        </router-link>
+                    </td>
                     <td class="p-4">{{ formatDate(invoice.invoice_date) }}</td>
                     <td class="p-4">{{ invoice.customer_name }}</td>
                     <td class="p-4">{{ invoice.agent_code }}</td>
@@ -56,7 +66,7 @@
 import { ref, onMounted, nextTick } from 'vue';
 import axios from 'axios';
 import moment from 'moment';
-import 'datatables.net-dt'
+import 'datatables.net-dt';
 
 import $ from 'jquery';
 import 'datatables.net';
@@ -96,13 +106,27 @@ onMounted(async () => {
         $.fn.dataTable.moment('D/M/YYYY');
 
         await nextTick();
-        $('#invoiceTable').DataTable({
+        const table = $('#invoiceTable').DataTable({
             order: [[1, 'desc']], // Order by the second column (index 1) in descending order
             pageLength: 50 // Set the number of rows to display per page
         });
+
+        // Add event listener for the active status filter
+        $('#activeStatusFilter').on('change', function () {
+            if (this.checked) {
+                table.column(11).search('รอชำระ|ชำระแล้ว', true, false).draw();
+            } else {
+                table.column(11).search('').draw();
+            }
+        });
+
+        // Apply initial filter for active status
+        table.column(11).search('รอชำระ|ชำระแล้ว', true, false).draw();
+
     } catch (error) {
         console.error('Error fetching invoices:', error);
     }
 });
 </script>
+
 <style scoped></style>

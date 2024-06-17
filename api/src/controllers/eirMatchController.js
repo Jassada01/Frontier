@@ -77,3 +77,34 @@ exports.updateEirMatch = (req, res) => {
     }
   );
 };
+// Existing endpoints...
+
+exports.deleteEirMatch = (req, res) => {
+  const { eir_id, type } = req.body;
+
+  let query = "";
+  if (type === "IN") {
+    query = `DELETE FROM eir_match WHERE eir_in = ?`;
+  } else if (type === "OUT") {
+    query = `DELETE FROM eir_match WHERE eir_out = ?`;
+  } else {
+    res.status(400).send({ message: "Invalid type" });
+    return;
+  }
+
+  db.query(query, [eir_id], (err, results) => {
+    if (err) {
+      res.status(500).send({
+        message: "Error deleting EIR match",
+        error: err,
+      });
+      return;
+    }
+    res.send({
+      message: "EIR match deleted successfully",
+      affectedRows: results.affectedRows,
+    });
+  });
+};
+
+// Export other existing endpoints...

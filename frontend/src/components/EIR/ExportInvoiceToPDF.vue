@@ -158,7 +158,7 @@ const createInvoicePage = (doc, image, copyType) => {
   if (invoice.status_id === 5) {
     doc.setFontSize(34)
     doc.setTextColor(255, 29, 25)
-    doc.text('เอกสารใบนี้ถูกยกเลิกแล้ว', 100, 550)
+    doc.text('ยกเลิก', 450, 160)
     doc.setTextColor(0, 0, 0)
     doc.setFontSize(14)
   }
