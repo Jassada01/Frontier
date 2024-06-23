@@ -3,12 +3,12 @@ const CONFIG = {
   APP_PORT: 5127, //App port
   //API_SERVER: 'http://localhost:3000', // API Server
   API_SERVER: 'https://giraffe-container.app', // REAL
-  //API_SERVER: 'http://192.168.1.47:3000', // API Server
+  //API_SERVER: 'http://172.20.10.2:3000', // API Server
 
   // Master Variable
   CONTAINE_SIZE: [
-    "20'",
-    "40'",
+    "20 GP",
+    "40 GP",
     "40' HC",
     "45'",
     'LCL',

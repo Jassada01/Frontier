@@ -1,6 +1,6 @@
 <template>
   <div>
-    <li @click="generatePDF">
+    <li @click="handlePrintInvoice">
       <a><i class="fa-solid fa-file-pdf"></i> Print Invoice</a>
     </li>
   </div>
@@ -10,7 +10,8 @@
 import { jsPDF } from 'jspdf'
 import font_config from '../../config/font_config'
 import moment from 'moment'
-import invoiceTemplateImage from '../../assets/media/pdf_template/invoice_template.png' // นำเข้า template ที่อัพโหลดมาใหม่
+import invoiceTemplateImage from '../../assets/media/pdf_template/invoice_template.png'
+import Swal from 'sweetalert2'
 
 const checkSVGBase64 = `data:image/png;base64,${font_config.check_png}`
 
@@ -70,8 +71,42 @@ function convertToThaiBaht(amount) {
 }
 
 function convertToEnglishBaht(amount) {
-  const number = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine']
-  const digit = ['', 'ten', 'hundred', 'thousand', 'ten thousand', 'hundred thousand', 'million']
+  const number = [
+    'zero',
+    'one',
+    'two',
+    'three',
+    'four',
+    'five',
+    'six',
+    'seven',
+    'eight',
+    'nine',
+    'ten',
+    'eleven',
+    'twelve',
+    'thirteen',
+    'fourteen',
+    'fifteen',
+    'sixteen',
+    'seventeen',
+    'eighteen',
+    'nineteen'
+  ]
+  const tens = [
+    '',
+    '',
+    'twenty',
+    'thirty',
+    'forty',
+    'fifty',
+    'sixty',
+    'seventy',
+    'eighty',
+    'ninety'
+  ]
+  const scales = ['', 'thousand', 'million', 'billion', 'trillion']
+
   amount = parseFloat(amount).toFixed(2).toString()
   let bahtText = ''
   let [integer, satang] = amount.split('.')
@@ -79,37 +114,57 @@ function convertToEnglishBaht(amount) {
   if (parseInt(integer) === 0) {
     bahtText = 'zero baht'
   } else {
-    let count = integer.length
-    for (let i = 0; i < count; i++) {
-      let numberStr = integer[i]
-      if (numberStr !== '0') {
-        if (numberStr === '1' && i === count - 1) {
-          bahtText += 'one'
-        } else {
-          bahtText += number[parseInt(numberStr)]
-        }
-        bahtText += ' ' + digit[count - i - 1] + ' '
-      }
+    let chunks = []
+
+    while (integer.length > 0) {
+      chunks.push(integer.slice(-3))
+      integer = integer.slice(0, -3)
     }
+
+    chunks = chunks.reverse()
+
+    chunks.forEach((chunk, index) => {
+      let chunkText = ''
+      const num = parseInt(chunk)
+
+      if (num >= 100) {
+        chunkText += number[Math.floor(num / 100)] + ' hundred '
+        chunk = num % 100
+      }
+
+      if (chunk >= 20) {
+        chunkText += tens[Math.floor(chunk / 10)] + ' '
+        if (chunk % 10 > 0) {
+          chunkText += number[chunk % 10] + ' '
+        }
+      } else if (chunk > 0) {
+        chunkText += number[chunk] + ' '
+      }
+
+      if (chunkText) {
+        bahtText += chunkText + scales[chunks.length - 1 - index] + ' '
+      }
+    })
+
     bahtText += 'baht'
   }
 
-  if (parseInt(satang) === 0) {
-    bahtText += ' only'
-  } else {
-    if (satang < 10) {
-      bahtText += ' ' + number[parseInt(satang[1])] + ' satang'
+  if (parseInt(satang) > 0) {
+    bahtText += ' and '
+    if (parseInt(satang) < 20) {
+      bahtText += number[parseInt(satang)] + ' satang'
     } else {
-      if (satang[1] === '0') {
-        bahtText += ' ' + number[parseInt(satang[0])] + ' ten satang'
-      } else {
-        bahtText +=
-          ' ' + number[parseInt(satang[0])] + ' ten ' + number[parseInt(satang[1])] + ' satang'
+      bahtText += tens[Math.floor(parseInt(satang) / 10)] + ' '
+      if (parseInt(satang) % 10 > 0) {
+        bahtText += number[parseInt(satang) % 10] + ' '
       }
+      bahtText += 'satang'
     }
+  } else {
+    bahtText += ' only'
   }
 
-  return bahtText
+  return bahtText.trim()
 }
 
 const props = defineProps({
@@ -123,19 +178,39 @@ const props = defineProps({
   }
 })
 
-const generatePDF = () => {
-  const doc = new jsPDF('p', 'pt', 'a4')
+const handlePrintInvoice = () => {
+  Swal.fire({
+    title: 'Print Invoice',
+    text: 'ออก Invoice พร้อม Copy?',
+    input: 'checkbox',
+    inputValue: 0,
+    inputPlaceholder: 'ออก Invoice ทั้ง ต้นฉบับและสำเนา',
+    confirmButtonText: 'ออกInvoice',
+    cancelButtonText: 'ยกเลิก',
+    showCancelButton: true
+  }).then((result) => {
+    if (result.isConfirmed) {
+      const includeCopy = result.value ? true : false
+      generatePDF(includeCopy)
+    }
+  })
+}
+
+const generatePDF = (includeCopy) => {
+  const doc = new jsPDF('p', 'pt', 'a4', {LineHeightFactor: 1})
 
   const image = new Image()
   image.src = invoiceTemplateImage
 
   image.onload = () => {
-    // Create the first page (ต้นฉบับ)
-    createInvoicePage(doc, image, '(ต้นฉบับ)')
+    // Create the first page
+    createInvoicePage(doc, image, includeCopy ? '(ต้นฉบับ)' : '')
 
-    // Create the second page (สำเนา)
-    doc.addPage()
-    createInvoicePage(doc, image, '(สำเนา)')
+    if (includeCopy) {
+      // Create the second page (สำเนา)
+      doc.addPage()
+      createInvoicePage(doc, image, '(สำเนา)')
+    }
 
     doc.save(`${props.form.invoice_no}.pdf`)
   }
@@ -164,19 +239,17 @@ const createInvoicePage = (doc, image, copyType) => {
   }
 
   // Original or Copy
-  doc.setFontSize(28)
-  if (copyType == "(ต้นฉบับ)")
-  {
-    doc.setTextColor(40, 40, 244)
+  if (copyType) {
+    doc.setFontSize(28)
+    if (copyType === '(ต้นฉบับ)') {
+      doc.setTextColor(40, 40, 244)
+    } else {
+      doc.setTextColor(150, 150, 150)
+    }
+    doc.text(copyType, 560, 41, { align: 'right' })
+    doc.setTextColor(0, 0, 0)
+    doc.setFontSize(14)
   }
-  else
-  {
-    doc.setTextColor(150, 150, 150)
-  }
- 
-  doc.text(copyType, 560, 41, { align: 'right' })
-  doc.setTextColor(0, 0, 0)
-  doc.setFontSize(14)
 
   // Header
   doc.text(invoice.invoice_no, 450, 107)
@@ -184,14 +257,21 @@ const createInvoicePage = (doc, image, copyType) => {
   doc.text(invoice.payment_method, 450, 133)
 
   // Customer Info
-  doc.text(
+  const customerInfo =
     invoice[`customer_name${lang === 'ENG' ? '_eng' : ''}`] +
-      ' (' +
-      invoice[`customer_address_branch${lang === 'ENG' ? '_eng' : ''}`] +
-      ')',
-    85,
-    107
-  )
+    ' (' +
+    invoice[`customer_address_branch${lang === 'ENG' ? '_eng' : ''}`] +
+    ')'
+
+  if (customerInfo.length > 35) {
+    doc.setFontSize(12)
+  }
+
+  doc.text(customerInfo, 85, 107,{ maxWidth: 280,lineHeightFactor: 0.6 })
+
+  // Reset font size back to 14
+  doc.setFontSize(14)
+
   doc.text(invoice[`customer_address${lang === 'ENG' ? '_eng' : ''}`], 60, 133, {
     maxWidth: 350,
     lineHeightFactor: 0.75
@@ -201,7 +281,22 @@ const createInvoicePage = (doc, image, copyType) => {
   // Invoice Details
   // LINE 1
   doc.text(EIR.agent_code, 95, 198)
-  doc.text(EIR.client_code, 225, 198)
+  // EIR Client Code
+  const clientCode = EIR.client_code
+
+  if (clientCode.length > 35) {
+    doc.setFontSize(12)
+    doc.text(clientCode, 225, 194, { maxWidth: 180,lineHeightFactor: 0.6 })
+  }
+  else
+  {
+    doc.text(clientCode, 225, 198, { maxWidth: 180,lineHeightFactor: 0.6  })
+  }
+
+
+
+  // Reset font size back to 14
+  doc.setFontSize(14)
   doc.text(EIR.booking_bl, 440, 198)
 
   // LINE 2
@@ -225,7 +320,7 @@ const createInvoicePage = (doc, image, copyType) => {
   })
 
   // Note
-  doc.text(invoice.note || "", 95, 540);
+  doc.text(invoice.note || '', 95, 540)
 
   // Totals
   doc.text(formatNumberValue(invoice.total_amount), 520, 514, { align: 'right' })
@@ -254,7 +349,12 @@ const createInvoicePage = (doc, image, copyType) => {
   })
 
   // Add converted Thai Baht text
-  const thaiBahtText = '(' + convertToThaiBaht(invoice.grand_total) + ')'
+  const thaiBahtText =
+    '(' +
+    (lang === 'ENG'
+      ? convertToEnglishBaht(invoice.grand_total)
+      : convertToThaiBaht(invoice.grand_total)) +
+    ')'
   doc.text(thaiBahtText, 80, 594)
 }
 </script>

@@ -7,7 +7,7 @@ import Breadcrumbs from '../../components/Breadcrumbs.vue';
 
 const breadcrumbsData = [
     { name: "Home", icon: "fa-home", link: "/" },
-    { name: "EIR List", icon: "fa-file", link: "" },
+    { name: "Invoice List", icon: "fa-file", link: "" },
 ];
 
 const route = useRoute();

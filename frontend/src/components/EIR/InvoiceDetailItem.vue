@@ -294,7 +294,7 @@ const grandTotal = computed(() => {
 });
 
 const withholdingTaxAmount = computed(() => {
-    return includeWithholdingTax.value ? grandTotal.value * (withholdingTaxRate.value / 100) : 0;
+    return includeWithholdingTax.value ? totalAfterDiscount.value * (withholdingTaxRate.value / 100) : 0;
 });
 
 const paymentAmount = computed(() => {

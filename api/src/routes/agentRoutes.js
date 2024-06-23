@@ -1,6 +1,6 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const agentController = require('../controllers/agentController');
+const agentController = require("../controllers/agentController");
 
 /**
  * @swagger
@@ -29,6 +29,8 @@ const agentController = require('../controllers/agentController');
  *                 type: string
  *               other_details:
  *                 type: string
+ *               image_path:
+ *                 type: string
  *               active:
  *                 type: boolean
  *     responses:
@@ -37,7 +39,7 @@ const agentController = require('../controllers/agentController');
  *       500:
  *         description: Error adding new agent
  */
-router.post('/add', agentController.addAgent);
+router.post("/add", agentController.addAgent);
 
 /**
  * @swagger
@@ -62,7 +64,7 @@ router.post('/add', agentController.addAgent);
  *       500:
  *         description: Error retrieving agents
  */
-router.get('/get', agentController.getAgents);
+router.get("/get", agentController.getAgents);
 
 /**
  * @swagger
@@ -98,6 +100,8 @@ router.get('/get', agentController.getAgents);
  *                 type: string
  *               other_details:
  *                 type: string
+ *               image_path:
+ *                 type: string
  *               active:
  *                 type: boolean
  *     responses:
@@ -106,6 +110,6 @@ router.get('/get', agentController.getAgents);
  *       500:
  *         description: Error updating agent
  */
-router.put('/update/:agent_id', agentController.updateAgent);
+router.put("/update/:agent_id", agentController.updateAgent);
 
 module.exports = router;

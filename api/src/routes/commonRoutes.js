@@ -91,15 +91,20 @@ router.get("/getProductPrices", commonController.getProductPrices);
  *                     type: integer
  *                   agent_code:
  *                     type: string
- *                   size_type:
+ *                   image_path:
  *                     type: string
- *                   CNT:
- *                     type: integer
+ *                   size_types:
+ *                     type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         size_type:
+ *                           type: string
+ *                         CNT:
+ *                           type: integer
  *       500:
  *         description: Error retrieving agent EIR count
  */
 router.get("/agentEirCount", commonController.getAgentEirCount);
-
-
 
 module.exports = router;

@@ -9,6 +9,7 @@ exports.addAgent = (req, res) => {
     phone_number,
     email,
     other_details,
+    image_path,
     active,
   } = req.body;
 
@@ -21,8 +22,9 @@ exports.addAgent = (req, res) => {
             phone_number,
             email,
             other_details,
+            image_path,
             active
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       agent_code,
       company_name,
@@ -31,6 +33,7 @@ exports.addAgent = (req, res) => {
       phone_number,
       email,
       other_details,
+      image_path,
       active || true,
     ],
     (err, results) => {
@@ -73,7 +76,6 @@ exports.getAgents = (req, res) => {
   });
 };
 
-
 exports.updateAgent = (req, res) => {
   const { agent_id } = req.params;
   const {
@@ -84,6 +86,7 @@ exports.updateAgent = (req, res) => {
     phone_number,
     email,
     other_details,
+    image_path,
     active,
   } = req.body;
 
@@ -96,6 +99,7 @@ exports.updateAgent = (req, res) => {
             phone_number = ?,
             email = ?,
             other_details = ?,
+            image_path = ?,
             active = ?
         WHERE agent_id = ?`,
     [
@@ -106,6 +110,7 @@ exports.updateAgent = (req, res) => {
       phone_number,
       email,
       other_details,
+      image_path,
       active,
       agent_id,
     ],

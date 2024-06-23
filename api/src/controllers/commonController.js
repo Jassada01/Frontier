@@ -75,7 +75,7 @@ exports.getProductPrices = (req, res) => {
 
 exports.getAgentEirCount = (req, res) => {
   const query = `
-    SELECT a.agent_id, a.agent_code, kk.size_type, IFNULL(kk.cnt, 0) AS CNT
+    SELECT a.agent_id, a.agent_code, a.image_path, kk.size_type, IFNULL(kk.cnt, 0) AS CNT
     FROM agents a
     LEFT JOIN (
         SELECT eir.agent_id, eir.size_type, COUNT(*) AS cnt 
@@ -108,6 +108,7 @@ exports.getAgentEirCount = (req, res) => {
         acc.push({
           agent_id: curr.agent_id,
           agent_code: curr.agent_code,
+          image_path: curr.image_path, // Include image_path here
           size_types: [
             {
               size_type: curr.size_type,

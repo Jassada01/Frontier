@@ -11,16 +11,24 @@
         <table id="agentTable" class="display table table-auto">
             <thead>
                 <tr>
-                    <th class="p-4">Agent Code</th>
-                    <th class="p-4">Company Name</th>
-                    <th class="p-4">Contact Name</th>
-                    <th class="p-4">Phone</th>
-                    <th class="p-4">Email</th>
-                    <th class="p-4">Actions</th>
+                    <th class="p-4  justify-center"></th>
+                    <th class="p-4">รหัสเอเย่นต์</th>
+                    <th class="p-4">ชื่อบริษัท</th>
+                    <th class="p-4">ชื่อผู้ติดต่อ</th>
+                    <th class="p-4">เบอร์โทรศัพท์</th>
+                    <th class="p-4">อีเมล</th>
+                    <th class="p-4"></th>
                 </tr>
             </thead>
             <tbody>
                 <tr v-for="agent in agents" :key="agent.agent_id">
+                    <td class="p-4 justify-center">
+                        <div class="avatar">
+                            <div class="w-12 mask mask-squircle justify-center">
+                                <img :src="agent.image_path || 'https://via.placeholder.com/150'" />
+                            </div>
+                        </div>
+                    </td>
                     <td class="p-4">{{ agent.agent_code }}</td>
                     <td class="p-4">{{ agent.company_name }}</td>
                     <td class="p-4">{{ agent.contact_name }}</td>
