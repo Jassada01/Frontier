@@ -75,18 +75,26 @@ const generatePDF = () => {
     doc.text(data.value.container, 265, 212) // 200 + 12
     doc.text(data.value.booking_bl, 470, 212) // 243 + 12
 
+    if (data.value.status_id === 2) {
+      doc.setFontSize(34)
+      doc.setTextColor(255, 29, 25)
+      doc.text('ยกเลิก', 450, 120)
+      doc.setTextColor(0, 0, 0)
+      doc.setFontSize(14)
+    }
+
+
     // Info Line 2
     const dataClientCode = data.value.client_code
 
     if (dataClientCode.length > 40) {
       doc.setFontSize(12)
-      doc.text(dataClientCode, 105, 230,{ maxWidth: 200,lineHeightFactor: 0.6 })
+      doc.text(dataClientCode, 105, 230, { maxWidth: 200, lineHeightFactor: 0.6 })
     }
-    else
-    {
-      doc.text(dataClientCode, 105, 234,{ maxWidth: 200,lineHeightFactor: 0.6 })
+    else {
+      doc.text(dataClientCode, 105, 234, { maxWidth: 200, lineHeightFactor: 0.6 })
     }
-   
+
 
     // Reset font size back to 16
     doc.setFontSize(16)
@@ -119,7 +127,7 @@ const generatePDF = () => {
     doc.text(data.value.container_color, 90, 670, { align: 'center' }, { maxWidth: 50 }) // 200 + 12
     // Remark
     doc.setFontSize(12)
-    doc.text(data.value.remark, 250, 481, { maxWidth: 200 })
+    doc.text(data.value.remark, 330, 490, { maxWidth: 200 })
 
     // PIC Name
     doc.setFontSize(16)

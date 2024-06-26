@@ -371,11 +371,23 @@ const cancelReceipt = () => {
         title: 'คุณต้องการยกเลิกใบ EIR นี้หรือไม่?',
         text: 'หากยกเลิกแล้ว ไม่สามารถแก้ไขได้',
         icon: 'warning',
+        input: 'textarea',
+        inputPlaceholder: 'กรุณากรอกสาเหตุในการยกเลิก...',
+        inputAttributes: {
+            'aria-label': 'กรุณากรอกสาเหตุในการยกเลิก'
+        },
         showCancelButton: true,
         confirmButtonColor: '#d33',
         cancelButtonColor: '#CCC',
         confirmButtonText: 'ใช่, ยกเลิกใบEIR',
-        cancelButtonText: 'ไม่ยกเลิก'
+        cancelButtonText: 'ไม่ยกเลิก',
+        preConfirm: (reason) => {
+            if (!reason) {
+                Swal.showValidationMessage('กรุณากรอกสาเหตุในการยกเลิก');
+                return false;
+            }
+            return reason;
+        }
     }).then(async (result) => {
         if (result.isConfirmed) {
             try {
@@ -386,6 +398,7 @@ const cancelReceipt = () => {
                     }
                 });
                 equipmentInterchangeReceipt.value.status_id = 2;
+                equipmentInterchangeReceipt.value.remark = result.value;
                 updateReceipt();
             } catch (error) {
                 handleError(error, 'Error deleting EIR match');

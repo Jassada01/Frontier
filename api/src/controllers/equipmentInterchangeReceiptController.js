@@ -160,7 +160,11 @@ const createInvoice = async (
   res
 ) => {
   try {
-    const invoice_no = await getRunningNo("INV", "GRT", new Date(date));
+    const InvoiceDate = new Date(date);
+    const invoice_no =
+      InvoiceDate.getMonth() + 1 >= 7 && InvoiceDate.getFullYear() >= 2024
+        ? await getRunningNo("INV", "GRT", InvoiceDate, 4)
+        : await getRunningNo("INV", "GRT", InvoiceDate);
 
     const invoiceQuery = `
       INSERT INTO invoice_header (invoice_no, eir_id)
@@ -179,7 +183,7 @@ const createInvoice = async (
       const invoiceId = result.insertId;
 
       try {
-        await updateInvoiceHeader(equipmentId, invoiceId) ;
+        await updateInvoiceHeader(equipmentId, invoiceId);
 
         if (initialItem) {
           const insertInvoiceDetailQuery = `
@@ -342,13 +346,20 @@ LEFT JOIN invoice_detail b ON a.id = b.invoice_header_id
   });
 };
 
-
 exports.createInvoiceWithoutInitialItem = async (req, res) => {
-  const { equipmentId, date, agent_id, yard_id, size_type, entry_type } = req.body;
-  await createInvoice(equipmentId, date, agent_id, yard_id, size_type, entry_type, false, res);
+  const { equipmentId, date, agent_id, yard_id, size_type, entry_type } =
+    req.body;
+  await createInvoice(
+    equipmentId,
+    date,
+    agent_id,
+    yard_id,
+    size_type,
+    entry_type,
+    false,
+    res
+  );
 };
-
-
 
 exports.getEquipmentInterchangeReceipts = (req, res) => {
   const { id, entry_type, status_id, start_date, end_date } = req.query;

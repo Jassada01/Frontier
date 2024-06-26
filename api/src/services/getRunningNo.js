@@ -1,11 +1,8 @@
 const db = require('../config/dbConfig');
 const moment = require('moment');
 
-function getRunningNo(running_type, running_prefix, date) {
+function getRunningNo(running_type, running_prefix, date, leadZerodigit=3) {
   return new Promise((resolve, reject) => {
-    // Running Digit
-    const leadZerodigit = 3;
-
     // แยกปีและเดือนจากวันที่
     const running_year = moment(date).format('YYYY');
     const running_month = moment(date).format('MM');
