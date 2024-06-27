@@ -229,22 +229,55 @@ const fetchConditions = async () => {
     }
 };
 
-const requiredFields = ['entry_type', 'date', 'container'];
+const requiredFields = ['entry_type', 'date', 'container', 'agent_id', 'yard_id', 'client_id', 'booking_bl', 'size_type'];
+const fieldNames = {
+    entry_type: 'ประเภท(IN/OUT)',
+    date: 'วันที่',
+    container: 'หมายเลขตู้',
+    agent_id: 'ตัวแทน',
+    yard_id: 'ลานเดิม',
+    client_id: 'ลูกค้า',
+    booking_bl: 'Booking/BL',
+    size_type: 'ขนาดและประเภท',
+    seal_no: 'หมายเลขซีล',
+    tare: 'น้ำหนักตู้เปล่า'
+};
 
 const checkRequiredFields = () => {
-    // console.log(equipmentInterchangeReceipt.value);
-    for (const field of requiredFields) {
+    let isValid = true;
+    let missingFields = [];
+
+    requiredFields.forEach(field => {
         if (!equipmentInterchangeReceipt.value[field]) {
-            Swal.fire('Error', `กรุณากรอกข้อมูลให้ครบถ้วน`, 'error');
-            return false;
+            isValid = false;
+            missingFields.push(fieldNames[field]);
+        }
+    });
+
+    if (equipmentInterchangeReceipt.value.entry_type === "OUT") {
+        if (!equipmentInterchangeReceipt.value.seal_no) {
+            isValid = false;
+            missingFields.push(fieldNames['seal_no']);
+        }
+        if (equipmentInterchangeReceipt.value.tare == null || equipmentInterchangeReceipt.value.tare === 0.0) {
+            isValid = false;
+            missingFields.push(fieldNames['tare']);
         }
     }
+
     if (equipmentInterchangeReceipt.value.conditions.length === 0) {
-        Swal.fire('Error', 'กรุณาเพิ่มข้อมูลสภาพอุปกรณ์', 'error');
-        return false;
+        isValid = false;
+        missingFields.push('สภาพอุปกรณ์');
     }
-    return true;
+
+    if (!isValid) {
+        Swal.fire('Error', `กรุณากรอกข้อมูลให้ครบถ้วน: ${missingFields.join(', ')}`, 'error');
+    }
+
+    return isValid;
 };
+
+
 const fetchZones = async () => {
     try {
         const response = await axios.get(`${CONFIG.API_SERVER}/api/zones/get?active=true`);
@@ -323,6 +356,43 @@ const createReceipt = async () => {
     }
 };
 
+const notMatchEIR = async () => {
+    if (equipmentInterchangeReceipt.value.eir_match_no == null) {
+        Swal.fire({
+            title: 'คุณไม่ต้องการ Match EIR ใบนี้ ใช่หรือไม่?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#CCC',
+            confirmButtonText: 'ใช่, ไม่ต้องการ Match',
+            cancelButtonText: 'ยกเลิก'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    const matchResponse = await axios.post(`${CONFIG.API_SERVER}/api/eir_match/add`, {
+                        eir_in: equipmentInterchangeReceipt.value.id,
+                        eir_out: equipmentInterchangeReceipt.value.id,
+                        is_active: true
+                    });
+                    Swal.fire('Success', 'สร้างข้อมูลสำเร็จ', 'success').then(async () => {
+                        router.go(0); // รีเฟรชหน้าเว็บ
+                    });
+                } catch (error) {
+                    handleError(error, 'Error Matching EIR');
+                }
+            }
+        });
+    } else {
+        Swal.fire({
+            title: 'EIR ใบนี้ถูกตั้งค่า Match แล้ว',
+            icon: 'info',
+            confirmButtonColor: '#3085d6',
+            confirmButtonText: 'ตกลง'
+        });
+    }
+};
+
+
 
 
 const updateReceipt = async () => {
@@ -343,14 +413,28 @@ const updateReceipt = async () => {
 };
 
 const mapSelectedToReceipt = () => {
-    equipmentInterchangeReceipt.value.agent_id = selectedAgent.value.agent_id;
-    equipmentInterchangeReceipt.value.agent_code = selectedAgent.value.agent_code;
-    equipmentInterchangeReceipt.value.client_id = selectedClient.value.client_id;
-    equipmentInterchangeReceipt.value.client_code = selectedClient.value.client_code;
+    if (selectedAgent.value) {
+        equipmentInterchangeReceipt.value.agent_id = selectedAgent.value.agent_id ?? '';
+        equipmentInterchangeReceipt.value.agent_code = selectedAgent.value.agent_code ?? '';
+    } else {
+        equipmentInterchangeReceipt.value.agent_id = '';
+        equipmentInterchangeReceipt.value.agent_code = '';
+    }
+
+    if (selectedClient.value) {
+        equipmentInterchangeReceipt.value.client_id = selectedClient.value.client_id ?? '';
+        equipmentInterchangeReceipt.value.client_code = selectedClient.value.client_code ?? '';
+    } else {
+        equipmentInterchangeReceipt.value.client_id = '';
+        equipmentInterchangeReceipt.value.client_code = '';
+    }
+
     equipmentInterchangeReceipt.value.conditions = conditions.value.filter(condition => condition.checked).map(condition => ({
-        condition_id: condition.id
+        condition_id: condition.id ?? ''
     }));
 };
+
+
 
 const handleConditionChange = (condition) => {
     if (condition.checked) {
@@ -406,6 +490,30 @@ const cancelReceipt = () => {
         }
     });
 };
+
+// CompleteReceipt
+const CompleteReceipt = () => {
+    Swal.fire({
+        title: 'คุณต้องการเสร็จสิ้นใบ EIR นี้หรือไม่?',
+        text: 'หากเสร็จสิ้นแล้ว ไม่สามารถแก้ไขได้',
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonColor: '#28a745',
+        cancelButtonColor: '#CCC',
+        confirmButtonText: 'ใช่, EIR นี้เสร็จสิ้นแล้ว',
+        cancelButtonText: 'ไม่',
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            try {
+                equipmentInterchangeReceipt.value.status_id = 6;
+                updateReceipt();
+            } catch (error) {
+                handleError(error, 'Error Complete EIR');
+            }
+        }
+    });
+};
+
 
 
 
@@ -492,6 +600,12 @@ const matchOut = () => {
         entry_type: 'OUT',
         receipt_no: 'เลขอัตโนมัติ', // ตั้งค่าใหม่
         date: new Date(), // ตั้งค่าใหม่
+        client_id: null,
+        client_code: '',
+        yard_id: null,
+        yard: '',
+        booking_bl: '',
+        remark: '',
         conditions: [...equipmentInterchangeReceipt.value.conditions]
     };
 
@@ -555,6 +669,9 @@ onMounted(async () => {
         if (equipmentInterchangeReceipt.value.status_id === 2) {
             disableForm();
             Swal.fire('ใบ EIR นี้ยกเลิกแล้ว', '', 'warning');
+        }
+        if (equipmentInterchangeReceipt.value.status_id === 6) {
+            disableForm();
         }
         await fetchUserData();
 
@@ -650,6 +767,7 @@ onMounted(async () => {
                         <ExportToPdf :data="equipmentInterchangeReceipt" />
                         <li><a @click="createNewInvoice"><i class="fa-solid fa-file-circle-plus"></i> เพิ่มใบ
                                 Invoice ใหม่</a></li>
+                        <li><a @click="notMatchEIR"><i class="fa-solid fa-not-equal"></i> ไม่ Match EIR ใบนี้</a></li>
                         <div class="divider my-1"></div>
                         <li><a @click="cancelReceipt">ยกเลิก</a></li>
                     </ul>
@@ -661,7 +779,7 @@ onMounted(async () => {
                     <div class="flex w-full flex-wrap -mx-2">
                         <div class="w-full md:w-1/4 px-2 mb-4">
                             <label class="block mb-2 text-sm" for="receipt_no"> EIR No. <span
-                                    class="text-error">*</span>
+                                    class="text-error font-bold"> *</span>
                             </label>
                             <input v-model="equipmentInterchangeReceipt.receipt_no"
                                 class="input input-bordered w-full text-sm" type="text" id="receipt_no"
@@ -670,7 +788,7 @@ onMounted(async () => {
                         <div class="w-full md:w-2/4 px-2 mb-4"></div>
                         <div class="w-full md:w-1/4 px-2 mb-4">
                             <label class="block mb-2 text-sm" for="date"> วันที่/Date : <span
-                                    class="text-error">*</span>
+                                    class="text-error font-bold"> *</span>
                             </label>
                             <flat-pickr v-model="equipmentInterchangeReceipt.date"
                                 class="input input-bordered w-full text-sm" :config="config"
@@ -678,7 +796,7 @@ onMounted(async () => {
                         </div>
                         <div class="w-full md:w-1/4 px-2 mb-4">
                             <label class="block mb-2 text-sm" for="entry_type"> ประเภท/Type<span
-                                    class="text-error">*</span>
+                                    class="text-error font-bold"> *</span>
                             </label>
                             <select v-model="equipmentInterchangeReceipt.entry_type"
                                 class="input input-bordered w-full text-sm" id="entry_type">
@@ -687,7 +805,7 @@ onMounted(async () => {
                                 <option value="OUT">OUT</option>
                             </select>
                         </div>
-                        <div class="w-full px-4 md:w-2/4 md:px-10 mb-4 flex items-center justify-start">
+                        <div class="w-full px-4 md:w-1/6 md:px-10 mb-4 flex items-center justify-start">
                             <label class="block text-sm mr-2" for="drop_container"> Drop </label>
                             <div class="form-control">
                                 <input v-model="equipmentInterchangeReceipt.drop_container"
@@ -697,16 +815,27 @@ onMounted(async () => {
                         </div>
 
                         <!-- การแสดงผล eir_out_no หรือปุ่ม Match Out -->
-                        <div v-if="isEditMode" class="box px-4 rounded-lg">
+                        <div v-if="isEditMode" class="w-full px-4 md:w-2/4 ms-10 mb-4 flex items-center justify-end">
                             <div v-if="equipmentInterchangeReceipt.eir_match_no">
                                 <label class="block text-sm" for="eir_match_no"> Matching EIR No. </label>
-                                <input v-model="equipmentInterchangeReceipt.eir_match_no"
-                                    class="input w-full text-sm text-error" type="text" id="eir_match_no"
-                                    autocomplete="off" readonly />
+                                <div
+                                    v-if="equipmentInterchangeReceipt.eir_match_no == equipmentInterchangeReceipt.receipt_no">
+                                    <span class="text-sm text-error">ไม่ Match EIR ใบนี้</span>
+                                </div>
+                                <div v-else>
+                                    <input v-model="equipmentInterchangeReceipt.eir_match_no"
+                                        class="input w-full text-sm text-error" type="text" id="eir_match_no"
+                                        autocomplete="off" readonly />
+                                </div>
+
                             </div>
                             <div v-else>
                                 <button class="btn btn-primary text-sm" @click="matchOut">Match ตู้ Out</button>
                             </div>
+                            <button v-if="equipmentInterchangeReceipt.status_id == 1"
+                                class="ms-5 btn btn-outline btn-success" @click="CompleteReceipt">เสร็จสิ้นแล้ว</button>
+                            <span v-if="equipmentInterchangeReceipt.status_id == 6"
+                                class="ms-5 text-success subpixel-antialiased text-lg font-bold	">เสร็จสิ้นแล้ว</span>
                         </div>
 
                     </div>
@@ -716,23 +845,27 @@ onMounted(async () => {
                 <div class="box mb-6 p-4 border rounded-lg">
                     <div class="flex flex-wrap -mx-2">
                         <div class="w-full md:w-1/2 px-2 mb-4">
-                            <label class="block mb-2 text-sm" for="agent"> ตัวแทน/Agent </label>
+                            <label class="block mb-2 text-sm" for="agent"> ตัวแทน/Agent <span
+                                    class="text-error font-bold"> *</span></label>
                             <multiselect v-model="selectedAgent" :options="agents" label="label" track-by="agent_id"
                                 class="text-sm" placeholder="เลือกตัวแทน" />
                         </div>
                         <div class="w-full md:w-1/2 px-2 mb-4">
-                            <label class="block mb-2 text-sm" for="client"> ลูกค้า/Shipper </label>
+                            <label class="block mb-2 text-sm" for="client"> ลูกค้า/Shipper <span
+                                    class="text-error font-bold"> *</span></label>
                             <multiselect v-model="selectedClient" :options="clients" label="label" track-by="client_id"
                                 class="text-sm z-0" placeholder="เลือกลูกค้า" />
                         </div>
                         <div class="w-full md:w-1/2 px-2 mb-4">
-                            <label class="block mb-2 text-sm" for="yard"> ลานเดิม/Original Yard </label>
+                            <label class="block mb-2 text-sm" for="yard"> ลานเดิม/Original Yard <span
+                                    class="text-error font-bold"> *</span></label>
                             <multiselect v-model="selectedYard" :options="yards" label="label" track-by="yard_id"
                                 @update:modelValue="handleYardSelection" class="text-sm" placeholder="เลือกลานเดิม">
                             </multiselect>
                         </div>
                         <div class="w-full md:w-1/2 px-2 mb-4">
-                            <label class="block mb-2 text-sm" for="booking_bl"> Booking/BL </label>
+                            <label class="block mb-2 text-sm" for="booking_bl"> Booking/BL <span
+                                    class="text-error font-bold"> *</span></label>
                             <input v-model="equipmentInterchangeReceipt.booking_bl"
                                 class="input input-bordered w-full text-sm" type="text" id="booking_bl"
                                 autocomplete="off" />
@@ -744,7 +877,8 @@ onMounted(async () => {
                 <div class="box mb-6 p-4 border rounded-lg">
                     <div class="flex flex-wrap -mx-2">
                         <div class="w-full md:w-1/3 px-2 mb-4">
-                            <label class="block mb-2 text-sm" for="container"> หมายเลขตู้/Container No. </label>
+                            <label class="block mb-2 text-sm" for="container"> หมายเลขตู้/Container No. <span
+                                    class="text-error font-bold"> *</span></label>
                             <input v-model="equipmentInterchangeReceipt.container"
                                 class="input input-bordered w-full text-sm" type="text" id="container"
                                 autocomplete="off" @blur="validateContainerNumber" />
@@ -767,13 +901,17 @@ onMounted(async () => {
                         </div>
 
                         <div class="w-full md:w-1/3 px-2 mb-4">
-                            <label class="block mb-2 text-sm" for="size_type"> ขนาดและประเภท/Size </label>
+                            <label class="block mb-2 text-sm" for="size_type"> ขนาดและประเภท/Size <span
+                                    class="text-error font-bold">
+                                    *</span></label>
                             <multiselect v-model="equipmentInterchangeReceipt.size_type" :options="sizeOptions"
                                 class="text-sm" placeholder="เลือกขนาดและประเภท" />
                         </div>
 
                         <div class="w-full md:w-1/3 px-2 mb-4">
-                            <label class="block mb-2 text-sm" for="seal_no"> หมายเลขซีล/Seal No. </label>
+                            <label class="block mb-2 text-sm" for="seal_no"> หมายเลขซีล/Seal No. <span
+                                    v-if="equipmentInterchangeReceipt.entry_type == 'OUT'" class="text-error font-bold">
+                                    *</span></label>
                             <input v-model="equipmentInterchangeReceipt.seal_no"
                                 class="input input-bordered w-full text-sm" type="text" id="seal_no"
                                 autocomplete="off" />
@@ -785,7 +923,9 @@ onMounted(async () => {
                                 autocomplete="off" />
                         </div>
                         <div class="w-full md:w-1/3 px-2 mb-4">
-                            <label class="block mb-2 text-sm" for="tare"> น้ำหนักตู้เปล่า/Tare </label>
+                            <label class="block mb-2 text-sm" for="tare"> น้ำหนักตู้เปล่า/Tare <span
+                                    v-if="equipmentInterchangeReceipt.entry_type == 'OUT'" class="text-error font-bold">
+                                    *</span></label>
                             <label class="input input-bordered flex items-center gap-2">
                                 <input v-model="equipmentInterchangeReceipt.tare" type="text" id="tare"
                                     autocomplete="off" class="grow" placeholder="Search" />

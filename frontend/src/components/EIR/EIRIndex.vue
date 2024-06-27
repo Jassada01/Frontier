@@ -67,7 +67,8 @@
                 <div v-if="eir.drop_container" class="badge badge-primary badge-outline">Drop</div>
               </div>
             </td>
-            <td class="p-4 whitespace-nowrap text-primary"><router-link :to="`/EIR/${eir.id}`">{{ eir.receipt_no }}</router-link></td>
+            <td class="p-4 whitespace-nowrap text-primary"><router-link :to="`/EIR/${eir.id}`">{{ eir.receipt_no
+                }}</router-link></td>
             <td class="p-4 whitespace-nowrap">{{ formatDate(eir.date) }}</td>
             <td class="p-4">{{ eir.agent_code }}</td>
             <td class="p-4">{{ eir.client_code }}</td>
@@ -78,17 +79,21 @@
             <td class="p-4">{{ eir.yard }}</td>
             <td class="p-4 whitespace-nowrap">
               <div v-if="eir.match_eir" class="tooltip" :data-tip="eir.match_eir">
-                <div class="badge badge-accent badge-outline">M</div>
+                <div v-if="eir.match_eir == eir.receipt_no" class="badge badge-ghost badge-outline">X</div>
+                <div v-else class="badge badge-accent badge-outline">M</div>
               </div>
             </td>
             <td class="p-4">
               <div :class="eir.status_name_th === 'ใช้งาน'
-                  ? 'badge badge-primary badge-outline whitespace-nowrap'
+                ? 'badge badge-primary badge-outline whitespace-nowrap'
+                : eir.status_name_th === 'เสร็จสิ้น'
+                  ? 'badge badge-success whitespace-nowrap'
                   : 'badge badge-error badge-outline whitespace-nowrap'
                 ">
                 {{ eir.status_name_th }}
               </div>
             </td>
+
           </tr>
         </tbody>
       </table>
@@ -163,23 +168,26 @@ onMounted(async () => {
       // Add event listener for the match EIR filter
       $('#matchEirFilter').on('change', function () {
         if (this.checked) {
-          table.column(11).search('^((?!M).)*$', true, false).draw()
+          table.column(11).search('^$', true, false).draw()
         } else {
           table.column(11).search('').draw()
         }
       })
 
+
       // Add event listener for the active status filter
       $('#activeStatusFilter').on('change', function () {
         if (this.checked) {
-          table.column(12).search('ใช้งาน').draw()
+          table.column(12).search('^(?!.*ยกเลิก).*$', true, false).draw() // Filter out 'ยกเลิก'
         } else {
           table.column(12).search('').draw()
         }
       })
 
-      // Apply initial filter for active status
-      table.column(12).search('ใช้งาน').draw()
+      // Apply initial filter to exclude 'ยกเลิก'
+      table.column(12).search('^(?!.*ยกเลิก).*$', true, false).draw()
+
+
     }, 0)
   } catch (error) {
     console.error('Error fetching EIRs:', error)

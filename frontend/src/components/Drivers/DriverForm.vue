@@ -31,7 +31,7 @@ const truckCompanies = ref([])
 const provinces = ref([])
 const isUploading = ref(false)
 
-const requiredFields = ['driver_name', 'phone_number', 'license_plate', 'truck_company_id', 'province']
+const requiredFields = ['driver_name', 'truck_company_id']
 
 const checkRequiredFields = () => {
     for (const field of requiredFields) {
@@ -71,10 +71,10 @@ const createDriver = async () => {
     try {
         const driverPayload = {
             ...driver.value,
-            province: driver.value.province.name_in_thai,
-            truck_company_id: driver.value.truck_company_id.id,
-            truck_company_name: driver.value.truck_company_id.company_name,
-        }
+            province: driver.value.province?.name_in_thai ?? '',
+            truck_company_id: driver.value.truck_company_id?.id ?? '',
+            truck_company_name: driver.value.truck_company_id?.company_name ?? '',
+        };
         driverPayload.is_active = driverPayload.is_active ? 1 : 0
 
         const response = await axios.post(`${CONFIG.API_SERVER}/api/drivers/add`, driverPayload)
@@ -95,10 +95,12 @@ const updateDriver = async () => {
     try {
         const driverPayload = {
             ...driver.value,
-            province: driver.value.province.name_in_thai,
-            truck_company_id: driver.value.truck_company_id.id,
-            truck_company_name: driver.value.truck_company_id.company_name,
-        }
+            province: driver.value.province?.name_in_thai ?? '',
+            truck_company_id: driver.value.truck_company_id?.id ?? '',
+            truck_company_name: driver.value.truck_company_id?.company_name ?? '',
+        };
+
+
         driverPayload.is_active = driverPayload.is_active ? 1 : 0
 
         await axios.put(`${CONFIG.API_SERVER}/api/drivers/update/${props.driverId}`, driverPayload)
@@ -194,21 +196,21 @@ onMounted(async () => {
             </div>
             <div class="mb-4 flex items-center">
                 <label class="block pe-5 text-end mb-2 w-1/3 text-sm" for="phone_number">
-                    เบอร์โทร <span class="text-error">*</span>
+                    เบอร์โทร
                 </label>
                 <input v-model="driver.phone_number" class="input input-bordered w-1/3 text-sm" type="text"
-                    id="phone_number" autocomplete="off" required />
+                    id="phone_number" autocomplete="off" />
             </div>
             <div class="mb-4 flex items-center">
                 <label class="block pe-5 text-end mb-2 w-1/3 text-sm" for="license_plate">
-                    เลขทะเบียน <span class="text-error">*</span>
+                    เลขทะเบียน
                 </label>
                 <input v-model="driver.license_plate" class="input input-bordered w-1/3 text-sm" type="text"
-                    id="license_plate" autocomplete="off" required />
+                    id="license_plate" autocomplete="off" />
             </div>
             <div class="mb-4 flex items-center">
                 <label class="block pe-5 text-end mb-2 w-1/3 text-sm" for="province">
-                    จังหวัด <span class="text-error">*</span>
+                    จังหวัด
                 </label>
                 <div class="w-1/3">
                     <Multiselect v-model="driver.province" :options="provinces" label="name_in_thai"

@@ -221,7 +221,7 @@
       <div></div>
     </form>
     <!-- Modal -->
-    <dialog id="customerModal" class="modal">
+    <dialog :id="'customerModal_' + form.id" class="modal">
       <div class="modal-box">
         <h3 class="font-bold text-lg">เลือกชื่อลูกค้า</h3>
         <div class="h-48">
@@ -475,12 +475,13 @@ const updateInvoice = async () => {
 }
 
 const openCustomerModal = () => {
-  document.getElementById('customerModal').showModal()
+  document.getElementById(`customerModal_${form.value.id}`).showModal()
 }
 
 const closeCustomerModal = () => {
-  document.getElementById('customerModal').close()
+  document.getElementById(`customerModal_${form.value.id}`).close()
 }
+
 
 const confirmCustomerChange = () => {
   if (selectedCustomer.value) {
