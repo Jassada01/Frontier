@@ -606,6 +606,21 @@ const matchOut = () => {
         yard: '',
         booking_bl: '',
         remark: '',
+        status_id: 1,
+        status_name_th: 'แบบร่าง',
+        status_name_en: 'Draft',
+        remark: '',
+        driver_sign: '',
+        receiver_sign: '',
+        create_user: null,
+        create_user_name: '',
+        update_user: null,
+        update_user_name: '',
+        truck_license: '',
+        driver_id: null,
+        driver_name: '',
+        truck_company: '',
+        tel: '',
         conditions: [...equipmentInterchangeReceipt.value.conditions]
     };
 

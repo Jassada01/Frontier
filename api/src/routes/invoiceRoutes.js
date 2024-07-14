@@ -384,4 +384,30 @@ router.put("/update/:id", invoiceController.updateInvoice);
  */
 router.get("/getInvoiceByEirId", invoiceController.getInvoiceByEirId);
 
+/**
+ * @swagger
+ * /api/invoices/updateStatusToPaid:
+ *   put:
+ *     summary: Update invoice status to "Paid"
+ *     tags: [Invoices]
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The ID of the invoice
+ *     responses:
+ *       200:
+ *         description: Invoice status updated successfully
+ *       400:
+ *         description: Missing or invalid id
+ *       404:
+ *         description: Invoice not found
+ *       500:
+ *         description: Error updating invoice status
+ */
+router.put("/updateStatusToPaid", invoiceController.updateInvoiceStatusToPaid);
+
+
 module.exports = router;

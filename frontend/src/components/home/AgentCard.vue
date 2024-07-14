@@ -10,16 +10,16 @@
           <img
             :src="agent.image_path || 'https://via.placeholder.com/150'"
             alt="Agent Image"
-            class="w-full h-full object-contain "
+            class="w-full h-full object-contain"
           />
         </figure>
         <div class="card-body w-2/3">
           <h2 class="card-title text-xl font-bold">{{ agent.agent_code }}</h2>
           <ul class="list-disc list-inside">
             <div v-for="size in agent.size_types" :key="size.size_type">
-              <a v-if="size.size_type">
-                <span class="font-medium">Size:</span> {{ size.size_type || 'N/A' }} -
-                <span class="font-medium">จำนวน:</span> {{ size.CNT }}
+              <a v-if="size.size_type" class="text-xl font-semibold">
+                <span class="font-bold">Size:</span> {{ size.size_type || 'N/A' }} -
+                <span class="font-bold ">จำนวน:</span> <span class="text-black antialiased">{{ size.CNT }}</span>
               </a>
             </div>
           </ul>

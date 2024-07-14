@@ -21,7 +21,7 @@ const clientId = computed(() => route.params.id ? Number(route.params.id) : null
         <Breadcrumbs :breadcrumbs="breadcrumbsData" />
 
         <div class="flex-grow flex justify-center p-4">
-            <div class="w-full max-w-md sm:max-w-lg md:max-w-2xl lg:max-w-4xl">
+            <div class="w-4/6">
                 <ClientIndex />
             </div>
         </div>

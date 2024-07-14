@@ -54,7 +54,16 @@
                     </td>
                     <td class="p-4">{{ invoice.payment_method }}</td>
                     <td class="p-4">
-                        <div :class="{
+                        <div v-if="invoice.status === 'รอชำระ'" class="dropdown dropdown-bottom dropdown-end">
+                            <div tabindex="0" role="button" class="badge badge-warning whitespace-nowrap">รอชำระ</div>
+                            <ul tabindex="0"
+                                class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+                                <li>
+                                    <a @click="updateStatusToPaid(invoice.id)">ชำระแล้ว</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div v-else :class="{
                             'badge badge-warning whitespace-nowrap': invoice.status === 'รอชำระ',
                             'badge badge-success whitespace-nowrap': invoice.status === 'ชำระแล้ว',
                             'badge badge-error whitespace-nowrap': invoice.status === 'ยกเลิก'
@@ -62,6 +71,7 @@
                             {{ invoice.status }}
                         </div>
                     </td>
+
                 </tr>
             </tbody>
         </table>
@@ -74,6 +84,7 @@ import axios from 'axios';
 import moment from 'moment';
 import 'datatables.net-dt';
 import flatpickr from 'flatpickr';
+import Swal from 'sweetalert2';
 import 'flatpickr/dist/flatpickr.css';
 
 import $ from 'jquery';
@@ -102,6 +113,41 @@ const getDefaultEndDate = () => {
 };
 
 
+
+const updateStatusToPaid = async (id) => {
+    try {
+        const result = await Swal.fire({
+            title: 'คุณแน่ใจหรือไม่?',
+            text: "คุณต้องการเปลี่ยนสถานะเป็น 'ชำระแล้ว' หรือไม่?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'ใช่, ฉันแน่ใจ',
+            cancelButtonText: 'ยกเลิก'
+        });
+
+        if (result.isConfirmed) {
+            await axios.put(`${CONFIG.API_SERVER}/api/invoices/updateStatusToPaid`, null, {
+                params: { id }
+            });
+            Swal.fire(
+                'สำเร็จ!',
+                'สถานะใบแจ้งหนี้ถูกเปลี่ยนเป็นชำระแล้ว.',
+                'success'
+            ).then(() => {
+                window.location.reload(); // Refresh the page
+            });
+        }
+    } catch (error) {
+        console.error('Error updating invoice status:', error);
+        Swal.fire(
+            'เกิดข้อผิดพลาด',
+            'ไม่สามารถเปลี่ยนสถานะใบแจ้งหนี้ได้.',
+            'error'
+        );
+    }
+};
+
+
 onMounted(async () => {
     const route = useRoute();
     const router = useRouter();
@@ -124,6 +170,9 @@ onMounted(async () => {
             }
         }
     });
+
+
+
 
     try {
         const response = await axios.get(`${CONFIG.API_SERVER}/api/invoices/get`, {

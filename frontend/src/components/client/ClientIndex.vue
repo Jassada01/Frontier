@@ -11,13 +11,14 @@
     <table id="clientTable" class="display table table-zebra">
       <thead>
         <tr>
-          <th class="p-4">Client Code</th>
-          <th class="p-4">Name</th>
-          <th class="p-4">Branch</th>
-          <th class="p-4">Contact Person</th>
-          <th class="p-4">Phone</th>
-          <th class="p-4">Remark</th>
-          <th class="p-4">Actions</th>
+          <th class="p-4">รหัสลูกค้า</th>
+          <th class="p-4">ชื่อ</th>
+          <th class="p-4">สาขา</th>
+          <th class="p-4">ผู้ติดต่อ</th>
+          <th class="p-4">โทรศัพท์</th>
+          <th class="p-4">หมายเหตุ</th>
+          <th class="p-4">สถานะ</th>
+          <th class="p-4"></th>
         </tr>
       </thead>
       <tbody>
@@ -28,6 +29,11 @@
           <td class="p-4">{{ client.contact_person }}</td>
           <td class="p-4">{{ client.phone }}</td>
           <td class="p-4">{{ client.remark }}</td>
+          <td class="p-4">
+            <div :class="client.is_active === 1 ? 'badge badge-primary badge-outline  whitespace-nowrap' : 'badge badge-error badge-outline  whitespace-nowrap'">
+              {{ client.is_active === 1 ? 'ใช้งาน' : 'ไม่ใช้งาน' }}
+            </div>
+          </td>
           <td class="p-4">
             <router-link :to="`/client/${client.client_id}`">
               <button class="btn btn-sm btn-circle">
@@ -44,13 +50,11 @@
 <script setup>
 import { ref, onMounted, nextTick } from 'vue';
 import axios from 'axios';
-// import '@/assets/datatables.css'; // import CSS ที่คุณสร้าง
-// import 'datatables.net-dt/css/dataTables.dataTables.min.css';
-import 'datatables.net-dt'
-
+import 'datatables.net-dt';
 import $ from 'jquery';
 import 'datatables.net';
 import CONFIG from '../../config/config';
+
 const clients = ref([]);
 
 onMounted(async () => {
@@ -58,10 +62,13 @@ onMounted(async () => {
     const response = await axios.get(`${CONFIG.API_SERVER}/api/client/get`);
     clients.value = response.data;
     await nextTick();
-    $('#clientTable').DataTable();
+    $('#clientTable').DataTable({
+      pageLength: 50, // กำหนดให้แสดงหน้าละ 50 รายชื่อ
+    });
   } catch (error) {
     console.error('Error fetching clients:', error);
   }
 });
 </script>
+
 <style scoped></style>

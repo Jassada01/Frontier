@@ -306,3 +306,31 @@ exports.getInvoiceByEirId = (req, res) => {
     res.send(results);
   });
 };
+
+exports.updateInvoiceStatusToPaid = (req, res) => {
+  const { id } = req.query;
+
+  if (!id) {
+    return res.status(400).send({ message: "id is required" });
+  }
+
+  const query = `
+    UPDATE invoice_header 
+    SET status_id = 4, status = 'ชำระแล้ว' 
+    WHERE id = ?`;
+
+  db.query(query, [id], (err, results) => {
+    if (err) {
+      console.error("Error updating invoice status:", err);
+      return res
+        .status(500)
+        .send({ message: "Error updating invoice status", error: err });
+    }
+
+    if (results.affectedRows === 0) {
+      return res.status(404).send({ message: "Invoice not found" });
+    }
+
+    res.send({ message: "Invoice status updated successfully" });
+  });
+};

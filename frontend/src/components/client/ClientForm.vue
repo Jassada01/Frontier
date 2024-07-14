@@ -63,7 +63,9 @@ const createClient = async () => {
 
 const updateClient = async () => {
   try {
+    //console.log(client.value.is_active);
     client.value.is_active = client.value.is_active ? 1 : 0
+    // console.log(client.value.is_active);
     await axios.put(`${CONFIG.API_SERVER}/api/client/update/${props.clientId}`, client.value)
     Swal.fire('Success', 'อัพเดทข้อมูลสำเร็จ', 'success').then(() => {
       window.location.reload()

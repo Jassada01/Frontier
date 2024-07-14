@@ -190,7 +190,7 @@ exports.updateClient = (req, res) => {
       line_token,
       default_language,
       default_payment_method,
-      is_active || 1,
+      is_active,
       remark,
       client_id,
     ],
