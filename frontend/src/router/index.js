@@ -197,8 +197,8 @@ import truckCompanyRoutes from './truckCompanyRoutes'
 import driverRoutes from './driverRoutes'
 import yardRoutes from './yardRoutes'
 import EIRRoutes from './EIRRoutes'
-import priceRoutes from './priceRoutes'; // เพิ่มบรรทัดนี้
-
+import priceRoutes from './priceRoutes' // เพิ่มบรรทัดนี้
+import lineLoginRoutes from './lineLoginRoutes'
 
 const routes = [
   // Home and Login
@@ -228,7 +228,8 @@ const routes = [
   ...yardRoutes,
   // EIR Management
   ...EIRRoutes,
-  ...priceRoutes // เพิ่มบรรทัดนี้
+  ...priceRoutes, // เพิ่มบรรทัดนี้
+  ...lineLoginRoutes
 ]
 
 const router = createRouter({

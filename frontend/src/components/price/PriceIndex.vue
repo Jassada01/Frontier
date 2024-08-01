@@ -2,9 +2,15 @@
     <div class="price-table p-4 overflow-x-auto">
         <div class="flex justify-between items-center mb-4">
             <h1 class="text-2xl font-bold">รายการราคา</h1>
-            <button class="btn btn-primary" @click="openModal(null)">
-                <i class="fa fa-plus-square mr-2"></i> เพิ่มราคา
-            </button>
+            <div class="flex items-center">
+                <select v-model="selectedAgent" @change="filterCustomPrices" class="select select-bordered mr-2">
+                    <option value="">เลือก Agent</option>
+                    <option v-for="agent in uniqueAgents" :key="agent" :value="agent">{{ agent }}</option>
+                </select>
+                <button class="btn btn-primary" @click="openModal(null)">
+                    <i class="fa fa-plus-square mr-2"></i> เพิ่มราคา
+                </button>
+            </div>
         </div>
         <table id="priceTable" class="table table-auto w-full">
             <thead>
@@ -73,7 +79,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, nextTick } from 'vue';
+import { ref, onMounted, computed, nextTick, watch } from 'vue';
 import axios from 'axios';
 import CONFIG from '../../config/config';
 import CustomPriceModal from './CustomPriceModal.vue';
@@ -81,7 +87,7 @@ import $ from 'jquery';
 import 'datatables.net-dt/css/dataTables.dataTables.min.css';
 import 'datatables.net-dt';
 import 'datatables.net';
-import Swal from 'sweetalert2'
+import Swal from 'sweetalert2';
 
 const prices = ref([]);
 const showModal = ref(false);
@@ -89,6 +95,7 @@ const showCustomPriceModal = ref(false);
 const isEditMode = ref(false);
 const selectedPrice = ref(null);
 const selectedCustomPrice = ref(null);
+const selectedAgent = ref(''); // ตัวแปรสำหรับเก็บค่า agent ที่เลือก
 
 const formData = ref({
     id: null,
@@ -119,6 +126,11 @@ const fetchPrices = async () => {
 };
 
 const initializeDataTable = () => {
+    // Check if DataTable is already initialized
+    if ($.fn.DataTable.isDataTable('#priceTable')) {
+        $('#priceTable').DataTable().destroy();
+    }
+
     const table = $('#priceTable').DataTable({
         data: prices.value,
         columns: [
@@ -135,14 +147,13 @@ const initializeDataTable = () => {
             {
                 data: null,
                 title: 'Action',
-                render: (data, type, row) => `
-                    <button class="btn btn-sm btn-circle edit-button" data-id="${row.id}">
+                render: (data, type, row) =>
+                    `<button class="btn btn-sm btn-circle edit-button" data-id="${row.id}">
                         <i class="fa fa-pencil text-primary"></i>
                     </button>
                     <button class="btn btn-sm btn-circle add-button" data-id="${row.id}">
                         <i class="fa fa-plus text-success"></i>
-                    </button>
-                `
+                    </button>`
             }
         ],
         order: [[1, 'asc']]
@@ -196,13 +207,16 @@ const format = (data) => {
     }
     let table = '<table class="table w-full ms-20"><thead><th>Agent</th><th>ลานอ้างอิง</th><th>ขนาด</th><th>ราคา(ไม่รวม VAT)</th><th></th></tr></thead><tbody>';
     data.customprice.forEach(custom => {
-        table += `<tr>
+        if ((selectedAgent.value == custom.agent_code) || selectedAgent.value == "") {
+            table += `<tr>
             <td>${custom.agent_code}</td>
             <td>${custom.yard_short_name}</td>
             <td>${custom.size}</td>
             <td>${custom.custom_price}</td>
             <td><button class="btn btn-sm btn-circle edit-custom-button" data-price-id="${data.id}" data-custom-price-id="${custom.custom_price_id}"><i class="fa fa-pencil"></i></button></td>
         </tr>`;
+        }
+
     });
     table += '</tbody></table>';
     return table;
@@ -258,6 +272,29 @@ const openCustomPriceModal = (price, customPrice = null) => {
 const closeCustomPriceModal = () => {
     showCustomPriceModal.value = false;
 };
+
+// ฟังก์ชันสำหรับ Filter Custom Prices ตาม Agent ที่เลือก
+const filterCustomPrices = () => {
+    const table = $('#priceTable').DataTable();
+
+    // Clear existing DataTable rows
+    table.clear().draw();
+
+    // Re-initialize DataTable and show all child rows
+    initializeDataTable();
+    showAllChildRows();
+};
+
+// สร้าง List ของ Agents ที่ไม่ซ้ำกัน
+const uniqueAgents = computed(() => {
+    const agents = new Set();
+    prices.value.forEach(price => {
+        if (price.customprice) {
+            price.customprice.forEach(custom => agents.add(custom.agent_code));
+        }
+    });
+    return [...agents];
+});
 </script>
 
 <style scoped>

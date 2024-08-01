@@ -2,8 +2,8 @@ import os
 import zipfile
 import subprocess
 from datetime import datetime
-from pydrive.auth import GoogleAuth
-from pydrive.drive import GoogleDrive
+from pydrive.auth import GoogleAuth # type: ignore
+from pydrive.drive import GoogleDrive # type: ignore
 
 # Define base directory
 base_dir = '/usr/myPi/'
@@ -45,7 +45,7 @@ write_log("Completed MySQL backup process")
 
 # Step 2: Zip the backup file
 write_log("Starting to zip the backup file")
-zip_file = os.path.join(base_dir, f"{database_name}_{current_date}.zip")
+zip_file = os.path.join(base_dir, f"{database_name}.zip")
 with zipfile.ZipFile(zip_file, 'w') as zf:
     zf.write(backup_file, os.path.basename(backup_file))
 write_log("Completed zipping the backup file")

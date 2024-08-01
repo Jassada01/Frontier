@@ -9,6 +9,8 @@ import FlatPickr from 'vue-flatpickr-component';
 import 'flatpickr/dist/flatpickr.css';
 import ExportToPdf from '../../components/EIR/ExportToPdf.vue'
 import InvoiceForm from '../../components/EIR/InvoiceForm.vue'
+import AddDetentionModal from './components/AddDetentionModal.vue';
+import moment from 'moment';  // Import Moment.js
 
 import { Thai } from 'flatpickr/dist/l10n/th.js';
 
@@ -21,6 +23,8 @@ const props = defineProps({
 const emit = defineEmits(['formSubmitted']);
 const router = useRouter();
 const invoiceList = ref([]);
+const detentionLogs = ref([]); // เพิ่มตัวแปรสำหรับเก็บ detention logs
+
 
 
 const equipmentInterchangeReceipt = ref({
@@ -94,6 +98,16 @@ const fetchUserData = async () => {
         equipmentInterchangeReceipt.value.update_user = response.data.user_id;
     } catch (error) {
         console.error('Error fetching user data', error);
+    }
+};
+
+const fetchDetentionLogs = async (eirId) => {
+    try {
+        const response = await axios.get(`${CONFIG.API_SERVER}/api/detentionLogs?EIR_ID=${eirId}`);
+        detentionLogs.value = response.data;
+        // console.log(detentionLogs.value);
+    } catch (error) {
+        console.error('Error fetching detention logs', error);
     }
 };
 
@@ -393,7 +407,9 @@ const notMatchEIR = async () => {
 };
 
 
-
+const formatDate = (date) => {
+    return moment(date).format('DD/MM/YYYY HH:mm');
+};
 
 const updateReceipt = async () => {
     mapSelectedToReceipt();
@@ -659,6 +675,10 @@ function getBadgeClass(status_id) {
     }
     return '';
 }
+// Function to handle detention saved event
+const onDetentionSaved = async () => {
+    await fetchDetentionLogs(props.receiptId);
+};
 
 onMounted(async () => {
     loading.value = true; // เริ่มโหลดข้อมูล
@@ -670,6 +690,7 @@ onMounted(async () => {
         await fetchZones();
         await fetchConditions();
         await fetchReceiptData(props.receiptId);
+        await fetchDetentionLogs(props.receiptId);
         // ดึงข้อมูล invoice ตาม eir_id
         await fetchInvoiceByEirId(props.receiptId);
 
@@ -772,9 +793,21 @@ onMounted(async () => {
 
         <div v-show="activeTab === 0" class="bg-base-100 border-base-300 rounded-box p-6">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-2xl font-bold text-center flex-grow">
-                    {{ isEditMode ? 'แก้ไขข้อมูล EIR' : 'สร้างข้อมูลใหม่' }}
-                </h2>
+                <div class=" text-center flex-grow">
+                    <h2 class="text-2xl font-bold">
+                        {{ isEditMode ? 'แก้ไขข้อมูล EIR' : 'สร้างข้อมูลใหม่' }}
+                    </h2>
+                    <div v-if="isEditMode">
+                        <div v-for="log in detentionLogs" :key="log.id">
+                            <span class="text-base text-error subpixel-antialiased	">Detention : {{
+                                formatDate(log.detention_datetime) }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    v-if="isEditMode && equipmentInterchangeReceipt.entry_type === 'IN' && !equipmentInterchangeReceipt.eir_match_no">
+                    <add-detention-modal :eirId="props.receiptId" @detentionSaved="onDetentionSaved" />
+                </div>
                 <div v-if="isEditMode" class="dropdown dropdown-end">
                     <div tabindex="0" role="button" class="btn btn-ghost m-1 "><i class="fa-solid fa-bars"></i>
                     </div>

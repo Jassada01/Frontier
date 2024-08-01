@@ -123,3 +123,76 @@ exports.getAgentEirCount = (req, res) => {
     res.send(groupedResults);
   });
 };
+
+exports.getInitialData = (req, res) => {
+  const queries = {
+    agents: "SELECT * FROM agents WHERE active = true",
+    clients: "SELECT * FROM client WHERE is_active = 1",
+    drivers: "SELECT * FROM drivers WHERE is_active = 1",
+    yards: "SELECT * FROM yards WHERE active = 1",
+    zones: "SELECT * FROM zones WHERE active = 1",
+    conditions: "SELECT * FROM conditions WHERE active = 1",
+  };
+
+  const results = {};
+  let completedQueries = 0;
+  const totalQueries = Object.keys(queries).length;
+
+  Object.keys(queries).forEach((key) => {
+    db.query(queries[key], (err, rows) => {
+      if (err) {
+        res.status(500).send({
+          message: `Error retrieving ${key} information`,
+          error: err,
+        });
+        return;
+      }
+
+      results[key.charAt(0).toUpperCase() + key.slice(1)] = rows;
+      completedQueries++;
+
+      if (completedQueries === totalQueries) {
+        res.send(results);
+      }
+    });
+  });
+};
+
+exports.getDetentionLogs = (req, res) => {
+  const query = `
+    SELECT 
+      a.id, 
+      a.EIR_ID, 
+      b.receipt_no, 
+      a.detention_datetime, 
+      b.booking_bl, 
+      b.container, 
+      a.remark, 
+      b.agent_code, 
+      b.size_type, 
+      b.yard 
+    FROM 
+      detention_logs a 
+    INNER JOIN 
+      equipment_interchange_receipt b 
+    ON 
+      a.EIR_ID = b.id 
+    LEFT JOIN 
+      eir_match c 
+    ON 
+      b.id = c.eir_in 
+    AND 
+      c.is_active = 1 
+    WHERE 
+      c.eir_in IS NULL;
+  `;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      return res
+        .status(500)
+        .send({ message: "Error retrieving detention logs", error: err });
+    }
+    res.send(results);
+  });
+};

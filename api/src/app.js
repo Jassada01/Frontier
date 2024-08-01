@@ -13,12 +13,12 @@ const commonRoutes = require("./routes/commonRoutes");
 const driverRoutes = require("./routes/driverRoutes");
 const yardsRoutes = require("./routes/yardsRoutes");
 const equipmentInterchangeReceiptRoutes = require("./routes/equipmentInterchangeReceiptRoutes");
-const priceRoutes = require("./routes/priceRoutes"); 
-const priceListCustomRoutes = require("./routes/priceListCustomRoutes"); 
-const eirMatchRoutes = require("./routes/eirMatchRoutes"); 
-const invoiceRoutes = require("./routes/invoiceRoutes"); 
-
-
+const priceRoutes = require("./routes/priceRoutes");
+const priceListCustomRoutes = require("./routes/priceListCustomRoutes");
+const eirMatchRoutes = require("./routes/eirMatchRoutes");
+const invoiceRoutes = require("./routes/invoiceRoutes");
+const lineUserProfilesRoutes = require("./routes/lineUserProfilesRoutes");
+const detentionLogsRoutes = require("./routes/detentionLogsRoutes"); // เพิ่มการนำเข้าเส้นทางนี้
 
 const app = express();
 
@@ -42,11 +42,12 @@ app.use("/api/common", commonRoutes);
 app.use("/api/drivers", driverRoutes);
 app.use("/api/yards", yardsRoutes);
 app.use("/api/EIR", equipmentInterchangeReceiptRoutes);
-app.use("/api/prices", priceRoutes); 
-app.use("/api/price_custom", priceListCustomRoutes); 
-app.use("/api/eir_match", eirMatchRoutes); 
-app.use("/api/invoices", invoiceRoutes); 
-
+app.use("/api/prices", priceRoutes);
+app.use("/api/price_custom", priceListCustomRoutes);
+app.use("/api/eir_match", eirMatchRoutes);
+app.use("/api/invoices", invoiceRoutes);
+app.use("/api/line_user_profiles", lineUserProfilesRoutes);
+app.use("/api/detentionLogs", detentionLogsRoutes); // เพิ่มเส้นทางนี้
 
 const port = process.env.PORT || 3000;
 

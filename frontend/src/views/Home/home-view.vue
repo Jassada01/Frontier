@@ -11,6 +11,8 @@
       </div>
       <div class="divider"></div>
       <AgentCard />
+
+      <DetentionLogsTable class="mt-10" />
     </div>
   </div>
 </template>
@@ -19,6 +21,7 @@
 import { ref, onMounted } from 'vue'
 import Navbar from '../../components/Navbar.vue'
 import AgentCard from '../../components/home/AgentCard.vue'
+import DetentionLogsTable from '../../components/home/DetentionLogsTable.vue' // Import the new component
 import moment from 'moment'
 
 // สร้างตัวแปรเพื่อเก็บเวลา
@@ -33,11 +36,8 @@ const updateTime = () => {
 onMounted(() => {
   setInterval(updateTime, 1000);// อัปเดตทุก 1 วินาที
 });
-
-
 </script>
 
 <style scoped>
 /* คุณสามารถเพิ่ม CSS ที่นี่หากต้องการปรับแต่งเพิ่มเติม */
-
 </style>

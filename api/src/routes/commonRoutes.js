@@ -107,4 +107,89 @@ router.get("/getProductPrices", commonController.getProductPrices);
  */
 router.get("/agentEirCount", commonController.getAgentEirCount);
 
+/**
+ * @swagger
+ * /api/common/initialData:
+ *   get:
+ *     summary: Get initial data for agents, clients, drivers, yards, zones, and conditions
+ *     tags: [Common]
+ *     responses:
+ *       200:
+ *         description: Initial data retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 Agent:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                 Client:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                 Driver:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                 Yard:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                 Zone:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                 Condition:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *       500:
+ *         description: Error retrieving initial data
+ */
+router.get("/initialData", commonController.getInitialData);
+
+/**
+ * @swagger
+ * /api/common/getDetentionLogs:
+ *   get:
+ *     summary: Get detention logs
+ *     tags: [Common]
+ *     responses:
+ *       200:
+ *         description: Detention logs retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   EIR_ID:
+ *                     type: integer
+ *                   receipt_no:
+ *                     type: string
+ *                   detention_datetime:
+ *                     type: string
+ *                     format: date-time
+ *                   booking_bl:
+ *                     type: string
+ *                   container:
+ *                     type: string
+ *                   remark:
+ *                     type: string
+ *                   agent_code:
+ *                     type: string
+ *                   size_type:
+ *                     type: string
+ *                   yard:
+ *                     type: string
+ *       500:
+ *         description: Error retrieving detention logs
+ */
+router.get("/getDetentionLogs", commonController.getDetentionLogs);
+
 module.exports = router;
