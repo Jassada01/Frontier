@@ -263,11 +263,11 @@ const createInvoicePage = (doc, image, copyType) => {
     invoice[`customer_address_branch${lang === 'ENG' ? '_eng' : ''}`] +
     ')'
 
-  if (customerInfo.length > 35) {
+  if (customerInfo.length > 30) {
     doc.setFontSize(12)
   }
 
-  doc.text(customerInfo, 85, 107,{ maxWidth: 280,lineHeightFactor: 0.6 })
+  doc.text(customerInfo, 85, 107,{ maxWidth: 320,lineHeightFactor: 0.6 })
 
   // Reset font size back to 14
   doc.setFontSize(14)
@@ -284,7 +284,7 @@ const createInvoicePage = (doc, image, copyType) => {
   // EIR Client Code
   const clientCode = EIR.client_code
 
-  if (clientCode.length > 35) {
+  if (clientCode.length > 30) {
     doc.setFontSize(12)
     doc.text(clientCode, 225, 194, { maxWidth: 180,lineHeightFactor: 0.6 })
   }

@@ -15,9 +15,13 @@
                 </div>
                 <div v-if="userProfile && !loading && showRegisterButtons" class="form-control mt-6">
                     <h3 class="text-center">สวัสดี, {{ userProfile.displayName }}</h3>
-                    <img :src="userProfile.pictureUrl" alt="Profile Picture" class="rounded-full mx-auto" />
+                    <div class="avatar flex justify-center">
+                        <div class="w-24 rounded-full">
+                            <img :src="userProfile.pictureUrl" alt="Profile Picture" class="mx-auto" />
+                        </div>
+                    </div>
+
                     <p class="text-center">{{ userProfile.statusMessage }}</p>
-                    <p class="text-center">User ID: {{ userProfile.userId }}</p>
                 </div>
                 <div v-if="errorMessage" class="mt-4">
                     <div class="alert alert-error">
@@ -35,7 +39,11 @@
                 <div v-if="showRegisterForm && userType === 'Client'" class="form-control mt-6">
                     <h3 class="text-center font-bold">ลงทะเบียนผู้ใช้ใหม่</h3>
                     <form @submit.prevent="registerUser">
-                        <img :src="userProfile.pictureUrl" alt="Profile Picture" class="rounded-full mx-auto" />
+                        <div class="avatar flex justify-center">
+                            <div class="w-24 rounded-full">
+                                <img :src="userProfile.pictureUrl" alt="Profile Picture" class="mx-auto" />
+                            </div>
+                        </div>
                         <div class="form-control">
                             <label class="label">
                                 <span class="label-text">ชื่อในระบบ<span class="text-error font-bold"> *</span></span>
