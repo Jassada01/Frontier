@@ -196,3 +196,26 @@ exports.getDetentionLogs = (req, res) => {
     res.send(results);
   });
 };
+exports.getEquipmentInterchangeReceipt = (req, res) => {
+  const { container } = req.query;
+
+  if (!container) {
+    return res.status(400).send({ message: "Container number is required" });
+  }
+
+  const query = `
+    SELECT * FROM equipment_interchange_receipt a 
+    WHERE container = ? 
+    ORDER BY a.create_datetime
+  `;
+
+  db.query(query, [container], (err, results) => {
+    if (err) {
+      return res.status(500).send({
+        message: "Error retrieving equipment interchange receipt",
+        error: err,
+      });
+    }
+    res.send(results);
+  });
+};
