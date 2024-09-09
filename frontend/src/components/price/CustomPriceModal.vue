@@ -91,8 +91,8 @@ const agents = ref([]);
 const yards = ref([]);
 const sizeOptions = CONFIG.CONTAINE_SIZE;
 
-const vatPrice = computed(() => (customPriceData.value.custom_price * 0.07).toFixed(2));
-const totalPrice = computed(() => (customPriceData.value.custom_price + parseFloat(vatPrice.value)).toFixed(2));
+const vatPrice = computed(() => (customPriceData.value.custom_price * 0.07).toFixed(4));
+const totalPrice = computed(() => (customPriceData.value.custom_price + parseFloat(vatPrice.value)).toFixed(4));
 
 const selectedAgent = ref(null);
 const selectedYard = ref(null);

@@ -28,17 +28,17 @@
                     </td>
                     <td v-if="!item.isEditing">{{ item.quantity.toLocaleString('en-US', {
                         minimumFractionDigits: 2,
-                        maximumFractionDigits: 2
+                        maximumFractionDigits: 4
                     }) }}</td>
                     <td v-else><input v-model.number="item.quantity" @input="updateAmount(item)"
                             class="input input-sm input-bordered w-20" /></td>
                     <td v-if="!item.isEditing">{{ item.unit_price.toLocaleString('en-US', {
                         minimumFractionDigits: 2,
-                        maximumFractionDigits: 2
+                        maximumFractionDigits: 4
                     }) }}</td>
                     <td v-else><input v-model.number="item.unit_price" @input="updateAmount(item)"
                             class="input input-sm input-bordered w-full" /></td>
-                    <td>{{ item.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                    <td>{{ item.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 })
                         }}</td>
                     <td v-if="!item.isEditing">{{ item.remark }}</td>
                     <td v-else><input v-model="item.remark" class="input input-sm input-bordered w-full" /></td>
@@ -113,7 +113,7 @@
                                 2, maximumFractionDigits: 2
                         }) }}</span>
                     </div>
-                    <div v-if="grandTotal>=1000 & !includeWithholdingTax" class="flex justify-end mt-2">
+                    <div v-if="grandTotal >= 1000 & !includeWithholdingTax" class="flex justify-end mt-2">
                         <span class="text-error">ยอดรวมทั้งสิ้นเกิน 1,000 บาท แต่ไม่ได้ทำการหัก ณ. ที่จ่าย</span>
                     </div>
                     <div class="flex justify-between mt-2">
@@ -148,15 +148,15 @@
                             <td>{{ item.name_eng }}</td>
                             <td>{{ item.price.toLocaleString('en-US', {
                                 minimumFractionDigits: 2, maximumFractionDigits:
-                                    2
+                                    4
                             }) }}</td>
                             <td>{{ (item.price * 0.07).toLocaleString('en-US', {
                                 minimumFractionDigits: 2,
-                                maximumFractionDigits: 2
+                                maximumFractionDigits: 4
                             }) }}</td>
                             <td>{{ (item.price * 1.07).toLocaleString('en-US', {
                                 minimumFractionDigits: 2,
-                                maximumFractionDigits: 2
+                                maximumFractionDigits: 4
                             }) }}</td>
                             <td>
                                 <button @click="addItem(item)" class="btn btn-primary btn-sm">เพิ่ม</button>
@@ -245,8 +245,8 @@ const fetchProductPrices = async () => {
         // console.log(response);
         productPrices.value = response.data.map(item => ({
             ...item,
-            vat: (item.price * 0.07).toFixed(2),
-            priceWithVat: (item.price * 1.07).toFixed(2)
+            vat: (item.price * 0.07).toFixed(4),
+            priceWithVat: (item.price * 1.07).toFixed(4)
         }));
     } catch (error) {
         console.error('Error fetching product prices:', error);

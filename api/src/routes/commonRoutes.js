@@ -192,4 +192,110 @@ router.get("/initialData", commonController.getInitialData);
  */
 router.get("/getDetentionLogs", commonController.getDetentionLogs);
 
+/**
+ * @swagger
+ * /api/common/getEquipmentInterchangeReceipt:
+ *   get:
+ *     summary: Get equipment interchange receipt by container number
+ *     tags: [Common]
+ *     parameters:
+ *       - in: query
+ *         name: container
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The container number
+ *     responses:
+ *       200:
+ *         description: Equipment interchange receipt retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   entry_type:
+ *                     type: string
+ *                   drop_container:
+ *                     type: boolean
+ *                   receipt_no:
+ *                     type: string
+ *                   date:
+ *                     type: string
+ *                     format: date-time
+ *                   agent_id:
+ *                     type: integer
+ *                   agent_code:
+ *                     type: string
+ *                   client_id:
+ *                     type: integer
+ *                   client_code:
+ *                     type: string
+ *                   booking_bl:
+ *                     type: string
+ *                   container:
+ *                     type: string
+ *                   container_color:
+ *                     type: string
+ *                   size_type:
+ *                     type: string
+ *                   seal_no:
+ *                     type: string
+ *                   vessel:
+ *                     type: string
+ *                   zone_id:
+ *                     type: integer
+ *                   zone:
+ *                     type: string
+ *                   path_map:
+ *                     type: string
+ *                   tare:
+ *                     type: number
+ *                   voyage:
+ *                     type: string
+ *                   truck_license:
+ *                     type: string
+ *                   driver_id:
+ *                     type: integer
+ *                   driver_name:
+ *                     type: string
+ *                   truck_company:
+ *                     type: string
+ *                   tel:
+ *                     type: string
+ *                   yard_id:
+ *                     type: integer
+ *                   yard:
+ *                     type: string
+ *                   status_id:
+ *                     type: integer
+ *                   remark:
+ *                     type: string
+ *                   driver_sign:
+ *                     type: string
+ *                   receiver_sign:
+ *                     type: string
+ *                   create_user:
+ *                     type: integer
+ *                   create_datetime:
+ *                     type: string
+ *                     format: date-time
+ *                   update_user:
+ *                     type: integer
+ *                   update_datetime:
+ *                     type: string
+ *                     format: date-time
+ *       400:
+ *         description: Container number is required
+ *       500:
+ *         description: Error retrieving equipment interchange receipt
+ */
+router.get(
+  "/getEquipmentInterchangeReceipt",
+  commonController.getEquipmentInterchangeReceipt
+);
+
 module.exports = router;

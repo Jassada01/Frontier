@@ -163,7 +163,7 @@ const fetchYards = async () => {
     }
 };
 
-const validateContainerNumber = () => {
+const validateContainerNumber = async () => {
     equipmentInterchangeReceipt.value.container = equipmentInterchangeReceipt.value.container.toUpperCase();
     const regex = /^[A-Z]{4}\d{7}$/;
 
@@ -173,7 +173,49 @@ const validateContainerNumber = () => {
             title: 'รูปแบบไม่ถูกต้อง',
             text: 'หมายเลขตู้ต้องอยู่ในรูปแบบ AAAAXXXXXXX โดยที่ A เป็นตัวอักษรภาษาอังกฤษและ X เป็นตัวเลข',
         });
-        //equipmentInterchangeReceipt.value.container = "";
+        return;
+    }
+
+    try {
+        const response = await axios.get(`${CONFIG.API_SERVER}/api/common/getEquipmentInterchangeReceipt`, {
+            params: { container: equipmentInterchangeReceipt.value.container }
+        });
+
+        if (response.data && response.data.length > 0) {
+            const lastRecord = response.data[response.data.length - 1];
+            if (lastRecord.entry_type === equipmentInterchangeReceipt.value.entry_type &&
+                lastRecord.receipt_no !== equipmentInterchangeReceipt.value.receipt_no) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'ข้อมูลไม่ถูกต้อง',
+                    html: `
+                        <div class="text-left">
+                            <p class="mb-2">ตู้นี้มีการบันทึก ${lastRecord.entry_type} ไว้แล้วในระบบ</p>
+                            <table class="table-auto w-full">
+                                <tr>
+                                    <td class="font-bold pr-2">EIR:</td>
+                                    <td>${lastRecord.receipt_no}</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold pr-2">วันที่:</td>
+                                    <td>${moment(lastRecord.date).format('DD/MM/YYYY HH:mm')}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    `,
+                    confirmButtonText: 'ตกลง'
+                });
+                return;
+            }
+
+        }
+    } catch (error) {
+        console.error('Error checking container number:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'เกิดข้อผิดพลาด',
+            text: 'ไม่สามารถตรวจสอบข้อมูลตู้ได้ กรุณาลองใหม่อีกครั้ง',
+        });
     }
 };
 

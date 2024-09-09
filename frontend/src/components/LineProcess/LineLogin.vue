@@ -80,6 +80,8 @@ import axios from 'axios'
 import Swal from 'sweetalert2'
 import CONFIG from '../../config/config'
 import DriverForm from './DirectRegisterDriver.vue'
+import { useRouter } from 'vue-router'
+
 
 const userProfile = ref(null)
 const errorMessage = ref('')
@@ -90,6 +92,9 @@ const showRegisterForm = ref(false)
 const name = ref('')
 const companyName = ref('')
 let userType = ref('Client')
+
+const router = useRouter()
+
 
 const loginWithLine = async () => {
     try {
@@ -115,6 +120,15 @@ const checkUserInDatabase = async (userId) => {
         if (response.data.length === 0) {
             // User not found in the database, show register buttons
             showRegisterButtons.value = true
+        }
+        else {
+            // User found, log the user data
+            console.log('User data:', response.data);
+            // User found, navigate to LineDashboard
+            router.push({ 
+                name: 'LineDashboard', 
+                query: { userId: userId }
+            })
         }
     } catch (err) {
         errorMessage.value = 'เกิดข้อผิดพลาดในการตรวจสอบผู้ใช้ในฐานข้อมูล'
