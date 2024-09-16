@@ -449,5 +449,52 @@ router.post(
   equipmentInterchangeReceiptController.createInvoiceWithoutInitialItem
 );
 
+/**
+ * @swagger
+ * /api/EIR/createInvoiceDetailsforDropOut:
+ *   post:
+ *     summary: Create invoice details based on equipmentId and invoiceHeaderId
+ *     tags: [EquipmentInterchangeReceipt]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               equipmentId:
+ *                 type: integer
+ *                 description: The ID of the equipment interchange receipt
+ *                 example: 123
+ *               invoiceHeaderId:
+ *                 type: integer
+ *                 description: The ID of the invoice header where details will be added
+ *                 example: 456
+ *     responses:
+ *       201:
+ *         description: Invoice details created and total updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Invoice details created and total updated successfully
+ *                 invoice_header_id:
+ *                   type: integer
+ *                   description: The ID of the invoice header
+ *                   example: 456
+ *       400:
+ *         description: Invalid input, equipmentId and invoiceHeaderId are required
+ *       404:
+ *         description: No matching records found for the provided equipmentId
+ *       500:
+ *         description: Error creating invoice details
+ */
+router.post(
+  "/createInvoiceDetailsforDropOut",
+  equipmentInterchangeReceiptController.createInvoiceDetailsForEquipment
+);
 
 module.exports = router;

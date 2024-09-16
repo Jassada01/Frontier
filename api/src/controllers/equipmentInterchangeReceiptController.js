@@ -1,5 +1,7 @@
 const db = require("../config/dbConfig");
 const { getRunningNo } = require("../services/getRunningNo");
+const util = require("util");
+const query = util.promisify(db.query).bind(db);
 
 exports.addEquipmentInterchangeReceipt = async (req, res) => {
   const {
@@ -126,16 +128,29 @@ exports.addEquipmentInterchangeReceipt = async (req, res) => {
 
         try {
           await Promise.all(conditionQueries);
-          await createInvoice(
-            equipmentId,
-            date,
-            agent_id,
-            yard_id,
-            size_type,
-            entry_type,
-            true,
-            res
-          );
+          if (!(entry_type === "IN" && drop_container)) {
+            let isInitialItem = true;
+            if (drop_container) {
+              isInitialItem = false;
+            }
+            await createInvoice(
+              equipmentId,
+              date,
+              agent_id,
+              yard_id,
+              size_type,
+              entry_type,
+              isInitialItem,
+              res
+            );
+          } else {
+            res.status(201).send({
+              message:
+                "Equipment, conditions successfully with invoice details",
+              equipment_interchange_receipt_id: equipmentId,
+              invoice_id: null,
+            });
+          }
         } catch (err) {
           res.status(500).send(err);
         }
@@ -665,4 +680,127 @@ exports.getFilteredEquipmentInterchangeReceipts = (req, res) => {
 
     res.send(results);
   });
+};
+
+/**
+ * ฟังก์ชั่นสำหรับสร้าง invoice_detail โดยรับค่า equipmentId
+ */
+exports.createInvoiceDetailsForEquipment = async (req, res) => {
+  const { equipmentId, invoiceHeaderId } = req.body;
+
+  if (!equipmentId || !invoiceHeaderId) {
+    return res.status(400).send({
+      message: "equipmentId and invoiceHeaderId are required",
+    });
+  }
+
+  try {
+    // ดึงข้อมูลตาม equipmentId
+    const selectQuery = `
+      SELECT 
+        a.id, 
+        a.date as out_date, 
+        c.id AS in_ID, 
+        c.date AS in_date, 
+        d.size, 
+        d.std_price, 
+        d.ext_price 
+      FROM equipment_interchange_receipt a 
+      INNER JOIN eir_match b ON a.id = b.eir_out AND b.is_active = 1
+      INNER JOIN equipment_interchange_receipt c ON b.eir_in = c.id
+      INNER JOIN price_drop d ON a.size_type = d.size
+      WHERE a.id = ?
+    `;
+
+    const results = await query(selectQuery, [equipmentId]);
+
+    if (results.length === 0) {
+      return res.status(404).send({
+        message: "No matching records found for the provided equipmentId.",
+      });
+    }
+
+    const invoiceDetails = [];
+
+    results.forEach((row) => {
+      const outDate = new Date(row.out_date);
+      const inDate = new Date(row.in_date);
+      const diffInHours = Math.abs(inDate - outDate) / 36e5; // คำนวณเวลาห่างเป็นชั่วโมง
+
+      // ถ้าห่างกันไม่เกิน 72 ชั่วโมง
+      if (diffInHours <= 72) {
+        invoiceDetails.push({
+          invoice_header_id: invoiceHeaderId,
+          price_list_id: 99, // ปรับตาม schema ของคุณ
+          description: `ค่าฝากตู้ สำหรับขนาด ${row.size}`, // ภาษาไทย
+          description_eng: `CONTAINER DROP for size ${row.size}`, // ภาษาอังกฤษ
+          quantity: 1,
+          unit_price: row.std_price,
+          amount: row.std_price * 1,
+          remark: "Within 72 hours",
+        });
+      } else {
+        // ถ้าห่างกันเกิน 72 ชั่วโมง
+        const extraHours = diffInHours - 72;
+        const extraDays = Math.ceil(extraHours / 24); // ปัดขึ้นเป็นวัน
+
+        // เพิ่ม std_price
+        invoiceDetails.push({
+          invoice_header_id: invoiceHeaderId,
+          price_list_id: 99,
+          description: `ค่าฝากตู้	 สำหรับขนาด ${row.size}`, // ภาษาไทย
+          description_eng: `CONTAINER DROP for size ${row.size}`, // ภาษาอังกฤษ
+          quantity: 1,
+          unit_price: row.std_price,
+          amount: row.std_price * 1,
+          remark: "Exceeds 72 hours",
+        });
+
+        // เพิ่ม ext_price ตามจำนวนวัน
+        invoiceDetails.push({
+          invoice_header_id: invoiceHeaderId,
+          price_list_id: 99,
+          description: `ค่าบริการเพิ่มเติม สำหรับตู้ขนาด ${row.size}`, // ภาษาไทย
+          description_eng: `Extra price for for size ${row.size}`, // ภาษาอังกฤษ
+          quantity: extraDays,
+          unit_price: row.ext_price,
+          amount: row.ext_price * extraDays,
+          remark: `Extra charges for exceeding 72 hours by ${extraDays} day(s)`,
+        });
+      }
+    });
+
+    // Insert ข้อมูลเข้าไปใน invoice_detail
+    const insertQuery = `
+      INSERT INTO invoice_detail 
+        (invoice_header_id, price_list_id, description, description_eng, quantity, unit_price, amount, remark) 
+      VALUES ?
+    `;
+
+    const values = invoiceDetails.map((detail) => [
+      detail.invoice_header_id,
+      detail.price_list_id,
+      detail.description,
+      detail.description_eng, // เพิ่ม description_eng เข้าไปในค่าที่จะ insert
+      detail.quantity,
+      detail.unit_price,
+      detail.amount,
+      detail.remark,
+    ]);
+
+    await query(insertQuery, [values]);
+
+    // เรียกใช้ updateInvoiceTotal หลังจาก insert ข้อมูล detail เสร็จแล้ว
+    await updateInvoiceTotal(invoiceHeaderId);
+
+    res.status(201).send({
+      message: "Invoice details created and total updated successfully",
+      invoice_header_id: invoiceHeaderId,
+    });
+  } catch (error) {
+    res.status(500).send({
+      message: "Error creating invoice details",
+      error: error.message,
+    });
+  }
 };
