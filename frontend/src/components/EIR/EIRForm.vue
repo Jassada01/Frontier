@@ -15,6 +15,7 @@ import moment from 'moment';  // Import Moment.js
 import { Thai } from 'flatpickr/dist/l10n/th.js';
 
 
+
 const props = defineProps({
     isEditMode: Boolean,
     receiptId: Number
@@ -402,11 +403,22 @@ const createReceipt = async () => {
                     eir_out: response.data.equipment_interchange_receipt_id,
                     is_active: true
                 });
+
+                // ตรวจสอบเงื่อนไข drop_container = true และ entry_type = OUT
+                if (equipmentInterchangeReceipt.value.drop_container && equipmentInterchangeReceipt.value.entry_type === 'OUT') {
+                    // เรียก API /api/EIR/createInvoiceDetailsforDropOut
+                    await axios.post(`${CONFIG.API_SERVER}/api/EIR/createInvoiceDetailsforDropOut`, {
+                        equipmentId: response.data.equipment_interchange_receipt_id,
+                        invoiceHeaderId: response.data.invoice_id // ตรวจสอบว่ามี invoice_id ที่ถูกต้อง
+                    });
+                }
             }
+            // รีไดเรกต์ไปหน้า EIR แล้วรีเฟรชหน้าเว็บ
             router.push({ path: `/EIR/${response.data.equipment_interchange_receipt_id}` }).then(() => {
                 router.go(0); // รีเฟรชหน้าเว็บ
             });
         });
+
     } catch (error) {
         handleError(error, 'Error creating equipment interchange receipt');
     }
@@ -701,11 +713,21 @@ async function fetchInvoiceByEirId(eirId) {
     try {
         const response = await axios.get(`${CONFIG.API_SERVER}/api/invoices/getInvoiceByEirId?eir_id=${eirId}`);
         invoiceList.value = response.data;
-        // console.log(invoiceList.value);
+        console.log(invoiceList.value);
     } catch (error) {
-        console.error('Error fetching invoice data:', error);
+        if (error.response && error.response.status === 404) {
+            // จัดการกรณีที่สถานะเป็น 404
+            console.error('ไม่พบข้อมูล Invoice (404)');
+            // คุณสามารถตั้งค่า invoiceList ให้เป็นอาเรย์ว่าง หรือแสดงข้อความให้ผู้ใช้ทราบ
+            invoiceList.value = [];
+        } else {
+            console.error('เกิดข้อผิดพลาดในการดึงข้อมูล Invoice:', error);
+            // จัดการข้อผิดพลาดอื่น ๆ ตามความเหมาะสม
+            Swal.fire('เกิดข้อผิดพลาดในการดึงข้อมูล Invoice', error.message, 'error');
+        }
     }
 }
+
 
 function getBadgeClass(status_id) {
     if (status_id === 3) {

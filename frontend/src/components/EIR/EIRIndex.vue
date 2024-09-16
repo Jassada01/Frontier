@@ -123,7 +123,15 @@ const formatDate = (date) => {
 
 onMounted(async () => {
   try {
-    const response = await axios.get(`${CONFIG.API_SERVER}/api/EIR/get`)
+    const startDate = moment().subtract(60, 'days').format('YYYY-MM-DD')
+    const endDate = moment().format('YYYY-MM-DD')
+
+    const response = await axios.get(`${CONFIG.API_SERVER}/api/EIR/get`, {
+      params: {
+        start_date: startDate,
+        end_date: endDate
+      }
+    })
     eirs.value = response.data
 
     // Extend DataTables sorting for dates
