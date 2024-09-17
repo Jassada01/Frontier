@@ -124,7 +124,7 @@ const formatDate = (date) => {
 onMounted(async () => {
   try {
     const startDate = moment().subtract(60, 'days').format('YYYY-MM-DD')
-    const endDate = moment().format('YYYY-MM-DD')
+    const endDate = moment().add(60, 'days').format('YYYY-MM-DD')
 
     const response = await axios.get(`${CONFIG.API_SERVER}/api/EIR/get`, {
       params: {
