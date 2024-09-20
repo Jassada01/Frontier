@@ -54,7 +54,9 @@ const createClient = async () => {
     client.value.is_active = client.value.is_active ? 1 : 0
     const response = await axios.post(`${CONFIG.API_SERVER}/api/client/add`, client.value)
     Swal.fire('Success', 'สร้างข้อมูลลูกค้าสำเร็จ', 'success').then(() => {
-      router.push({ path: `/Client/${response.data.client_id}` })
+      router.push({ path: `/Client/${response.data.client_id}` }).then(() => {
+        location.reload();
+      });
     })
   } catch (error) {
     Swal.fire('Error', 'Error creating client: ' + error.response.data.message, 'error')

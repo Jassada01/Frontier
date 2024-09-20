@@ -1,3 +1,4 @@
+//clientController.js
 const db = require("../config/dbConfig");
 
 exports.addClient = (req, res) => {
@@ -105,6 +106,8 @@ exports.getClient = (req, res) => {
     query += ` AND is_active = ?`;
     params.push(active === "true" ? 1 : 0);
   }
+
+  query += ` Order By name`;
 
   db.query(query, params, (err, results) => {
     if (err) {

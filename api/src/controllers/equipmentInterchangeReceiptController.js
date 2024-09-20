@@ -704,7 +704,8 @@ exports.createInvoiceDetailsForEquipment = async (req, res) => {
         c.date AS in_date, 
         d.size, 
         d.std_price, 
-        d.ext_price 
+        d.ext_price,
+        a.client_id
       FROM equipment_interchange_receipt a 
       INNER JOIN eir_match b ON a.id = b.eir_out AND b.is_active = 1
       INNER JOIN equipment_interchange_receipt c ON b.eir_in = c.id
@@ -722,13 +723,35 @@ exports.createInvoiceDetailsForEquipment = async (req, res) => {
 
     const invoiceDetails = [];
 
+    // ตรวจสอบ free_period จาก client_free_drop_period
+    const clientId = results[0].client_id;
+    const freeDropQuery = `
+      SELECT free_period 
+      FROM client_free_drop_period 
+      WHERE client_id = ? 
+      AND is_active = 1 
+      AND expire_date > NOW()
+      LIMIT 1
+    `;
+
+    const freeDropResults = await query(freeDropQuery, [clientId]);
+
+    // กำหนด default freePeriod เป็น 72 ชั่วโมง
+    let freePeriodInHours = 72;
+
+    // ถ้ามีข้อมูลใน client_free_drop_period ให้ใช้ free_period แทน
+    if (freeDropResults.length > 0) {
+      const freePeriodInDays = freeDropResults[0].free_period;
+      freePeriodInHours = freePeriodInDays * 24; // แปลง free_period เป็นชั่วโมง
+    }
+
     results.forEach((row) => {
       const outDate = new Date(row.out_date);
       const inDate = new Date(row.in_date);
       const diffInHours = Math.abs(inDate - outDate) / 36e5; // คำนวณเวลาห่างเป็นชั่วโมง
 
-      // ถ้าห่างกันไม่เกิน 72 ชั่วโมง
-      if (diffInHours <= 72) {
+      // ถ้าห่างกันไม่เกิน freePeriodInHours
+      if (diffInHours <= freePeriodInHours) { 
         invoiceDetails.push({
           invoice_header_id: invoiceHeaderId,
           price_list_id: 99, // ปรับตาม schema ของคุณ
@@ -737,11 +760,11 @@ exports.createInvoiceDetailsForEquipment = async (req, res) => {
           quantity: 1,
           unit_price: row.std_price,
           amount: row.std_price * 1,
-          remark: "Within 72 hours",
+          remark: `Within ${freePeriodInHours} hours`,
         });
       } else {
-        // ถ้าห่างกันเกิน 72 ชั่วโมง
-        const extraHours = diffInHours - 72;
+        // ถ้าห่างกันเกิน freePeriodInHours
+        const extraHours = diffInHours - freePeriodInHours;
         const extraDays = Math.ceil(extraHours / 24); // ปัดขึ้นเป็นวัน
 
         // เพิ่ม std_price
@@ -753,7 +776,7 @@ exports.createInvoiceDetailsForEquipment = async (req, res) => {
           quantity: 1,
           unit_price: row.std_price,
           amount: row.std_price * 1,
-          remark: "Exceeds 72 hours",
+          remark: `Exceeds ${freePeriodInHours} hours`,
         });
 
         // เพิ่ม ext_price ตามจำนวนวัน
@@ -765,7 +788,7 @@ exports.createInvoiceDetailsForEquipment = async (req, res) => {
           quantity: extraDays,
           unit_price: row.ext_price,
           amount: row.ext_price * extraDays,
-          remark: `Extra charges for exceeding 72 hours by ${extraDays} day(s)`,
+          remark: `Extra charges for exceeding ${freePeriodInHours} hours by ${extraDays} day(s)`,
         });
       }
     });

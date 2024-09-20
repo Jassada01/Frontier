@@ -37,6 +37,12 @@
                 </li>
                 <li>
                   <router-link to="/PriceIndex"><i class="fa fa-tags"></i> รายการค่าบริการ</router-link>
+                  <ul>
+                    <li>
+                      <router-link to="/ClientFreeDropPeriodIndex"><i class="fa fa-clock"></i>
+                        ดรอปโปรโมชั่น</router-link>
+                    </li>
+                  </ul>
                 </li>
                 <!-- เพิ่มลาน -->
                 <li>
@@ -102,6 +108,11 @@
           </li>
           <li>
             <router-link to="/PriceIndex"><i class="fa fa-tags"></i> รายการค่าบริการ</router-link>
+            <ul>
+              <li>
+                <router-link to="/ClientFreeDropPeriodIndex"><i class="fa fa-clock"></i> ดรอปโปรโมชั่น</router-link>
+              </li>
+            </ul>
           </li>
           <!-- เพิ่มลาน -->
           <li>

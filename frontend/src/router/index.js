@@ -199,6 +199,7 @@ import yardRoutes from './yardRoutes'
 import EIRRoutes from './EIRRoutes'
 import priceRoutes from './priceRoutes' // เพิ่มบรรทัดนี้
 import lineLoginRoutes from './lineLoginRoutes'
+import clientFreeDropPeriodRoutes from './clientFreeDropPeriodRoutes'
 
 const routes = [
   // Home and Login
@@ -229,7 +230,8 @@ const routes = [
   // EIR Management
   ...EIRRoutes,
   ...priceRoutes, // เพิ่มบรรทัดนี้
-  ...lineLoginRoutes
+  ...lineLoginRoutes,
+  ...clientFreeDropPeriodRoutes
 ]
 
 const router = createRouter({

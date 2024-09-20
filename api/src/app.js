@@ -19,6 +19,8 @@ const eirMatchRoutes = require("./routes/eirMatchRoutes");
 const invoiceRoutes = require("./routes/invoiceRoutes");
 const lineUserProfilesRoutes = require("./routes/lineUserProfilesRoutes");
 const detentionLogsRoutes = require("./routes/detentionLogsRoutes"); // เพิ่มการนำเข้าเส้นทางนี้
+const clientFreeDropPeriodRoutes = require("./routes/clientFreeDropPeriodRoutes");
+
 
 const app = express();
 
@@ -48,6 +50,8 @@ app.use("/api/eir_match", eirMatchRoutes);
 app.use("/api/invoices", invoiceRoutes);
 app.use("/api/line_user_profiles", lineUserProfilesRoutes);
 app.use("/api/detentionLogs", detentionLogsRoutes); // เพิ่มเส้นทางนี้
+app.use("/api/client_free_drop_period", clientFreeDropPeriodRoutes);
+
 
 const port = process.env.PORT || 3000;
 
