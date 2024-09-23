@@ -3,11 +3,13 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
 import CONFIG from '../../config/config';
+import ContainerReturnForm from './ContainerReturnForm.vue';
 
 const route = useRoute();
 const userData = ref(null);
 const loading = ref(true);
 const error = ref(null);
+const showReturnForm = ref(false);
 
 const userType = computed(() => {
   return userData.value?.user_type === 'Client' ? 'ลูกค้า' : 'คนขับรถ';
@@ -35,6 +37,25 @@ const loadUserData = async () => {
     error.value = 'ไม่พบ User ID หรือ User ID ไม่ถูกต้อง';
     loading.value = false;
   }
+};
+
+const handleReturnContainer = () => {
+  showReturnForm.value = true;
+};
+
+const handleReceiveContainer = () => {
+  // TODO: Implement logic for receiving container
+  console.log('Receive container requested');
+};
+
+const handleReturnFormSubmit = (formData) => {
+  // TODO: Implement logic to process the return form data
+  console.log('Form submitted:', formData);
+  showReturnForm.value = false;
+};
+
+const handleReturnFormCancel = () => {
+  showReturnForm.value = false;
 };
 
 onMounted(() => {
@@ -82,21 +103,29 @@ onMounted(() => {
             <span>{{ error }}</span>
           </div>
           <template v-else-if="userData">
-            <div class="flex flex-col items-center">
-              <div class="avatar">
-                <div class="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                  <img :src="userData.picture_url" :alt="`รูปโปรไฟล์ของ ${userData.display_name}`" />
+            <div v-if="!showReturnForm">
+              <div class="flex flex-col items-center">
+                <div class="avatar">
+                  <div class="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                    <img :src="userData.picture_url" :alt="`รูปโปรไฟล์ของ ${userData.display_name}`" />
+                  </div>
                 </div>
+                <h2 class="card-title mt-4">{{ userData.display_name }}</h2>
+                <div class="badge badge-accent mt-2">{{ userType }}</div>
               </div>
-              <h2 class="card-title mt-4">{{ userData.display_name }}</h2>
-              <div class="badge badge-accent mt-2">{{ userType }}</div>
+              <div class="divider"></div>
+              <div class="space-y-2">
+                <p><strong>ชื่อ:</strong> {{ userData.name }}</p>
+                <p><strong>บริษัท:</strong> {{ userData.company_name }}</p>
+                <p><strong>วันที่ลงทะเบียน:</strong> {{ new Date(userData.created_at).toLocaleDateString('th-TH') }}</p>
+              </div>
+              <div class="divider"></div>
+              <div class="flex justify-between mt-4">
+                <button @click="handleReturnContainer" class="btn btn-primary flex-1 mr-2">ขอคืนตู้</button>
+                <button @click="handleReceiveContainer" class="btn btn-secondary flex-1 ml-2">ขอรับตู้</button>
+              </div>
             </div>
-            <div class="divider"></div>
-            <div class="space-y-2">
-              <p><strong>ชื่อ:</strong> {{ userData.name }}</p>
-              <p><strong>บริษัท:</strong> {{ userData.company_name }}</p>
-              <p><strong>วันที่ลงทะเบียน:</strong> {{ new Date(userData.created_at).toLocaleDateString('th-TH') }}</p>
-            </div>
+            <ContainerReturnForm v-else @submit="handleReturnFormSubmit" @cancel="handleReturnFormCancel" />
           </template>
         </div>
       </div>

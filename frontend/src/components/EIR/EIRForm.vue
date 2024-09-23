@@ -87,7 +87,32 @@ const conditions = ref([]);
 const selectedColor = ref(null);
 const matching_eir_id = ref(null);
 const activeTab = ref(0);
+const isEditing = ref(false);
+const editForm = ref({
+    driver_name: '',
+    truck_license: '',
+    tel: ''
+});
 
+const startEditing = () => {
+    isEditing.value = true;
+    editForm.value = {
+        driver_name: equipmentInterchangeReceipt.value.driver_name,
+        truck_license: equipmentInterchangeReceipt.value.truck_license,
+        tel: equipmentInterchangeReceipt.value.tel
+    };
+};
+
+const saveEdit = () => {
+    equipmentInterchangeReceipt.value.driver_name = editForm.value.driver_name;
+    equipmentInterchangeReceipt.value.truck_license = editForm.value.truck_license;
+    equipmentInterchangeReceipt.value.tel = editForm.value.tel;
+    isEditing.value = false;
+};
+
+const cancelEdit = () => {
+    isEditing.value = false;
+};
 
 
 const fetchUserData = async () => {
@@ -840,19 +865,22 @@ onMounted(async () => {
             <span class="loading loading-spinner loading-lg"></span>
         </div>
 
-        <div role="tablist" class="tabs  tabs-bordered flex justify-start">
-            <a role="tab" class="tab inline text-primary" :class="{ 'tab-active': activeTab === 0 }"
-                @click="activeTab = 0">
-                <div class="badge badge-primary badge-xs"></div> ใบ
-                EIR
-            </a>
-            <a v-for="(invoice) in invoiceList" :key="invoice.invoice_id" role="tab" class="tab inline text-secondary"
-                :class="{ 'tab-active': activeTab === invoice.invoice_id }" @click="activeTab = invoice.invoice_id">
-                <div :class="getBadgeClass(invoice.status_id)" class="badge badge-xs"></div> {{ invoice.invoice_no }}
-            </a>
-            <a v-if="isEditMode" role="tab" class="tab inline text-neutral-content" @click="createNewInvoice">
-                <i class="fa-solid fa-circle-plus"></i> สร้าง Invoice เพิ่ม
-            </a>
+        <div class="tab-container">
+            <div role="tablist" class="tabs tabs-bordered flex justify-start overflow-x-auto whitespace-nowrap">
+                <a role="tab" class="tab inline text-primary" :class="{ 'tab-active': activeTab === 0 }"
+                    @click="activeTab = 0">
+                    <div class="badge badge-primary badge-xs"></div> ใบ EIR
+                </a>
+                <a v-for="(invoice) in invoiceList" :key="invoice.invoice_id" role="tab"
+                    class="tab inline text-secondary" :class="{ 'tab-active': activeTab === invoice.invoice_id }"
+                    @click="activeTab = invoice.invoice_id">
+                    <div :class="getBadgeClass(invoice.status_id)" class="badge badge-xs"></div> {{ invoice.invoice_no
+                    }}
+                </a>
+                <a v-if="isEditMode" role="tab" class="tab inline text-neutral-content" @click="createNewInvoice">
+                    <i class="fa-solid fa-circle-plus"></i> สร้าง Invoice เพิ่ม
+                </a>
+            </div>
         </div>
 
         <div v-show="activeTab === 0" class="bg-base-100 border-base-300 rounded-box p-6">
@@ -942,7 +970,8 @@ onMounted(async () => {
 
                             </div>
                             <div v-else>
-                                <button class="btn btn-primary text-sm" @click="matchOut">Match ตู้ Out</button>
+                                <button class="btn btn-primary text-sm" @click="matchOut">{{
+                                    equipmentInterchangeReceipt.drop_container ? 'Drop' : 'Match' }} ตู้ Out</button>
                             </div>
                             <button v-if="equipmentInterchangeReceipt.status_id == 1"
                                 class="ms-5 btn btn-outline btn-success" @click="CompleteReceipt">เสร็จสิ้นแล้ว</button>
@@ -1072,16 +1101,33 @@ onMounted(async () => {
                                 </template>
                             </multiselect>
                         </div>
-                        <div class="w-full  md:w-2/3  px-2 mb-4">
-                            <div v-if="selectedDriver" class="card card-side bg-base-100 shadow-sm">
+                        <div class="w-full md:w-2/3 px-2 mb-4">
+                            <div v-if="selectedDriver" class="card card-side bg-base-100 shadow-sm relative">
+                                <button @click="startEditing"
+                                    class="btn btn-sm  btn-outline btn-neutral absolute top-2 right-2">
+                                    <i class="fas fa-edit"></i> แก้ไข
+                                </button>
                                 <figure><img :src="selectedDriver.driver_image_path" alt="Truck" class="w-64" />
                                 </figure>
                                 <div class="card-body">
-                                    <h2 class="card-title">{{ selectedDriver.driver_name }}</h2>
-                                    <p>ทะเบียนรถบรรทุก: {{ selectedDriver.license_plate }}</p>
+                                    <h2 class="card-title">
+                                        <span v-if="!isEditing">{{ equipmentInterchangeReceipt.driver_name }}</span>
+                                        <input v-else v-model="editForm.driver_name" class="input input-bordered" />
+                                    </h2>
+                                    <p>ทะเบียนรถบรรทุก:
+                                        <span v-if="!isEditing">{{ equipmentInterchangeReceipt.truck_license }}</span>
+                                        <input v-else v-model="editForm.truck_license" class="input input-bordered" />
+                                    </p>
                                     <p>รหัสคนขับ: {{ selectedDriver.id }}</p>
                                     <p>บริษัทขนส่ง: {{ selectedDriver.truck_company_name }}</p>
-                                    <p>เบอร์โทร: {{ selectedDriver.phone_number }}</p>
+                                    <p>เบอร์โทร:
+                                        <span v-if="!isEditing">{{ equipmentInterchangeReceipt.tel }}</span>
+                                        <input v-else v-model="editForm.tel" class="input input-bordered" />
+                                    </p>
+                                    <div v-if="isEditing" class="mt-4">
+                                        <button @click="saveEdit" class="btn btn-sm btn-success mr-2">เปลี่ยน</button>
+                                        <button @click="cancelEdit" class="btn btn-sm btn-error">ยกเลิก</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1185,7 +1231,27 @@ export default {
     }
 }
 </script>
+<style scoped>
+.tab-container {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: auto;
+}
 
-<style>
-/* คุณสามารถเพิ่ม CSS เพื่อปรับแต่งการแสดงผลได้ที่นี่ */
+.tabs {
+    min-width: max-content;
+}
+
+/* ซ่อน scrollbar สำหรับ Chrome, Safari และ Opera */
+.tab-container::-webkit-scrollbar {
+    display: none;
+}
+
+/* ซ่อน scrollbar สำหรับ IE, Edge และ Firefox */
+.tab-container {
+    -ms-overflow-style: none;
+    /* IE และ Edge */
+    scrollbar-width: none;
+    /* Firefox */
+}
 </style>

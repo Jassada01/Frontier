@@ -1,5 +1,5 @@
 <template>
-  <div class="container mx-auto p-10 box mb-6 border rounded-lg">
+  <div class="container mx-auto p-2 box mb-6 border rounded-lg">
     <div class="flex justify-between items-center mb-2">
       <div>
         <h2 class="text-2xl font-bold text-secondary">Invoice No: {{ form.invoice_no }}</h2>
@@ -22,7 +22,7 @@
       </div>
     </div>
     <form class="space-y-4">
-      <div class="flex justify-between items-center">
+      <div class="flex justify-between items-center flex-wrap">
         <div>
           <label class="block text-gray-700 text-sm mb-2">Invoice Language:</label>
           <div class="flex items-center space-x-4">
@@ -36,77 +36,77 @@
             </label>
           </div>
         </div>
-        <div class="flex justify-center items-center">
-          <ul v-if="form.status_id === 3" class="timeline">
+        <div class="flex justify-center items-center flex-wrap">
+          <ul v-if="form.status_id === 3" class="timeline timeline-vertical lg:timeline-horizontal">
             <li>
-              <div class="timeline-start timeline-box">สร้าง Invoice</div>
-              <div class="timeline-middle text-success">
-                <i class="fa-solid fa-circle-check"></i>
+              <div class="timeline-start timeline-box text-xs sm:text-sm">สร้าง Invoice</div>
+              <div class="timeline-middle">
+                <i class="fa-solid fa-circle-check text-success text-xs sm:text-sm"></i>
               </div>
               <hr class="bg-success" />
             </li>
             <li>
               <hr class="bg-success" />
-              <div class="timeline-start timeline-box bg-warning">รอชำระ</div>
-              <div class="timeline-middle text-success">
-                <i class="fa-solid fa-circle-check"></i>
+              <div class="timeline-start timeline-box bg-warning text-xs sm:text-sm">รอชำระ</div>
+              <div class="timeline-middle">
+                <i class="fa-solid fa-circle-check text-success text-xs sm:text-sm"></i>
               </div>
               <hr />
             </li>
             <li>
               <hr />
-              <a class="timeline-start timeline-box btn btn-outline btn-success" @click="confirmPayment()">ชำระแล้ว</a>
-              <div class="timeline-middle text-base-300">
-                <i class="fa-solid fa-circle-check"></i>
+              <a class="timeline-start timeline-box btn btn-outline btn-success btn-xs sm:btn-sm text-xs sm:text-sm"
+                @click="confirmPayment()">ชำระแล้ว</a>
+              <div class="timeline-middle">
+                <i class="fa-solid fa-circle-check text-base-300 text-xs sm:text-sm"></i>
               </div>
             </li>
           </ul>
-          <ul v-if="form.status_id === 4" class="timeline">
+          <ul v-if="form.status_id === 4" class="timeline timeline-vertical lg:timeline-horizontal">
             <li>
-              <div class="timeline-start timeline-box">สร้าง Invoice</div>
-              <div class="timeline-middle text-success">
-                <i class="fa-solid fa-circle-check"></i>
+              <div class="timeline-start timeline-box text-xs sm:text-sm">สร้าง Invoice</div>
+              <div class="timeline-middle">
+                <i class="fa-solid fa-circle-check text-success text-xs sm:text-sm"></i>
               </div>
               <hr class="bg-success" />
             </li>
             <li>
               <hr class="bg-success" />
-              <div class="timeline-start timeline-box">รอชำระ</div>
-              <div class="timeline-middle text-success">
-                <i class="fa-solid fa-circle-check"></i>
+              <div class="timeline-start timeline-box text-xs sm:text-sm">รอชำระ</div>
+              <div class="timeline-middle">
+                <i class="fa-solid fa-circle-check text-success text-xs sm:text-sm"></i>
               </div>
               <hr class="bg-success" />
             </li>
             <li>
               <hr class="bg-success" />
-              <a class="timeline-start timeline-box bg-success">ชำระแล้ว</a>
-              <div class="timeline-middle text-success">
-                <i class="fa-solid fa-circle-check"></i>
+              <a class="timeline-start timeline-box bg-success text-xs sm:text-sm">ชำระแล้ว</a>
+              <div class="timeline-middle">
+                <i class="fa-solid fa-circle-check text-success text-xs sm:text-sm"></i>
               </div>
             </li>
           </ul>
-
-          <ul v-if="form.status_id === 5" class="timeline">
+          <ul v-if="form.status_id === 5" class="timeline timeline-vertical lg:timeline-horizontal">
             <li>
-              <div class="timeline-start timeline-box text-base-300">สร้าง Invoice</div>
-              <div class="timeline-middle text-error">
-                <i class="fa-solid fa-circle-check"></i>
+              <div class="timeline-start timeline-box text-base-300 text-xs sm:text-sm">สร้าง Invoice</div>
+              <div class="timeline-middle">
+                <i class="fa-solid fa-circle-check text-error text-xs sm:text-sm"></i>
               </div>
               <hr class="bg-error" />
             </li>
             <li>
               <hr class="bg-error" />
-              <div class="timeline-start timeline-box text-base-300">รอชำระ</div>
-              <div class="timeline-middle text-error">
-                <i class="fa-solid fa-circle-check"></i>
+              <div class="timeline-start timeline-box text-base-300 text-xs sm:text-sm">รอชำระ</div>
+              <div class="timeline-middle">
+                <i class="fa-solid fa-circle-check text-error text-xs sm:text-sm"></i>
               </div>
               <hr class="bg-error" />
             </li>
             <li>
               <hr class="bg-error" />
-              <a class="timeline-start timeline-box bg-error">ยกเลิก</a>
-              <div class="timeline-middle text-error">
-                <i class="fa-solid fa-circle-check"></i>
+              <a class="timeline-start timeline-box bg-error text-xs sm:text-sm">ยกเลิก</a>
+              <div class="timeline-middle">
+                <i class="fa-solid fa-circle-check text-error text-xs sm:text-sm"></i>
               </div>
             </li>
           </ul>
@@ -208,10 +208,11 @@
           </div>
         </div>
       </div>
-
-      <InvoiceDetailItem v-if="!is_invoice_load" :detail-items="form.detail" :form="form"
-        :equipmentInterchangeReceipt="equipmentInterchangeReceipt" @remove-detail="removeDetail" @add-item="addItem" />
-
+      <div class="tab-container">
+        <InvoiceDetailItem v-if="!is_invoice_load" :detail-items="form.detail" :form="form"
+          :equipmentInterchangeReceipt="equipmentInterchangeReceipt" @remove-detail="removeDetail"
+          @add-item="addItem" />
+      </div>
       <div class="flex justify-end items-center mb-6">
         <button type="button" @click="updateInvoice" class="btn btn-primary w-full md:w-auto">
           อัพเดทเอกสาร
@@ -505,5 +506,26 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Add your styles here */
+.tab-container {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: auto;
+}
+
+.tabs {
+  min-width: max-content;
+}
+
+/* ซ่อน scrollbar สำหรับ Chrome, Safari และ Opera */
+.tab-container::-webkit-scrollbar {
+  display: none;
+}
+
+/* ซ่อน scrollbar สำหรับ IE, Edge และ Firefox */
+.tab-container {
+  -ms-overflow-style: none;
+  /* IE และ Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
 </style>

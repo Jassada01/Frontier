@@ -197,7 +197,7 @@ const handlePrintInvoice = () => {
 }
 
 const generatePDF = (includeCopy) => {
-  const doc = new jsPDF('p', 'pt', 'a4', {LineHeightFactor: 1})
+  const doc = new jsPDF('p', 'pt', 'a4', { LineHeightFactor: 1 })
 
   const image = new Image()
   image.src = invoiceTemplateImage
@@ -267,7 +267,7 @@ const createInvoicePage = (doc, image, copyType) => {
     doc.setFontSize(12)
   }
 
-  doc.text(customerInfo, 85, 107,{ maxWidth: 320,lineHeightFactor: 0.6 })
+  doc.text(customerInfo, 85, 107, { maxWidth: 320, lineHeightFactor: 0.6 })
 
   // Reset font size back to 14
   doc.setFontSize(14)
@@ -280,17 +280,19 @@ const createInvoicePage = (doc, image, copyType) => {
 
   // Invoice Details
   // LINE 1
+  if (EIR.agent_code === "NON") {
+    EIR.agent_code = "-";
+  }
   doc.text(EIR.agent_code, 95, 198)
   // EIR Client Code
   const clientCode = EIR.client_code
 
   if (clientCode.length > 30) {
     doc.setFontSize(12)
-    doc.text(clientCode, 225, 194, { maxWidth: 180,lineHeightFactor: 0.6 })
+    doc.text(clientCode, 225, 194, { maxWidth: 180, lineHeightFactor: 0.6 })
   }
-  else
-  {
-    doc.text(clientCode, 225, 198, { maxWidth: 180,lineHeightFactor: 0.6  })
+  else {
+    doc.text(clientCode, 225, 198, { maxWidth: 180, lineHeightFactor: 0.6 })
   }
 
 

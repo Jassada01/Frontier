@@ -71,6 +71,9 @@ const generatePDF = () => {
     doc.text(moment(data.value.date).format('D/M/YYYY H:mm'), 425, 167) // 155 + 12
 
     // Info Line 1
+    if (data.value.agent_code === "NON") {
+      data.value.agent_code = "-";
+    }
     doc.text(data.value.agent_code, 105, 212) // 200 + 12
     doc.text(data.value.container, 265, 212) // 200 + 12
     doc.text(data.value.booking_bl, 470, 212) // 243 + 12
