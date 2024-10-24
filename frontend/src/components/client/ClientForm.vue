@@ -32,7 +32,7 @@ const client = ref({
   attribute4: '',
   attribute5: '',
   line_token: '',
-  default_language: 'TH',
+  default_language: 'ENG',
   default_payment_method: '',
   is_active: true,
   remark: ''

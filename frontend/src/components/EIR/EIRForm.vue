@@ -10,6 +10,8 @@ import 'flatpickr/dist/flatpickr.css';
 import ExportToPdf from '../../components/EIR/ExportToPdf.vue'
 import InvoiceForm from '../../components/EIR/InvoiceForm.vue'
 import AddDetentionModal from './components/AddDetentionModal.vue';
+import AttachmentGallery from './components/AttachmentGallery.vue';
+
 import moment from 'moment';  // Import Moment.js
 
 import { Thai } from 'flatpickr/dist/l10n/th.js';
@@ -59,6 +61,9 @@ const equipmentInterchangeReceipt = ref({
     status_name_th: 'แบบร่าง',
     status_name_en: 'Draft',
     remark: '',
+    request_detail_id: '',
+    request_id: '',
+    request_type: '',
     driver_sign: '',
     receiver_sign: '',
     create_user: null,
@@ -716,6 +721,9 @@ const matchOut = () => {
         driver_name: '',
         truck_company: '',
         tel: '',
+        request_id: '',
+        request_detail_id: '',
+        request_type: '',
         conditions: [...equipmentInterchangeReceipt.value.conditions]
     };
 
@@ -833,6 +841,7 @@ onMounted(async () => {
             matching_eir_id.value = initialData.id;
             await fetchUserData();
             await fetchConditions();
+            console.log(equipmentInterchangeReceipt);
             conditions.value.forEach(condition => {
                 condition.checked = equipmentInterchangeReceipt.value.conditions.some(c => c.condition_id === condition.id);
             });
@@ -1082,6 +1091,16 @@ onMounted(async () => {
                     </div>
                 </div>
 
+                <!-- Attachment -->
+                <div v-if="isEditMode" class="box mb-6 p-4 rounded-lg">
+                    <div class="flex flex-wrap -mx-2">
+                        <div class="w-full">
+                            <AttachmentGallery v-if="equipmentInterchangeReceipt.entry_type !== ''"
+                                :type="equipmentInterchangeReceipt.entry_type" :relate-eir="props.receiptId" />
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- กลุ่มที่ 4 -->
                 <div class="box mb-6 p-4 border rounded-lg">
                     <div class="flex flex-wrap -mx-2">
@@ -1167,6 +1186,8 @@ onMounted(async () => {
                         </div>
                     </div>
                 </div>
+
+
 
                 <!-- กลุ่มที่ 6 -->
                 <div class="box mb-6 p-4 border rounded-lg">

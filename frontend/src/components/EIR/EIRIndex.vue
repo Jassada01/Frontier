@@ -1,3 +1,5 @@
+"use strict";
+
 <template>
   <div class="eir-table p-4 overflow-x-auto">
     <div class="flex justify-between items-center mb-4">
@@ -34,7 +36,7 @@
         </label>
       </div>
     </div>
-    <div class="overflow-x-auto">
+    <div  v-show="isDataTableInitialized" class="overflow-x-auto">
       <table id="eirTable" class="table table-zebra">
         <thead>
           <tr>
@@ -98,10 +100,15 @@
         </tbody>
       </table>
     </div>
+    <div v-show="!isDataTableInitialized" class="overflow-x-auto text-center py-4">
+      <span class="loading loading-spinner loading-lg"></span>
+      <p>กำลังโหลดข้อมูล...</p>
+    </div>
   </div>
 </template>
 
 <script setup>
+"use strict";
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
@@ -116,12 +123,14 @@ import 'datatables.net'
 
 const eirs = ref([])
 const router = useRouter()
+const isDataTableInitialized = ref(false)
 
 const formatDate = (date) => {
   return moment(date).format('D/M/YYYY H:mm')
 }
 
 onMounted(async () => {
+  "use strict";
   try {
     const startDate = moment().subtract(60, 'days').format('YYYY-MM-DD')
     const endDate = moment().add(60, 'days').format('YYYY-MM-DD')
@@ -156,7 +165,10 @@ onMounted(async () => {
     setTimeout(() => {
       const table = $('#eirTable').DataTable({
         pageLength: 100, // Set the number of rows to display per page
-        order: [[3, 'desc']] // Order by the fifth column (index 4) in descending order
+        order: [[3, 'desc']], // Order by the fifth column (index 4) in descending order
+        initComplete: function(settings, json) {
+          isDataTableInitialized.value = true
+        }
       })
 
       // Add event listener for the entry type filter
@@ -193,7 +205,8 @@ onMounted(async () => {
       })
 
       // Apply initial filter to exclude 'ยกเลิก'
-      table.column(12).search('^(?!.*ยกเลิก).*$', true, false).draw()
+      table.column(12).search('^(?!.*ยกเลิก).*$', true, false).draw();
+
 
 
     }, 0)

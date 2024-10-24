@@ -19,6 +19,21 @@
                 <li>
                   <router-link to="/InvoiceIndex"><i class="fa-solid fa-file-invoice"></i> Invoice</router-link>
                 </li>
+                <li>
+                  <h2 class="menu-title">รายการที่ร้องขอเข้ามา</h2>
+                  <ul>
+                    <li>
+                      <router-link to="/RequestReturnIndex">
+                        <i class="fa-solid fa-download"></i> ขอคืนตู้
+                      </router-link>
+                    </li>
+                    <li>
+                      <router-link to="/RequestReceiveIndex">
+                        <i class="fa-solid fa-upload"></i> ขอรับตู้
+                      </router-link>
+                    </li>
+                  </ul>
+                </li>
               </ul>
             </details>
           </li>
@@ -69,6 +84,9 @@
                 <li>
                   <router-link to="/UserIndex"><i class="fa fa-user-cog"></i> ผู้ใช้งาน</router-link>
                 </li>
+                <li>
+                  <router-link to="/line-group"><i class="fa fa-users"></i> ผู้ใช้งานภายนอก</router-link>
+                </li>
               </ul>
             </details>
           </li>
@@ -89,6 +107,24 @@
           <li>
             <router-link to="/InvoiceIndex"><i class="fa-solid fa-file-invoice"></i> Invoice</router-link>
           </li>
+          <li>
+            <h2 class="menu-title">รายการที่ร้องขอเข้ามา</h2>
+            <ul>
+              <li>
+                <router-link to="/RequestReturnIndex">
+                  <i class="fa-solid fa-download"></i> ขอคืนตู้
+                </router-link>
+              </li>
+              <li>
+                <router-link to="/RequestReceiveIndex">
+                  <i class="fa-solid fa-upload"></i> ขอรับตู้
+                </router-link>
+              </li>
+            </ul>
+          </li>
+
+
+
         </ul>
       </div>
 
@@ -139,6 +175,9 @@
           <li>
             <router-link to="/UserIndex"><i class="fa fa-user-cog"></i> ผู้ใช้งาน</router-link>
           </li>
+          <li>
+            <router-link to="/line-group"><i class="fa fa-users"></i> ผู้ใช้งานภายนอก</router-link>
+          </li>
         </ul>
       </div>
     </div>
@@ -146,6 +185,8 @@
       <div class="form-control">
         <input type="text" placeholder="Search" class="input input-bordered w-24 md:w-auto" />
       </div>
+      <NotificationDropdown  />
+
       <div class="dropdown dropdown-end">
         <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
           <div class="w-10 rounded-full">
@@ -173,6 +214,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { checkLoginStatus, displayName, position, image, language, logout } from '../utils/auth'
+import NotificationDropdown from './Notification.vue'
 import '@fortawesome/fontawesome-free/css/all.css'
 import CONFIG from '../config/config'
 

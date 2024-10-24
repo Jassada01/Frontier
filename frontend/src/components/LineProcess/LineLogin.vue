@@ -125,8 +125,8 @@ const checkUserInDatabase = async (userId) => {
             // User found, log the user data
             console.log('User data:', response.data);
             // User found, navigate to LineDashboard
-            router.push({ 
-                name: 'LineDashboard', 
+            router.push({
+                name: 'LineDashboard',
                 query: { userId: userId }
             })
         }
@@ -149,11 +149,14 @@ const registerAsDriver = () => {
 }
 
 const registerUser = async () => {
+    // Default profile picture URL
+    const defaultProfilePicture = 'https://storage.googleapis.com/giraffepark-bdb1d.appspot.com/default_avatar_utg.png';
+
     try {
         await axios.post(`${CONFIG.API_SERVER}/api/line_user_profiles/add`, {
             line_user_id: userProfile.value.userId,
             display_name: userProfile.value.displayName,
-            picture_url: userProfile.value.pictureUrl,
+            picture_url: userProfile.value.pictureUrl || defaultProfilePicture, // Use default if pictureUrl is empty
             status_message: userProfile.value.statusMessage,
             user_type: userType.value,
             name: name.value,
@@ -169,11 +172,14 @@ const registerUser = async () => {
             company_name: companyName.value
         }
         showRegisterForm.value = false
+        // Show success message and reload page after user clicks OK
         Swal.fire({
             icon: 'success',
             title: 'ลงทะเบียนสำเร็จ',
             text: 'ข้อมูลของคุณถูกบันทึกเรียบร้อยแล้ว!'
-        })
+        }).then(() => {
+            window.location.reload();
+        });
     } catch (err) {
         errorMessage.value = 'เกิดข้อผิดพลาดในการลงทะเบียนผู้ใช้'
         console.error('User registration failed', err)
@@ -211,15 +217,43 @@ onMounted(() => {
     if (liff.isInClient()) {
         loginWithLine();
     } else {
+
+        /* FOR TEST
         userProfile.value = {
-            displayName: "Setsuna",
+            displayName: "ทดสอบ2",
             pictureUrl: "https://storage.googleapis.com/giraffepark-bdb1d.appspot.com/loginBG_wqv.png",
             statusMessage: "",
-            userId: "Ue2ff72aa5df21f6c0047be7f883d57ff"
+            userId: "Ue2ff72aa5df21f6c0047be7f883d57ffL"
         }
         checkUserInDatabase(userProfile.value.userId).then(() => {
             loading.value = false;
         });
+
+        */
+        
+        Swal.fire({
+            icon: 'warning',
+            title: 'แจ้งเตือน',
+            text: 'กรุณาเข้าสู่ระบบด้วย Line Official ของยีราฟ คอนเทนเนอร์',
+            html: `
+            <div class="flex flex-col items-center">
+                <p class="mb-4">เพื่อเข้าใช้งานผ่านระบบ Line <BR>กรุณาสแกน QR Code หรือคลิกที่ลิงก์ด้านล่าง</p>
+                <img src="https://storage.googleapis.com/giraffepark-bdb1d.appspot.com/Line%20QR%20Code_rsk.png" 
+                     alt="Line QR Code" 
+                     style="width: 200px; height: 200px; margin-bottom: 16px;">
+                <a href="https://line.me/R/ti/p/%40283jiovr" 
+                   target="_blank" 
+                   class="btn btn-success"
+                   style="background-color: #00B900; color: white;">
+                    เพิ่มเพื่อน Line Official
+                </a>
+            </div>
+        `,
+            showConfirmButton: false,
+            showCloseButton: false,
+            allowOutsideClick: false
+        });
+
     }
 });
 </script>

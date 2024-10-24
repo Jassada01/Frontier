@@ -4,12 +4,18 @@ import { useRoute } from 'vue-router';
 import axios from 'axios';
 import CONFIG from '../../config/config';
 import ContainerReturnForm from './ContainerReturnForm.vue';
+import ContainerReturnsTable from './ContainerReturnsTable.vue';
+import ContainerReceiveForm from './ContainerReceiveForm.vue';
+import ContainerReceivesTable from './ContainerReceivesTable.vue';
 
 const route = useRoute();
 const userData = ref(null);
 const loading = ref(true);
 const error = ref(null);
 const showReturnForm = ref(false);
+const showReceiveForm = ref(false);
+
+const activeTab = ref('requestReturn');
 
 const userType = computed(() => {
   return userData.value?.user_type === 'Client' ? 'ลูกค้า' : 'คนขับรถ';
@@ -41,21 +47,32 @@ const loadUserData = async () => {
 
 const handleReturnContainer = () => {
   showReturnForm.value = true;
+  showReceiveForm.value = false;
 };
 
 const handleReceiveContainer = () => {
-  // TODO: Implement logic for receiving container
-  console.log('Receive container requested');
+  showReceiveForm.value = true;
+  showReturnForm.value = false;
 };
 
 const handleReturnFormSubmit = (formData) => {
-  // TODO: Implement logic to process the return form data
-  console.log('Form submitted:', formData);
+  console.log('Return form submitted:', formData);
   showReturnForm.value = false;
+  activeTab.value = 'requestReturn';
+};
+
+const handleReceiveFormSubmit = (formData) => {
+  console.log('Receive form submitted:', formData);
+  showReceiveForm.value = false;
+  activeTab.value = 'history';
 };
 
 const handleReturnFormCancel = () => {
   showReturnForm.value = false;
+};
+
+const handleReceiveFormCancel = () => {
+  showReceiveForm.value = false;
 };
 
 onMounted(() => {
@@ -88,7 +105,7 @@ onMounted(() => {
 
     <!-- Main Content -->
     <div class="flex-grow container mx-auto px-4 py-8">
-      <div class="card bg-base-100 shadow-xl max-w-md mx-auto">
+      <div class="card bg-base-100 shadow-xl max-w-4xl mx-auto">
         <div class="card-body">
           <div v-if="loading" class="text-center">
             <span class="loading loading-spinner loading-lg"></span>
@@ -103,29 +120,54 @@ onMounted(() => {
             <span>{{ error }}</span>
           </div>
           <template v-else-if="userData">
-            <div v-if="!showReturnForm">
-              <div class="flex flex-col items-center">
+            <div v-if="!showReturnForm && !showReceiveForm" class="lg:flex lg:items-start lg:space-x-8">
+              <div class="flex flex-col items-center lg:w-1/3">
                 <div class="avatar">
-                  <div class="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                  <div class="w-24 lg:w-32 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
                     <img :src="userData.picture_url" :alt="`รูปโปรไฟล์ของ ${userData.display_name}`" />
                   </div>
                 </div>
                 <h2 class="card-title mt-4">{{ userData.display_name }}</h2>
-                <div class="badge badge-accent mt-2">{{ userType }}</div>
+                <div class="badge badge-success mt-2">{{ userType }}</div>
               </div>
-              <div class="divider"></div>
-              <div class="space-y-2">
-                <p><strong>ชื่อ:</strong> {{ userData.name }}</p>
-                <p><strong>บริษัท:</strong> {{ userData.company_name }}</p>
-                <p><strong>วันที่ลงทะเบียน:</strong> {{ new Date(userData.created_at).toLocaleDateString('th-TH') }}</p>
-              </div>
-              <div class="divider"></div>
-              <div class="flex justify-between mt-4">
-                <button @click="handleReturnContainer" class="btn btn-primary flex-1 mr-2">ขอคืนตู้</button>
-                <button @click="handleReceiveContainer" class="btn btn-secondary flex-1 ml-2">ขอรับตู้</button>
+              <div class="lg:w-2/3 mt-6 lg:mt-0">
+                <div class="space-y-2">
+                  <p><strong>ชื่อ:</strong> {{ userData.name }}</p>
+                  <p><strong>บริษัท:</strong> {{ userData.company_name }}</p>
+                  <p><strong>วันที่ลงทะเบียน:</strong> {{ new Date(userData.created_at).toLocaleDateString('th-TH') }}
+                  </p>
+                </div>
+                <div class="divider"></div>
+                <div class="flex flex-row justify-between mt-4 gap-x-4">
+                  <button @click="handleReturnContainer" class="btn btn-info flex-1">ขอคืนตู้</button>
+                  <button @click="handleReceiveContainer" class="btn btn-secondary flex-1">ขอรับตู้</button>
+                </div>
               </div>
             </div>
-            <ContainerReturnForm v-else @submit="handleReturnFormSubmit" @cancel="handleReturnFormCancel" />
+
+            <ContainerReturnForm v-if="showReturnForm" :line-user-id="userData.line_user_id"
+              @submit="handleReturnFormSubmit" @cancel="handleReturnFormCancel" />
+
+            <ContainerReceiveForm v-if="showReceiveForm" :line-user-id="userData.line_user_id"
+              @submit="handleReceiveFormSubmit" @cancel="handleReceiveFormCancel" />
+
+            <div v-if="!showReturnForm && !showReceiveForm" role="tablist" class="tabs tabs-boxed mt-10">
+              <a role="tab" class="tab" :class="{ 'tab-active': activeTab === 'requestReturn' }"
+                @click="activeTab = 'requestReturn'">
+                ประวัติการคืนตู้
+              </a>
+              <a role="tab" class="tab" :class="{ 'tab-active': activeTab === 'history' }"
+                @click="activeTab = 'history'">
+                ประวัติการขอรับตู้
+              </a>
+            </div>
+
+            <div v-if="!showReturnForm && !showReceiveForm && activeTab === 'requestReturn'">
+              <ContainerReturnsTable :line-user-id="userData.line_user_id" />
+            </div>
+            <div v-if="!showReturnForm && !showReceiveForm && activeTab === 'history'">
+              <ContainerReceivesTable :line-user-id="userData.line_user_id" />
+            </div>
           </template>
         </div>
       </div>
@@ -134,7 +176,7 @@ onMounted(() => {
     <!-- Footer -->
     <footer class="footer footer-center p-4 bg-base-300 text-base-content">
       <div>
-        <p>Copyright © {{ new Date().getFullYear() }} - All rights reserved by Giraffe Container</p>
+        <p>Copyright © {{ new Date().getFullYear() }} - All rights reserved by JSolutionsNext</p>
       </div>
     </footer>
   </div>
