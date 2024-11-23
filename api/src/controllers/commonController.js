@@ -219,3 +219,39 @@ exports.getEquipmentInterchangeReceipt = (req, res) => {
     res.send(results);
   });
 };
+
+
+exports.getPendingContainerCounts = (req, res) => {
+  const query = `
+    SELECT 
+      CURRENT_TIMESTAMP, 
+      IFNULL(a.cnt_pending_return, 0) AS cnt_pending_return, 
+      IFNULL(b.cnt_pending_receive, 0) AS cnt_pending_receive 
+    FROM 
+      (SELECT 
+        COUNT(*) AS cnt_pending_return
+        FROM request_container_returns rcr
+        LEFT JOIN request_container_returns_detail rcrd 
+          ON rcr.id = rcrd.request_id
+        WHERE rcr.status IN ('Pending', 'Processing')
+        AND rcrd.relate_EIR IS NULL) a
+    JOIN 
+      (SELECT 
+        COUNT(*) AS cnt_pending_receive
+        FROM request_container_receive rcv
+        LEFT JOIN request_container_receive_detail rcvd 
+          ON rcv.id = rcvd.request_return_id
+        WHERE rcv.status IN ('Pending', 'Processing')
+        AND rcvd.relate_EIR IS NULL
+      ) AS b`;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      return res.status(500).send({
+        message: "Error retrieving pending container counts",
+        error: err
+      });
+    }
+    res.send(results[0]); // Send first row since we expect only one row
+  });
+};

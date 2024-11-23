@@ -46,7 +46,8 @@ const uploadFileToSubfolder = (file) => {
       return reject("No file uploaded.");
     }
 
-    const suffix = generateRandomSuffix();
+    //const suffix = generateRandomSuffix();
+    const suffix = '';
     const fileName = `Upload_File_Attached/${
       path.parse(file.originalname).name
     }${suffix}${path.extname(file.originalname)}`;

@@ -298,4 +298,38 @@ router.get(
   commonController.getEquipmentInterchangeReceipt
 );
 
+
+/**
+ * @swagger
+ * /api/common/getPendingContainerCounts:
+ *   get:
+ *     summary: Get counts of pending container returns and receives
+ *     tags: [Common]
+ *     responses:
+ *       200:
+ *         description: Pending container counts retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 CURRENT_TIMESTAMP:
+ *                   type: string
+ *                   format: date-time
+ *                   description: Current server timestamp
+ *                 cnt_pending_return:
+ *                   type: integer
+ *                   description: Count of pending container returns
+ *                 cnt_pending_receive:
+ *                   type: integer
+ *                   description: Count of pending container receives
+ *               example:
+ *                 CURRENT_TIMESTAMP: "2024-10-24T10:00:00.000Z"
+ *                 cnt_pending_return: 5
+ *                 cnt_pending_receive: 3
+ *       500:
+ *         description: Error retrieving pending container counts
+ */
+router.get("/getPendingContainerCounts", commonController.getPendingContainerCounts);
+
 module.exports = router;

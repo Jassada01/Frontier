@@ -20,6 +20,10 @@ const invoiceRoutes = require("./routes/invoiceRoutes");
 const lineUserProfilesRoutes = require("./routes/lineUserProfilesRoutes");
 const detentionLogsRoutes = require("./routes/detentionLogsRoutes"); // เพิ่มการนำเข้าเส้นทางนี้
 const clientFreeDropPeriodRoutes = require("./routes/clientFreeDropPeriodRoutes");
+const requestContainerReturnRoutes = require("./routes/requestContainerReturnRoutes"); // เพิ่มบรรทัดนี้
+const lineGroupCombinedRoutes = require("./routes/lineGroupCombinedRoutes"); // เพิ่มบรรทัดนี้
+const requestContainerReceiveRoutes = require("./routes/requestContainerReceiveRoutes"); // เพิ่มบรรทัดนี้
+
 
 
 const app = express();
@@ -51,6 +55,11 @@ app.use("/api/invoices", invoiceRoutes);
 app.use("/api/line_user_profiles", lineUserProfilesRoutes);
 app.use("/api/detentionLogs", detentionLogsRoutes); // เพิ่มเส้นทางนี้
 app.use("/api/client_free_drop_period", clientFreeDropPeriodRoutes);
+app.use("/api/container-returns", requestContainerReturnRoutes); // เพิ่มบรรทัดนี้
+app.use("/api/line-groups", lineGroupCombinedRoutes); // เพิ่มบรรทัดนี้
+app.use("/api/container-receives", requestContainerReceiveRoutes); // เพิ่มบรรทัดนี้
+
+
 
 
 const port = process.env.PORT || 3000;

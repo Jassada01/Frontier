@@ -497,4 +497,183 @@ router.post(
   equipmentInterchangeReceiptController.createInvoiceDetailsForEquipment
 );
 
+
+/**
+ * @swagger
+ * /api/EIR/getAvailableContainers:
+ *   get:
+ *     summary: Get available containers for specific agent and size type
+ *     tags: [EquipmentInterchangeReceipt]
+ *     parameters:
+ *       - in: query
+ *         name: agent_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The ID of the agent
+ *         example: 1
+ *       - in: query
+ *         name: size_type
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The size type of container (e.g., "40' HC")
+ *         example: "40' HC"
+ *     responses:
+ *       200:
+ *         description: List of available containers
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 total:
+ *                   type: integer
+ *                   description: Total number of containers found
+ *                   example: 2
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                       entry_type:
+ *                         type: string
+ *                         enum: [IN]
+ *                       drop_container:
+ *                         type: boolean
+ *                       receipt_no:
+ *                         type: string
+ *                       date:
+ *                         type: string
+ *                         format: date-time
+ *                       agent_id:
+ *                         type: integer
+ *                       agent_code:
+ *                         type: string
+ *                       client_id:
+ *                         type: integer
+ *                       client_code:
+ *                         type: string
+ *                       booking_bl:
+ *                         type: string
+ *                       container:
+ *                         type: string
+ *                       container_color:
+ *                         type: string
+ *                       size_type:
+ *                         type: string
+ *                       seal_no:
+ *                         type: string
+ *                       vessel:
+ *                         type: string
+ *                       zone_id:
+ *                         type: integer
+ *                       zone:
+ *                         type: string
+ *                       path_map:
+ *                         type: string
+ *                       tare:
+ *                         type: number
+ *                       voyage:
+ *                         type: string
+ *                       yard_id:
+ *                         type: integer
+ *                       yard:
+ *                         type: string
+ *                       create_datetime:
+ *                         type: string
+ *                         format: date-time
+ *                       update_datetime:
+ *                         type: string
+ *                         format: date-time
+ *       400:
+ *         description: Missing required parameters
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "กรุณาระบุ agent_id และ size_type"
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "เกิดข้อผิดพลาดในการดึงข้อมูล"
+ *                 error:
+ *                   type: string
+ */
+router.get(
+  "/getAvailableContainers",
+  equipmentInterchangeReceiptController.getAvailableContainers
+);
+
+
+/**
+ * @swagger
+ * /api/EIR/getBookingOrContainerFiles:
+ *   get:
+ *     summary: Get booking or container files by type and relate_eir
+ *     tags: [EquipmentInterchangeReceipt]
+ *     parameters:
+ *       - in: query
+ *         name: type
+ *         schema:
+ *           type: string
+ *           enum: [IN, OUT]
+ *         required: true
+ *         description: The type of equipment interchange receipt (IN or OUT)
+ *       - in: query
+ *         name: relate_eir
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The relate EIR ID to fetch files for
+ *     responses:
+ *       200:
+ *         description: A list of booking or container files
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   subtype:
+ *                     type: string
+ *                   file_url:
+ *                     type: string
+ *                   file_name:
+ *                     type: string
+ *                   file_type:
+ *                     type: string
+ *       400:
+ *         description: Invalid input, type and relate_eir are required
+ *       500:
+ *         description: Error fetching booking or container files
+ */
+router.get(
+  "/getBookingOrContainerFiles",
+  equipmentInterchangeReceiptController.getBookingOrContainerFiles
+);
+
+
+
 module.exports = router;

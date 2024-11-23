@@ -32,6 +32,9 @@ exports.addEquipmentInterchangeReceipt = async (req, res) => {
     yard,
     status_id,
     remark,
+    request_detail_id,
+    request_id,
+    request_type,
     driver_sign,
     receiver_sign,
     create_user,
@@ -125,6 +128,68 @@ exports.addEquipmentInterchangeReceipt = async (req, res) => {
             );
           });
         });
+
+        console.log(request_type);
+
+        // Update incase request for return
+        if (request_type === "Return") {
+          try {
+            // อัพเดท relate_EIR ใน request_container_returns_detail
+            await query(
+              "UPDATE request_container_returns_detail SET relate_EIR = ? WHERE request_id = ? AND id = ?",
+              [equipmentId, request_id, request_detail_id]
+            );
+
+            // ตรวจสอบว่ายังมี relate_EIR ที่เป็น NULL อยู่หรือไม่
+            const [remainingNulls] = await query(
+              "SELECT COUNT(*) as count FROM request_container_returns_detail WHERE request_id = ? AND relate_EIR IS NULL",
+              [request_id]
+            );
+
+            // อัพเดทสถานะใน request_container_returns
+            const newStatus =
+              remainingNulls.count > 0 ? "Processing" : "Complete";
+            await query(
+              "UPDATE request_container_returns SET status = ? WHERE id = ?",
+              [newStatus, request_id]
+            );
+          } catch (error) {
+            console.error("Error updating request status:", error);
+            // คุณอาจต้องจัดการข้อผิดพลาดนี้อย่างเหมาะสม
+            // เช่น ส่งการตอบกลับที่เหมาะสมไปยังไคลเอนต์
+          }
+        }
+
+        if (request_type === "Receive") {
+          console.log("Access Here");
+          console.log(equipmentId);
+          console.log(request_id);
+          console.log(request_detail_id);
+          try {
+            // อัพเดท relate_EIR ใน request_container_receive_detail
+            await query(
+              "UPDATE request_container_receive_detail SET relate_EIR = ? WHERE request_return_id = ? AND id = ?",
+              [equipmentId, request_id, request_detail_id]
+            );
+
+            // ตรวจสอบว่ายังมี relate_EIR ที่เป็น NULL อยู่หรือไม่
+            const [remainingNulls] = await query(
+              "SELECT COUNT(*) as count FROM request_container_receive_detail WHERE request_return_id = ? AND relate_EIR IS NULL",
+              [request_id]
+            );
+
+            // อัพเดทสถานะใน request_container_receive
+            const newStatus =
+              remainingNulls.count > 0 ? "Processing" : "Complete";
+            await query(
+              "UPDATE request_container_receive SET status = ? WHERE id = ?",
+              [newStatus, request_id]
+            );
+          } catch (error) {
+            console.error("Error updating receive request status:", error);
+            // อาจจะจัดการ error เพิ่มเติมตามต้องการ
+          }
+        }
 
         try {
           await Promise.all(conditionQueries);
@@ -751,7 +816,7 @@ exports.createInvoiceDetailsForEquipment = async (req, res) => {
       const diffInHours = Math.abs(inDate - outDate) / 36e5; // คำนวณเวลาห่างเป็นชั่วโมง
 
       // ถ้าห่างกันไม่เกิน freePeriodInHours
-      if (diffInHours <= freePeriodInHours) { 
+      if (diffInHours <= freePeriodInHours) {
         invoiceDetails.push({
           invoice_header_id: invoiceHeaderId,
           price_list_id: 99, // ปรับตาม schema ของคุณ
@@ -823,6 +888,117 @@ exports.createInvoiceDetailsForEquipment = async (req, res) => {
   } catch (error) {
     res.status(500).send({
       message: "Error creating invoice details",
+      error: error.message,
+    });
+  }
+};
+
+exports.getAvailableContainers = async (req, res) => {
+  try {
+    // รับค่า parameters จาก query string
+    const { agent_id, size_type } = req.query;
+
+    // ตรวจสอบว่ามีการส่งค่าที่จำเป็นมาครบหรือไม่
+    if (!agent_id || !size_type) {
+      return res.status(400).json({
+        success: false,
+        message: "กรุณาระบุ agent_id และ size_type",
+      });
+    }
+
+    // สร้าง SQL query
+    const sqlQuery = `
+            SELECT * 
+            FROM equipment_interchange_receipt a 
+            WHERE a.agent_id = ?
+            AND a.size_type = ?
+            AND a.entry_type = 'IN'
+            AND a.drop_container = 0 
+            AND a.id NOT IN (SELECT eir_in FROM eir_match)
+            ORDER BY a.date DESC
+        `;
+
+    // execute query with parameters
+    const results = await query(sqlQuery, [agent_id, size_type]);
+
+    // จัดการกับ datetime fields ให้อยู่ในรูปแบบที่เหมาะสม
+    const formattedResults = results.map((record) => ({
+      ...record,
+      date: record.date ? new Date(record.date).toISOString() : null,
+      create_datetime: record.create_datetime
+        ? new Date(record.create_datetime).toISOString()
+        : null,
+      update_datetime: record.update_datetime
+        ? new Date(record.update_datetime).toISOString()
+        : null,
+    }));
+
+    // ส่ง response กลับ
+    res.status(200).json({
+      success: true,
+      total: results.length,
+      data: formattedResults,
+    });
+  } catch (error) {
+    console.error("Error in getAvailableContainers:", error);
+    res.status(500).json({
+      success: false,
+      message: "เกิดข้อผิดพลาดในการดึงข้อมูล",
+      error: error.message,
+    });
+  }
+};
+
+exports.getBookingOrContainerFiles = async (req, res) => {
+  const { type, relate_eir } = req.query;
+
+  if (!type || !relate_eir) {
+    return res.status(400).send({
+      message: "Please provide both 'type' (IN/OUT) and 'relate_eir'",
+    });
+  }
+
+  try {
+    let sqlQuery = "";
+    let params = [relate_eir];
+
+    if (type.toUpperCase() === "OUT") {
+      sqlQuery = `
+        SELECT 'Booking' as subtype, b.file_url, b.file_name, b.file_type 
+        FROM request_container_receive_detail a 
+        LEFT JOIN firebase_upload_file b ON a.request_return_id = b.relate_id 
+        WHERE a.relate_EIR = ?
+        AND b.type = 'Receive' AND b.sub_type = 'Booking';
+      `;
+    } else if (type.toUpperCase() === "IN") {
+      sqlQuery = `
+        SELECT 'BL' as subtype, c.file_url, c.file_name, c.file_type 
+        FROM request_container_returns_detail a 
+        LEFT JOIN request_container_returns b ON a.request_id = b.id
+        LEFT JOIN firebase_upload_file c ON a.request_id = c.relate_id 
+        WHERE a.relate_eir = ?
+        AND c.type = 'Return' AND c.sub_type = 'BL'
+        UNION ALL 
+        SELECT 'Container' as subtype, c.file_url, c.file_name, c.file_type 
+        FROM request_container_returns_detail a 
+        LEFT JOIN request_container_returns b ON a.request_id = b.id
+        LEFT JOIN firebase_upload_file c ON a.request_id = c.relate_id AND a.id = c.container_id
+        WHERE a.relate_eir = ?
+        AND c.type = 'Return' AND c.sub_type = 'Container';
+      `;
+      params.push(relate_eir); // เนื่องจาก query สำหรับ IN มี 2 ที่ที่ต้องใช้ relate_eir
+    } else {
+      return res.status(400).send({
+        message: "Invalid type. Please provide 'IN' or 'OUT'",
+      });
+    }
+
+    const results = await query(sqlQuery, params);
+    res.status(200).send(results);
+  } catch (error) {
+    console.error("Error fetching booking or container files:", error);
+    res.status(500).send({
+      message: "Error fetching booking or container files",
       error: error.message,
     });
   }
