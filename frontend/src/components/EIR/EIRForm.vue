@@ -923,71 +923,114 @@ onMounted(async () => {
                 </div>
             </div>
             <form @submit.prevent>
+
                 <!-- กลุ่มที่ 1 -->
-                <div class=" box mb-6 p-4 border rounded-lg">
-                    <div class="flex w-full flex-wrap -mx-2">
+                <div class="relative box mb-6 p-6 border rounded-lg overflow-hidden" :class="{
+                    'bg-gradient-to-br from-green-50 via-green-100 to-green-50': equipmentInterchangeReceipt.entry_type === 'IN',
+                    'bg-gradient-to-br from-red-50 via-red-100 to-red-50': equipmentInterchangeReceipt.entry_type === 'OUT'
+                }">
+                    <!-- Status Badges Strip -->
+                    <div
+                        class="absolute top-0 right-0 left-0 p-2 flex justify-start gap-2 bg-white bg-opacity-40 backdrop-blur-sm">
+                        <span v-if="equipmentInterchangeReceipt.entry_type"
+                            class="px-4 py-1.5 rounded-full text-white text-sm font-bold shadow-sm flex items-center gap-2"
+                            :class="{
+                                'bg-gradient-to-r from-green-500 to-green-600': equipmentInterchangeReceipt.entry_type === 'IN',
+                                'bg-gradient-to-r from-red-500 to-red-600': equipmentInterchangeReceipt.entry_type === 'OUT'
+                            }">
+                            <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+                            {{ equipmentInterchangeReceipt.entry_type }}
+                        </span>
+
+                        <span v-if="equipmentInterchangeReceipt.drop_container"
+                            class="px-4 py-1.5 rounded-full text-white text-sm font-bold shadow-sm bg-gradient-to-r from-amber-500 to-amber-600 flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+                            DROP
+                        </span>
+                    </div>
+
+                    <!-- Main Content with Increased Top Padding -->
+                    <div class="flex w-full flex-wrap -mx-2 mt-8">
+                        <!-- EIR No. -->
                         <div class="w-full md:w-1/4 px-2 mb-4">
-                            <label class="block mb-2 text-sm" for="receipt_no"> EIR No. <span
-                                    class="text-error font-bold"> *</span>
+                            <label class="block mb-2 text-sm font-medium" for="receipt_no">
+                                EIR No. <span class="text-error font-bold">*</span>
                             </label>
                             <input v-model="equipmentInterchangeReceipt.receipt_no"
-                                class="input input-bordered w-full text-sm" type="text" id="receipt_no"
-                                autocomplete="off" :readonly="props.isEditMode" />
+                                class="input input-bordered w-full text-sm bg-white bg-opacity-70 backdrop-blur-sm"
+                                type="text" id="receipt_no" autocomplete="off" :readonly="props.isEditMode" />
                         </div>
+
                         <div class="w-full md:w-2/4 px-2 mb-4"></div>
+
+                        <!-- Date -->
                         <div class="w-full md:w-1/4 px-2 mb-4">
-                            <label class="block mb-2 text-sm" for="date"> วันที่/Date : <span
-                                    class="text-error font-bold"> *</span>
+                            <label class="block mb-2 text-sm font-medium" for="date">
+                                วันที่/Date : <span class="text-error font-bold">*</span>
                             </label>
                             <flat-pickr v-model="equipmentInterchangeReceipt.date"
-                                class="input input-bordered w-full text-sm" :config="config"
-                                :disabled="props.isEditMode" />
+                                class="input input-bordered w-full text-sm bg-white bg-opacity-70 backdrop-blur-sm"
+                                :config="config" :disabled="props.isEditMode" />
                         </div>
+
+                        <!-- Entry Type -->
                         <div class="w-full md:w-1/4 px-2 mb-4">
-                            <label class="block mb-2 text-sm" for="entry_type"> ประเภท/Type<span
-                                    class="text-error font-bold"> *</span>
+                            <label class="block mb-2 text-sm font-medium" for="entry_type">
+                                ประเภท/Type<span class="text-error font-bold">*</span>
                             </label>
                             <select v-model="equipmentInterchangeReceipt.entry_type"
-                                class="input input-bordered w-full text-sm" id="entry_type">
+                                class="input input-bordered w-full text-sm bg-white bg-opacity-70 backdrop-blur-sm"
+                                id="entry_type" :disabled="props.isEditMode">
                                 <option value="" disabled selected>เลือกประเภท</option>
                                 <option value="IN">IN</option>
                                 <option value="OUT">OUT</option>
                             </select>
                         </div>
-                        <div class="w-full px-4 md:w-1/6 md:px-10 mb-4 flex items-center justify-start">
-                            <label class="block text-sm mr-2" for="drop_container"> Drop </label>
-                            <div class="form-control">
-                                <input v-model="equipmentInterchangeReceipt.drop_container"
-                                    class="toggle toggle-primary" type="checkbox" id="drop_container"
-                                    :disabled="props.isEditMode" />
+
+                        <!-- Drop Container -->
+                        <div class="w-full px-4 md:w-1/6 md:px-10 mb-4">
+                            <div class="flex flex-col">
+                                <label class="block text-sm font-medium mb-2" for="drop_container">Drop</label>
+                                <div class="flex items-center gap-2">
+                                    <div class="form-control">
+                                        <input v-model="equipmentInterchangeReceipt.drop_container"
+                                            class="toggle toggle-warning" type="checkbox" id="drop_container"
+                                            :disabled="props.isEditMode" />
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- การแสดงผล eir_out_no หรือปุ่ม Match Out -->
+                        <!-- Match EIR Section -->
                         <div v-if="isEditMode" class="w-full px-4 md:w-2/4 ms-10 mb-4 flex items-center justify-end">
                             <div v-if="equipmentInterchangeReceipt.eir_match_no">
-                                <label class="block text-sm" for="eir_match_no"> Matching EIR No. </label>
+                                <label class="block text-sm font-medium" for="eir_match_no">Matching EIR No.</label>
                                 <div
                                     v-if="equipmentInterchangeReceipt.eir_match_no == equipmentInterchangeReceipt.receipt_no">
                                     <span class="text-sm text-error">ไม่ Match EIR ใบนี้</span>
                                 </div>
                                 <div v-else>
                                     <input v-model="equipmentInterchangeReceipt.eir_match_no"
-                                        class="input w-full text-sm text-error" type="text" id="eir_match_no"
-                                        autocomplete="off" readonly />
+                                        class="input w-full text-sm text-error bg-white bg-opacity-70 backdrop-blur-sm"
+                                        type="text" id="eir_match_no" autocomplete="off" readonly />
                                 </div>
-
                             </div>
                             <div v-else>
-                                <button class="btn btn-primary text-sm" @click="matchOut">{{
-                                    equipmentInterchangeReceipt.drop_container ? 'Drop' : 'Match' }} ตู้ Out</button>
+                                <button class="btn btn-primary text-sm shadow-md hover:shadow-lg transition-all"
+                                    @click="matchOut">
+                                    {{ equipmentInterchangeReceipt.drop_container ? 'Drop' : 'Match' }} ตู้ Out
+                                </button>
                             </div>
                             <button v-if="equipmentInterchangeReceipt.status_id == 1"
-                                class="ms-5 btn btn-outline btn-success" @click="CompleteReceipt">เสร็จสิ้นแล้ว</button>
+                                class="ms-5 btn btn-outline btn-success shadow-md hover:shadow-lg transition-all"
+                                @click="CompleteReceipt">
+                                เสร็จสิ้นแล้ว
+                            </button>
                             <span v-if="equipmentInterchangeReceipt.status_id == 6"
-                                class="ms-5 text-success subpixel-antialiased text-lg font-bold	">เสร็จสิ้นแล้ว</span>
+                                class="ms-5 text-success subpixel-antialiased text-lg font-bold">
+                                เสร็จสิ้นแล้ว
+                            </span>
                         </div>
-
                     </div>
                 </div>
 
@@ -1100,7 +1143,7 @@ onMounted(async () => {
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- กลุ่มที่ 4 -->
                 <div class="box mb-6 p-4 border rounded-lg">
                     <div class="flex flex-wrap -mx-2">
