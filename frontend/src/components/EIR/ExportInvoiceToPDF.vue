@@ -1,10 +1,10 @@
 <template>
   <div>
-    <li @click="handlePrintInvoice">
-      <a><i class="fa-solid fa-file-pdf"></i> Print Invoice</a>
-    </li>
+    <button class="btn  btn-ghost "  @click="handlePreviewInvoice"><i class="fa-regular fa-file-pdf text-2xl"></i> Preview</button>
+    <button class="btn  btn-ghost "  @click="handleDownloadInvoice"><i class="fa-solid fa-file-arrow-down text-2xl"> </i>Download</button>
   </div>
 </template>
+
 
 <script setup>
 import { jsPDF } from 'jspdf'
@@ -178,25 +178,46 @@ const props = defineProps({
   }
 })
 
-const handlePrintInvoice = () => {
+const handlePreviewInvoice = () => {
+  generatePDF(true, true);
+  /*
   Swal.fire({
-    title: 'Print Invoice',
-    text: 'ออก Invoice พร้อม Copy?',
+    title: 'Preview Invoice',
+    text: 'ดูตัวอย่าง Invoice พร้อม Copy?',
     input: 'checkbox',
-    inputValue: 0,
-    inputPlaceholder: 'ออก Invoice ทั้ง ต้นฉบับและสำเนา',
-    confirmButtonText: 'ออกInvoice',
+    inputValue: 1,
+    inputPlaceholder: 'แสดง Invoice ทั้ง ต้นฉบับและสำเนา',
+    confirmButtonText: 'แสดง Preview',
     cancelButtonText: 'ยกเลิก',
     showCancelButton: true
   }).then((result) => {
     if (result.isConfirmed) {
       const includeCopy = result.value ? true : false
-      generatePDF(includeCopy)
+      generatePDF(includeCopy, true)
+    }
+  })
+    */
+}
+
+const handleDownloadInvoice = () => {
+  Swal.fire({
+    title: 'Download Invoice',
+    text: 'ดาวน์โหลด Invoice พร้อม Copy?',
+    input: 'checkbox',
+    inputValue: 1,
+    inputPlaceholder: 'ดาวน์โหลด Invoice ทั้ง ต้นฉบับและสำเนา',
+    confirmButtonText: 'ดาวน์โหลด',
+    cancelButtonText: 'ยกเลิก',
+    showCancelButton: true
+  }).then((result) => {
+    if (result.isConfirmed) {
+      const includeCopy = result.value ? true : false
+      generatePDF(includeCopy, false)
     }
   })
 }
 
-const generatePDF = (includeCopy) => {
+const generatePDF = (includeCopy, isPreview = false) => {
   const doc = new jsPDF('p', 'pt', 'a4', { LineHeightFactor: 1 })
 
   const image = new Image()
@@ -212,7 +233,19 @@ const generatePDF = (includeCopy) => {
       createInvoicePage(doc, image, '(สำเนา)')
     }
 
-    doc.save(`${props.form.invoice_no}.pdf`)
+    if (isPreview) {
+      // Open PDF in new window/tab for preview
+      // สร้าง Blob URL แทนการ save file
+      const pdfBlob = doc.output('blob')
+      const blobUrl = URL.createObjectURL(pdfBlob)
+      window.open(blobUrl, '_blank')
+
+      // Cleanup URL เมื่อไม่ใช้แล้ว
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 100)
+    } else {
+      // Download the PDF
+      doc.save(`${props.form.invoice_no}.pdf`)
+    }
   }
 }
 

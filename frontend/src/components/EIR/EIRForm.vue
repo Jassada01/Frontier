@@ -909,11 +909,15 @@ onMounted(async () => {
                     v-if="isEditMode && equipmentInterchangeReceipt.entry_type === 'IN' && !equipmentInterchangeReceipt.eir_match_no">
                     <add-detention-modal :eirId="props.receiptId" @detentionSaved="onDetentionSaved" />
                 </div>
+                <div v-if="isEditMode">
+                    <ExportToPdf :data="equipmentInterchangeReceipt" />
+
+                </div>
+
                 <div v-if="isEditMode" class="dropdown dropdown-end">
                     <div tabindex="0" role="button" class="btn btn-ghost m-1 "><i class="fa-solid fa-bars"></i>
                     </div>
                     <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
-                        <ExportToPdf :data="equipmentInterchangeReceipt" />
                         <li><a @click="createNewInvoice"><i class="fa-solid fa-file-circle-plus"></i> เพิ่มใบ
                                 Invoice ใหม่</a></li>
                         <li><a @click="notMatchEIR"><i class="fa-solid fa-not-equal"></i> ไม่ Match EIR ใบนี้</a></li>

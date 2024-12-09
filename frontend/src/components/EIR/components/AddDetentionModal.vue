@@ -1,6 +1,6 @@
 <template>
     <div>
-        <button @click="openModal" class="btn btn-outline btn-primary"><i class="fa-solid fa-clock"></i>
+        <button @click="openModal" class="btn  btn-ghost "><i class="fa-solid fa-clock"></i>
             เพิ่มแจ้ง Detention</button>
         <div v-if="isModalOpen" class="modal modal-open">
             <div class="modal-box">

@@ -7,13 +7,13 @@
       </div>
 
       <div class="flex justify-between items-center">
+        <ExportInvoiceToPDF :form="form" :equipmentInterchangeReceipt="equipmentInterchangeReceipt" />
+
         <div class="dropdown dropdown-end">
           <div tabindex="0" role="button" class="btn btn-ghost m-1">
             <i class="fa-solid fa-bars"></i>
           </div>
           <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
-            <ExportInvoiceToPDF :form="form" :equipmentInterchangeReceipt="equipmentInterchangeReceipt" />
-            <div class="divider my-1"></div>
             <li @click="confirmCancelInvoice">
               <a><i class="fa-solid fa-times"></i> ยกเลิก Invoice</a>
             </li>
