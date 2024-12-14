@@ -23,6 +23,7 @@ const clientFreeDropPeriodRoutes = require("./routes/clientFreeDropPeriodRoutes"
 const requestContainerReturnRoutes = require("./routes/requestContainerReturnRoutes"); // เพิ่มบรรทัดนี้
 const lineGroupCombinedRoutes = require("./routes/lineGroupCombinedRoutes"); // เพิ่มบรรทัดนี้
 const requestContainerReceiveRoutes = require("./routes/requestContainerReceiveRoutes"); // เพิ่มบรรทัดนี้
+const eirTasksRoutes = require("./routes/eirTasksRoutes"); // เพิ่มบรรทัดนี้
 
 
 
@@ -58,6 +59,7 @@ app.use("/api/client_free_drop_period", clientFreeDropPeriodRoutes);
 app.use("/api/container-returns", requestContainerReturnRoutes); // เพิ่มบรรทัดนี้
 app.use("/api/line-groups", lineGroupCombinedRoutes); // เพิ่มบรรทัดนี้
 app.use("/api/container-receives", requestContainerReceiveRoutes); // เพิ่มบรรทัดนี้
+app.use("/api/tasks", eirTasksRoutes); // เพิ่มบรรทัดนี้
 
 
 

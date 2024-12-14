@@ -255,3 +255,24 @@ exports.getPendingContainerCounts = (req, res) => {
     res.send(results[0]); // Send first row since we expect only one row
   });
 };
+
+
+exports.getTasks = (req, res) => {
+  const { task_id } = req.query; // รับค่า task_id ถ้ามี
+
+  let query = `SELECT * FROM master_tasks`; // คิวรีเริ่มต้น
+  let params = [];
+
+  if (task_id) {
+    query += ` WHERE task_id = ?`; // กรองตาม task_id ถ้ามี
+    params.push(task_id);
+  }
+
+  db.query(query, params, (err, results) => {
+    if (err) {
+      res.status(500).send({ message: "Error retrieving tasks", error: err });
+      return;
+    }
+    res.send(results); // ส่งผลลัพธ์กลับไป
+  });
+};

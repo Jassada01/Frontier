@@ -332,4 +332,27 @@ router.get(
  */
 router.get("/getPendingContainerCounts", commonController.getPendingContainerCounts);
 
+
+
+/**
+ * @swagger
+ * /api/common/tasks:
+ *   get:
+ *     summary: Retrieve tasks from the master tasks table
+ *     tags: [Common]
+ *     parameters:
+ *       - in: query
+ *         name: task_id
+ *         schema:
+ *           type: integer
+ *         description: The ID of the task
+ *     responses:
+ *       200:
+ *         description: A list of tasks
+ *       500:
+ *         description: Error retrieving tasks
+ */
+router.get("/tasks", commonController.getTasks);
+
+
 module.exports = router;

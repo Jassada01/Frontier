@@ -11,6 +11,7 @@ import ExportToPdf from '../../components/EIR/ExportToPdf.vue'
 import InvoiceForm from '../../components/EIR/InvoiceForm.vue'
 import AddDetentionModal from './components/AddDetentionModal.vue';
 import AttachmentGallery from './components/AttachmentGallery.vue';
+import TaskManager from './components/TaskManager.vue';
 
 import moment from 'moment';  // Import Moment.js
 
@@ -27,7 +28,11 @@ const emit = defineEmits(['formSubmitted']);
 const router = useRouter();
 const invoiceList = ref([]);
 const detentionLogs = ref([]); // เพิ่มตัวแปรสำหรับเก็บ detention logs
+const currentTasks = ref([]);
 
+const handleTasksUpdated = (updatedTasks) => {
+    currentTasks.value = updatedTasks;
+};
 
 
 const equipmentInterchangeReceipt = ref({
@@ -746,7 +751,7 @@ async function fetchInvoiceByEirId(eirId) {
     try {
         const response = await axios.get(`${CONFIG.API_SERVER}/api/invoices/getInvoiceByEirId?eir_id=${eirId}`);
         invoiceList.value = response.data;
-        console.log(invoiceList.value);
+        //console.log(invoiceList.value);
     } catch (error) {
         if (error.response && error.response.status === 404) {
             // จัดการกรณีที่สถานะเป็น 404
@@ -910,7 +915,7 @@ onMounted(async () => {
                     <add-detention-modal :eirId="props.receiptId" @detentionSaved="onDetentionSaved" />
                 </div>
                 <div v-if="isEditMode">
-                    <ExportToPdf :data="equipmentInterchangeReceipt" />
+                    <ExportToPdf :data="equipmentInterchangeReceipt" :tasks="currentTasks" />
 
                 </div>
 
@@ -1070,6 +1075,8 @@ onMounted(async () => {
                     </div>
                 </div>
 
+
+
                 <!-- กลุ่มที่ 3 -->
                 <div class="box mb-6 p-4 border rounded-lg">
                     <div class="flex flex-wrap -mx-2">
@@ -1147,58 +1154,79 @@ onMounted(async () => {
                         </div>
                     </div>
                 </div>
+                <div role="tablist" class="tabs tabs-lifted mb-6">
+                    <input type="radio" name="my_tabs_2" role="tab" class="tab" aria-label="คนขับ" checked="checked" />
+                    <div role="tabpanel" class="tab-content bg-base-100 border-base-300 rounded-box p-6">
 
-                <!-- กลุ่มที่ 4 -->
-                <div class="box mb-6 p-4 border rounded-lg">
-                    <div class="flex flex-wrap -mx-2">
-                        <div class="w-full md:w-1/3 px-2 mb-4">
-                            <label class="block mb-2 text-sm" for="driver"> เลือกคนขับ/Driver </label>
-                            <multiselect v-model="selectedDriver" :options="drivers" label="label" track-by="id"
-                                @update:modelValue="handleDriverSelection" class="text-sm" placeholder="เลือกคนขับ">
-                                <template #option="{ option }">
-                                    <span><img :src="option.driver_image_path"
-                                            class="inline-block w-6 h-6 rounded-full mr-2" /> {{ option.label
-                                        }}</span>
-                                </template>
-                                <template #singleLabel="{ option }">
-                                    <span><img :src="option.driver_image_path"
-                                            class="inline-block w-6 h-6 rounded-full mr-2" /> {{ option.label
-                                        }}</span>
-                                </template>
-                            </multiselect>
-                        </div>
-                        <div class="w-full md:w-2/3 px-2 mb-4">
-                            <div v-if="selectedDriver" class="card card-side bg-base-100 shadow-sm relative">
-                                <button @click="startEditing"
-                                    class="btn btn-sm  btn-outline btn-neutral absolute top-2 right-2">
-                                    <i class="fas fa-edit"></i> แก้ไข
-                                </button>
-                                <figure><img :src="selectedDriver.driver_image_path" alt="Truck" class="w-64" />
-                                </figure>
-                                <div class="card-body">
-                                    <h2 class="card-title">
-                                        <span v-if="!isEditing">{{ equipmentInterchangeReceipt.driver_name }}</span>
-                                        <input v-else v-model="editForm.driver_name" class="input input-bordered" />
-                                    </h2>
-                                    <p>ทะเบียนรถบรรทุก:
-                                        <span v-if="!isEditing">{{ equipmentInterchangeReceipt.truck_license }}</span>
-                                        <input v-else v-model="editForm.truck_license" class="input input-bordered" />
-                                    </p>
-                                    <p>รหัสคนขับ: {{ selectedDriver.id }}</p>
-                                    <p>บริษัทขนส่ง: {{ selectedDriver.truck_company_name }}</p>
-                                    <p>เบอร์โทร:
-                                        <span v-if="!isEditing">{{ equipmentInterchangeReceipt.tel }}</span>
-                                        <input v-else v-model="editForm.tel" class="input input-bordered" />
-                                    </p>
-                                    <div v-if="isEditing" class="mt-4">
-                                        <button @click="saveEdit" class="btn btn-sm btn-success mr-2">เปลี่ยน</button>
-                                        <button @click="cancelEdit" class="btn btn-sm btn-error">ยกเลิก</button>
+                        <!-- กลุ่มที่ 4 -->
+                        <div class="box mb-6 p-4  rounded-lg">
+                            <div class="flex flex-wrap -mx-2">
+                                <div class="w-full md:w-1/3 px-2 mb-4">
+                                    <label class="block mb-2 text-sm" for="driver"> เลือกคนขับ/Driver </label>
+                                    <multiselect v-model="selectedDriver" :options="drivers" label="label" track-by="id"
+                                        @update:modelValue="handleDriverSelection" class="text-sm"
+                                        placeholder="เลือกคนขับ">
+                                        <template #option="{ option }">
+                                            <span><img :src="option.driver_image_path"
+                                                    class="inline-block w-6 h-6 rounded-full mr-2" /> {{ option.label
+                                                }}</span>
+                                        </template>
+                                        <template #singleLabel="{ option }">
+                                            <span><img :src="option.driver_image_path"
+                                                    class="inline-block w-6 h-6 rounded-full mr-2" /> {{ option.label
+                                                }}</span>
+                                        </template>
+                                    </multiselect>
+                                </div>
+                                <div class="w-full md:w-2/3 px-2 mb-4">
+                                    <div v-if="selectedDriver" class="card card-side bg-base-100 shadow-sm relative">
+                                        <button @click="startEditing"
+                                            class="btn btn-sm  btn-outline btn-neutral absolute top-2 right-2">
+                                            <i class="fas fa-edit"></i> แก้ไข
+                                        </button>
+                                        <figure><img :src="selectedDriver.driver_image_path" alt="Truck" class="w-64" />
+                                        </figure>
+                                        <div class="card-body">
+                                            <h2 class="card-title">
+                                                <span v-if="!isEditing">{{ equipmentInterchangeReceipt.driver_name
+                                                    }}</span>
+                                                <input v-else v-model="editForm.driver_name"
+                                                    class="input input-bordered" />
+                                            </h2>
+                                            <p>ทะเบียนรถบรรทุก:
+                                                <span v-if="!isEditing">{{ equipmentInterchangeReceipt.truck_license
+                                                    }}</span>
+                                                <input v-else v-model="editForm.truck_license"
+                                                    class="input input-bordered" />
+                                            </p>
+                                            <p>รหัสคนขับ: {{ selectedDriver.id }}</p>
+                                            <p>บริษัทขนส่ง: {{ selectedDriver.truck_company_name }}</p>
+                                            <p>เบอร์โทร:
+                                                <span v-if="!isEditing">{{ equipmentInterchangeReceipt.tel }}</span>
+                                                <input v-else v-model="editForm.tel" class="input input-bordered" />
+                                            </p>
+                                            <div v-if="isEditing" class="mt-4">
+                                                <button @click="saveEdit"
+                                                    class="btn btn-sm btn-success mr-2">เปลี่ยน</button>
+                                                <button @click="cancelEdit" class="btn btn-sm btn-error">ยกเลิก</button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    <input v-if="isEditMode" type="radio" name="my_tabs_2" role="tab" class="tab"
+                        aria-label="สั่งงาน" />
+                    <div role="tabpanel" class="tab-content bg-base-100 border-base-300 rounded-box p-6">
+                        <TaskManager v-if="equipmentInterchangeReceipt.id" :eirId="equipmentInterchangeReceipt.id"
+                            @tasksSaved="fetchEIRTasks" @tasksUpdated="handleTasksUpdated" />
+                    </div>
+
                 </div>
+
+
 
                 <!-- กลุ่มที่ 5 -->
                 <div class="box mb-6 p-4 border rounded-lg">
