@@ -1,34 +1,107 @@
 <template>
   <div>
-    <button class="btn  btn-ghost "  @click="handlePreviewInvoice"><i class="fa-regular fa-file-pdf text-2xl"></i> Preview</button>
-    <button class="btn  btn-ghost "  @click="handleDownloadInvoice"><i class="fa-solid fa-file-arrow-down text-2xl"> </i>Download</button>
+    <div class="flex">
+      <div class="join">
+        <!-- ปุ่ม Preview -->
+        <button @click="handlePreviewInvoice" class="btn btn-ghost btn-sm join-item">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="w-5 h-5"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z"
+            />
+          </svg>
+          อินวอยซ์
+        </button>
+        <!-- ปุ่มแสดงเมนู -->
+        <button @click="toggleDropdown" class="btn btn-ghost btn-sm join-item">
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            ></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Dropdown Menu -->
+    <div
+      v-if="openDropdown"
+      class="absolute right-0 z-10 w-44 mt-2 origin-top-right bg-white border border-gray-200 rounded-md shadow-lg"
+    >
+      <button
+        @click="handleDownloadInvoice"
+        class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+      >
+        <i class="fa-solid fa-file-arrow-down text-xl"> </i> ดาวน์โหลด PDF
+      </button>
+    </div>
   </div>
 </template>
 
-
 <script setup>
 import { jsPDF } from 'jspdf'
+import { ref } from 'vue'
+
 import font_config from '../../config/font_config'
 import moment from 'moment'
 import invoiceTemplateImage from '../../assets/media/pdf_template/invoice_template.png'
 import Swal from 'sweetalert2'
 
-const checkSVGBase64 = `data:image/png;base64,${font_config.check_png}`
+const openDropdown = ref(false)
+function toggleDropdown() {
+  openDropdown.value = !openDropdown.value
+}
 
+// Define props to receive array of invoice data
+const props = defineProps({
+  invoiceData: {
+    type: Array,
+    required: true,
+    validator: (value) => {
+      return value.every(
+        (item) =>
+          item.hasOwnProperty('form') &&
+          item.hasOwnProperty('equipmentInterchangeReceipt') &&
+          typeof item.form === 'object' &&
+          typeof item.equipmentInterchangeReceipt === 'object'
+      )
+    }
+  }
+})
+
+// Format number to display with commas and decimal places
 function formatNumberValue(value, minimum_fix = 2) {
   if (!isNaN(value)) {
     return Number(value).toLocaleString('en-US', {
       minimumFractionDigits: minimum_fix,
       maximumFractionDigits: 2
     })
-  } else {
-    return ''
   }
+  return ''
 }
 
+// Convert number to Thai baht text
 function convertToThaiBaht(amount) {
   const number = ['ศูนย์', 'หนึ่ง', 'สอง', 'สาม', 'สี่', 'ห้า', 'หก', 'เจ็ด', 'แปด', 'เก้า']
   const digit = ['', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน', 'ล้าน']
+
   amount = parseFloat(amount).toFixed(2).toString()
   let bahtText = ''
   let [integer, satang] = amount.split('.')
@@ -70,6 +143,7 @@ function convertToThaiBaht(amount) {
   return bahtText
 }
 
+// Convert number to English baht text
 function convertToEnglishBaht(amount) {
   const number = [
     'zero',
@@ -115,12 +189,10 @@ function convertToEnglishBaht(amount) {
     bahtText = 'zero baht'
   } else {
     let chunks = []
-
     while (integer.length > 0) {
       chunks.push(integer.slice(-3))
       integer = integer.slice(0, -3)
     }
-
     chunks = chunks.reverse()
 
     chunks.forEach((chunk, index) => {
@@ -145,7 +217,6 @@ function convertToEnglishBaht(amount) {
         bahtText += chunkText + scales[chunks.length - 1 - index] + ' '
       }
     })
-
     bahtText += 'baht'
   }
 
@@ -167,38 +238,12 @@ function convertToEnglishBaht(amount) {
   return bahtText.trim()
 }
 
-const props = defineProps({
-  form: {
-    type: Object,
-    required: true
-  },
-  equipmentInterchangeReceipt: {
-    type: Object,
-    required: true
-  }
-})
-
+// Handle preview button click
 const handlePreviewInvoice = () => {
-  generatePDF(true, true);
-  /*
-  Swal.fire({
-    title: 'Preview Invoice',
-    text: 'ดูตัวอย่าง Invoice พร้อม Copy?',
-    input: 'checkbox',
-    inputValue: 1,
-    inputPlaceholder: 'แสดง Invoice ทั้ง ต้นฉบับและสำเนา',
-    confirmButtonText: 'แสดง Preview',
-    cancelButtonText: 'ยกเลิก',
-    showCancelButton: true
-  }).then((result) => {
-    if (result.isConfirmed) {
-      const includeCopy = result.value ? true : false
-      generatePDF(includeCopy, true)
-    }
-  })
-    */
+  generatePDF(true, true)
 }
 
+// Handle download button click
 const handleDownloadInvoice = () => {
   Swal.fire({
     title: 'Download Invoice',
@@ -217,79 +262,81 @@ const handleDownloadInvoice = () => {
   })
 }
 
+// Main function to generate PDF
 const generatePDF = (includeCopy, isPreview = false) => {
   const doc = new jsPDF('p', 'pt', 'a4', { LineHeightFactor: 1 })
-
   const image = new Image()
   image.src = invoiceTemplateImage
 
   image.onload = () => {
-    // Create the first page
-    createInvoicePage(doc, image, includeCopy ? '(ต้นฉบับ)' : '')
+    // Loop through each invoice data and create pages
+    props.invoiceData.forEach((data, index) => {
+      if (index > 0) {
+        doc.addPage()
+      }
 
-    if (includeCopy) {
-      // Create the second page (สำเนา)
-      doc.addPage()
-      createInvoicePage(doc, image, '(สำเนา)')
-    }
+      // Create original page
+      createInvoicePage(doc, image, '(ต้นฉบับ)', data.form, data.equipmentInterchangeReceipt)
+
+      if (includeCopy) {
+        // Create copy page
+        doc.addPage()
+        createInvoicePage(doc, image, '(สำเนา)', data.form, data.equipmentInterchangeReceipt)
+      }
+    })
 
     if (isPreview) {
-      // Open PDF in new window/tab for preview
-      // สร้าง Blob URL แทนการ save file
       const pdfBlob = doc.output('blob')
       const blobUrl = URL.createObjectURL(pdfBlob)
       window.open(blobUrl, '_blank')
-
-      // Cleanup URL เมื่อไม่ใช้แล้ว
       setTimeout(() => URL.revokeObjectURL(blobUrl), 100)
     } else {
-      // Download the PDF
-      doc.save(`${props.form.invoice_no}.pdf`)
+      doc.save(`${props.invoiceData[0].form.invoice_no}.pdf`)
     }
   }
 }
 
-const createInvoicePage = (doc, image, copyType) => {
+// Create individual invoice page
+const createInvoicePage = (doc, image, copyType, invoice, EIR) => {
+  // Add background template
   doc.addImage(image, 'PNG', 0, 0, 595.28, 841.89)
 
+  // Set up font
   doc.addFileToVFS('THSarabunNew.ttf', font_config.thSarabunBBase64)
   doc.addFont('THSarabunNew.ttf', 'THSarabunNew', 'normal')
   doc.setFont('THSarabunNew')
-
-  doc.setFont('THSarabunNew', 'normal')
   doc.setFontSize(14)
 
-  const invoice = props.form
-  const EIR = props.equipmentInterchangeReceipt
   const lang = invoice.invoice_language
 
+  // Add cancel watermark if status is 5
   if (invoice.status_id === 5) {
     doc.setFontSize(34)
-    doc.setTextColor(255, 29, 25)
+    doc.setTextColor(255, 29, 25) // แยกค่า RGB
     doc.text('ยกเลิก', 450, 160)
-    doc.setTextColor(0, 0, 0)
+    doc.setTextColor(0, 0, 0) // reset to black
     doc.setFontSize(14)
   }
 
-  // Original or Copy
+  // Add copy type text (Original/Copy)
   if (copyType) {
     doc.setFontSize(28)
     if (copyType === '(ต้นฉบับ)') {
-      doc.setTextColor(40, 40, 244)
+      doc.setTextColor(40, 40, 244) // สีน้ำเงิน
     } else {
-      doc.setTextColor(150, 150, 150)
+      doc.setTextColor(150, 150, 150) // สีเทา
     }
     doc.text(copyType, 560, 41, { align: 'right' })
-    doc.setTextColor(0, 0, 0)
+    doc.setTextColor(0, 0, 0) // reset to black
     doc.setFontSize(14)
   }
 
-  // Header
+  // Add header information
   doc.text(invoice.invoice_no, 450, 107)
   doc.text(moment(invoice.invoice_date).format('D/M/YYYY'), 450, 120)
   doc.text(invoice.payment_method, 450, 133)
 
-  // Customer Info
+  // Add customer information
   const customerInfo =
     invoice[`customer_name${lang === 'ENG' ? '_eng' : ''}`] +
     ' (' +
@@ -299,53 +346,39 @@ const createInvoicePage = (doc, image, copyType) => {
   if (customerInfo.length > 30) {
     doc.setFontSize(12)
   }
-
   doc.text(customerInfo, 85, 107, { maxWidth: 320, lineHeightFactor: 0.6 })
-
-  // Reset font size back to 14
   doc.setFontSize(14)
 
+  // Add remaining invoice details
   doc.text(invoice[`customer_address${lang === 'ENG' ? '_eng' : ''}`], 60, 133, {
     maxWidth: 350,
     lineHeightFactor: 0.75
   })
   doc.text(invoice.tax_id, 133, 170)
 
-  // Invoice Details
-  // LINE 1
-  if (EIR.agent_code === "NON") {
-    EIR.agent_code = "-";
-  }
-  doc.text(EIR.agent_code, 95, 198)
-  // EIR Client Code
-  const clientCode = EIR.client_code
+  // Add equipment details
+  doc.text(EIR.agent_code === 'NON' ? '-' : EIR.agent_code, 95, 198)
 
+  const clientCode = EIR.client_code
   if (clientCode.length > 30) {
     doc.setFontSize(12)
     doc.text(clientCode, 225, 194, { maxWidth: 180, lineHeightFactor: 0.6 })
+  } else {
+    doc.text(clientCode, 225, 198)
   }
-  else {
-    doc.text(clientCode, 225, 198, { maxWidth: 180, lineHeightFactor: 0.6 })
-  }
-
-
-
-  // Reset font size back to 14
   doc.setFontSize(14)
-  doc.text(EIR.booking_bl, 440, 198)
 
-  // LINE 2
+  // Add additional equipment details
+  doc.text(EIR.booking_bl, 440, 198)
   doc.text(EIR.container, 95, 213)
   doc.text(EIR.size_type, 225, 213)
   doc.text(EIR.vessel, 306, 213)
   doc.text(EIR.voyage, 440, 213)
-
-  // LINE 3
   doc.text(EIR.truck_company, 95, 228)
   doc.text(EIR.driver_name, 306, 228)
   doc.text(EIR.truck_license, 440, 228)
 
-  // Line Items
+  // Add invoice items
   invoice.detail.forEach((item, index) => {
     const y = 290 + index * 15
     doc.text(item[`description${lang === 'ENG' ? '_eng' : ''}`], 100, y)
@@ -354,10 +387,10 @@ const createInvoicePage = (doc, image, copyType) => {
     doc.text(formatNumberValue(item.amount), 520, y, { align: 'right' })
   })
 
-  // Note
+  // Add note
   doc.text(invoice.note || '', 95, 540)
 
-  // Totals
+  // Add totals
   doc.text(formatNumberValue(invoice.total_amount), 520, 514, { align: 'right' })
   doc.text(
     invoice.total_discount ? '-' + formatNumberValue(invoice.total_discount) : '-',
@@ -365,25 +398,16 @@ const createInvoicePage = (doc, image, copyType) => {
     527,
     { align: 'right' }
   )
-  doc.text(invoice.vat_amount ? formatNumberValue(invoice.vat_amount) : '-', 520, 540, {
-    align: 'right'
-  })
-  doc.setFontSize(18)
-  doc.text(invoice.grand_total ? formatNumberValue(invoice.grand_total) : '-', 520, 560, {
-    align: 'right'
-  })
-  doc.setFontSize(14)
-  doc.text(
-    invoice.total_with_holding_tax ? formatNumberValue(invoice.total_with_holding_tax) : '-',
-    520,
-    575,
-    { align: 'right' }
-  )
-  doc.text(invoice.payment_total ? formatNumberValue(invoice.payment_total) : '-', 520, 588, {
-    align: 'right'
-  })
+  doc.text(formatNumberValue(invoice.vat_amount || '-'), 520, 540, { align: 'right' })
 
-  // Add converted Thai Baht text
+  doc.setFontSize(18)
+  doc.text(formatNumberValue(invoice.grand_total || '-'), 520, 560, { align: 'right' })
+  doc.setFontSize(14)
+
+  doc.text(formatNumberValue(invoice.total_with_holding_tax || '-'), 520, 575, { align: 'right' })
+  doc.text(formatNumberValue(invoice.payment_total || '-'), 520, 588, { align: 'right' })
+
+  // Add amount in words
   const thaiBahtText =
     '(' +
     (lang === 'ENG'
@@ -393,9 +417,3 @@ const createInvoicePage = (doc, image, copyType) => {
   doc.text(thaiBahtText, 80, 594)
 }
 </script>
-
-<style scoped>
-.example {
-  margin: 0 auto;
-}
-</style>

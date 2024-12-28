@@ -7,13 +7,23 @@
       </div>
 
       <div class="flex justify-between items-center">
-        <ExportInvoiceToPDF :form="form" :equipmentInterchangeReceipt="equipmentInterchangeReceipt" />
+        <ExportInvoiceToPDF
+          :invoice-data="[
+            {
+              form: form,
+              equipmentInterchangeReceipt: equipmentInterchangeReceipt
+            }
+          ]"
+        />
 
         <div class="dropdown dropdown-end">
           <div tabindex="0" role="button" class="btn btn-ghost m-1">
             <i class="fa-solid fa-bars"></i>
           </div>
-          <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+          <ul
+            tabindex="0"
+            class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+          >
             <li @click="confirmCancelInvoice">
               <a><i class="fa-solid fa-times"></i> ยกเลิก Invoice</a>
             </li>
@@ -55,8 +65,11 @@
             </li>
             <li>
               <hr />
-              <a class="timeline-start timeline-box btn btn-outline btn-success btn-xs sm:btn-sm text-xs sm:text-sm"
-                @click="confirmPayment()">ชำระแล้ว</a>
+              <a
+                class="timeline-start timeline-box btn btn-outline btn-success btn-xs sm:btn-sm text-xs sm:text-sm"
+                @click="confirmPayment()"
+                >ชำระแล้ว</a
+              >
               <div class="timeline-middle">
                 <i class="fa-solid fa-circle-check text-base-300 text-xs sm:text-sm"></i>
               </div>
@@ -88,7 +101,9 @@
           </ul>
           <ul v-if="form.status_id === 5" class="timeline timeline-vertical lg:timeline-horizontal">
             <li>
-              <div class="timeline-start timeline-box text-base-300 text-xs sm:text-sm">สร้าง Invoice</div>
+              <div class="timeline-start timeline-box text-base-300 text-xs sm:text-sm">
+                สร้าง Invoice
+              </div>
               <div class="timeline-middle">
                 <i class="fa-solid fa-circle-check text-error text-xs sm:text-sm"></i>
               </div>
@@ -118,16 +133,29 @@
           <div class="w-full md:w-1/2 px-2">
             <label for="customer_name" class="block text-gray-700 text-sm mb-2">ชื่อลูกค้า:</label>
             <div class="join w-full">
-              <input v-model="form.customer_name" id="customer_name" type="text"
-                class="input input-bordered w-full text-sm join-item" />
-              <a class="btn join-item btn-outline rounded-btn" @click="openCustomerModal">เปลี่ยนลูกค้า</a>
+              <input
+                v-model="form.customer_name"
+                id="customer_name"
+                type="text"
+                class="input input-bordered w-full text-sm join-item"
+              />
+              <a class="btn join-item btn-outline rounded-btn" @click="openCustomerModal"
+                >เปลี่ยนลูกค้า</a
+              >
             </div>
           </div>
           <div class="w-full md:w-1/2 px-2">
-            <label for="payment_method" class="block text-gray-700 text-sm mb-2">วิธีการชำระเงิน:</label>
+            <label for="payment_method" class="block text-gray-700 text-sm mb-2"
+              >วิธีการชำระเงิน:</label
+            >
             <div class="flex items-center space-x-4">
               <label class="inline-flex items-center">
-                <input v-model="form.payment_method" type="radio" value="เงินสด/โอน" class="radio" />
+                <input
+                  v-model="form.payment_method"
+                  type="radio"
+                  value="เงินสด/โอน"
+                  class="radio"
+                />
                 <span class="ml-2 text-sm">เงินสด/โอน</span>
               </label>
               <label class="inline-flex items-center">
@@ -139,24 +167,47 @@
         </div>
         <div class="flex flex-wrap -mx-2 mb-4">
           <div class="mb-4 w-full md:w-1/2 px-2">
-            <label for="customer_address" class="block text-gray-700 text-sm mb-2">ที่อยู่ลูกค้า:</label>
-            <textarea v-model="form.customer_address" id="customer_address"
-              class="textarea textarea-bordered w-full text-sm h-24"></textarea>
+            <label for="customer_address" class="block text-gray-700 text-sm mb-2"
+              >ที่อยู่ลูกค้า:</label
+            >
+            <textarea
+              v-model="form.customer_address"
+              id="customer_address"
+              class="textarea textarea-bordered w-full text-sm h-24"
+            ></textarea>
           </div>
           <div class="w-full md:w-1/3 px-2">
-            <label for="customer_address_branch" class="block text-gray-700 text-sm mb-2">สาขาลูกค้า:</label>
-            <input v-model="form.customer_address_branch" id="customer_address_branch" type="text"
-              class="input input-bordered w-full text-sm" />
+            <label for="customer_address_branch" class="block text-gray-700 text-sm mb-2"
+              >สาขาลูกค้า:</label
+            >
+            <input
+              v-model="form.customer_address_branch"
+              id="customer_address_branch"
+              type="text"
+              class="input input-bordered w-full text-sm"
+            />
           </div>
         </div>
         <div class="flex flex-wrap -mx-2 mb-4">
           <div class="w-full md:w-1/3 px-2">
-            <label for="tax_id" class="block text-gray-700 text-sm mb-2">เลขประจำตัวผู้เสียภาษี:</label>
-            <input v-model="form.tax_id" id="tax_id" type="text" class="input input-bordered w-full text-sm" />
+            <label for="tax_id" class="block text-gray-700 text-sm mb-2"
+              >เลขประจำตัวผู้เสียภาษี:</label
+            >
+            <input
+              v-model="form.tax_id"
+              id="tax_id"
+              type="text"
+              class="input input-bordered w-full text-sm"
+            />
           </div>
           <div class="w-full md:w-1/2 px-2">
             <label for="note" class="block text-gray-700 text-sm mb-2">หมายเหตุ:</label>
-            <input v-model="form.note" id="note" type="text" class="input input-bordered w-full text-sm" />
+            <input
+              v-model="form.note"
+              id="note"
+              type="text"
+              class="input input-bordered w-full text-sm"
+            />
           </div>
         </div>
       </div>
@@ -164,18 +215,33 @@
       <div v-else>
         <div class="flex flex-wrap -mx-2 mb-4">
           <div class="w-full md:w-1/2 px-2">
-            <label for="customer_name_eng" class="block text-gray-700 text-sm mb-2">Customer Name:</label>
+            <label for="customer_name_eng" class="block text-gray-700 text-sm mb-2"
+              >Customer Name:</label
+            >
             <div class="join w-full">
-              <input v-model="form.customer_name_eng" id="customer_name_eng" type="text"
-                class="input input-bordered w-full text-sm  join-item" />
-              <a class="btn join-item btn-outline rounded-btn" @click="openCustomerModal">เปลี่ยนลูกค้า</a>
+              <input
+                v-model="form.customer_name_eng"
+                id="customer_name_eng"
+                type="text"
+                class="input input-bordered w-full text-sm join-item"
+              />
+              <a class="btn join-item btn-outline rounded-btn" @click="openCustomerModal"
+                >เปลี่ยนลูกค้า</a
+              >
             </div>
           </div>
           <div class="w-full md:w-1/2 px-2">
-            <label for="payment_method" class="block text-gray-700 text-sm mb-2">Payment Method:</label>
+            <label for="payment_method" class="block text-gray-700 text-sm mb-2"
+              >Payment Method:</label
+            >
             <div class="flex items-center space-x-4">
               <label class="inline-flex items-center">
-                <input v-model="form.payment_method" type="radio" value="เงินสด/โอน" class="radio" />
+                <input
+                  v-model="form.payment_method"
+                  type="radio"
+                  value="เงินสด/โอน"
+                  class="radio"
+                />
                 <span class="ml-2 text-sm">เงินสด/โอน</span>
               </label>
               <label class="inline-flex items-center">
@@ -187,31 +253,59 @@
         </div>
         <div class="flex flex-wrap -mx-2 mb-4">
           <div class="mb-4 w-full md:w-1/2 px-2">
-            <label for="customer_address_eng" class="block text-gray-700 text-sm mb-2">Customer Address:</label>
-            <textarea v-model="form.customer_address_eng" id="customer_address_eng"
-              class="textarea textarea-bordered w-full text-sm h-24"></textarea>
+            <label for="customer_address_eng" class="block text-gray-700 text-sm mb-2"
+              >Customer Address:</label
+            >
+            <textarea
+              v-model="form.customer_address_eng"
+              id="customer_address_eng"
+              class="textarea textarea-bordered w-full text-sm h-24"
+            ></textarea>
           </div>
           <div class="w-full md:w-1/3 px-2">
-            <label for="customer_address_branch_eng" class="block text-gray-700 text-sm mb-2">Customer Branch:</label>
-            <input v-model="form.customer_address_branch_eng" id="customer_address_branch_eng" type="text"
-              class="input input-bordered w-full text-sm" />
+            <label for="customer_address_branch_eng" class="block text-gray-700 text-sm mb-2"
+              >Customer Branch:</label
+            >
+            <input
+              v-model="form.customer_address_branch_eng"
+              id="customer_address_branch_eng"
+              type="text"
+              class="input input-bordered w-full text-sm"
+            />
           </div>
         </div>
         <div class="flex flex-wrap -mx-2 mb-4">
           <div class="w-full md:w-1/3 px-2">
             <label for="tax_id" class="block text-gray-700 text-sm mb-2">Tax ID:</label>
-            <input v-model="form.tax_id" id="tax_id" type="text" class="input input-bordered w-full text-sm" />
+            <input
+              v-model="form.tax_id"
+              id="tax_id"
+              type="text"
+              class="input input-bordered w-full text-sm"
+            />
           </div>
           <div class="w-full md:w-1/2 px-2">
             <label for="note" class="block text-gray-700 text-sm mb-2">Note:</label>
-            <input v-model="form.note" id="note" type="text" class="input input-bordered w-full text-sm" />
+            <input
+              v-model="form.note"
+              id="note"
+              type="text"
+              class="input input-bordered w-full text-sm"
+            />
           </div>
         </div>
       </div>
       <div class="tab-container">
-        <InvoiceDetailItem v-if="!is_invoice_load" :detail-items="form.detail" :form="form"
-          :equipmentInterchangeReceipt="equipmentInterchangeReceipt" @remove-detail="removeDetail"
-          @add-item="addItem" />
+        <InvoiceDetailItem
+          v-if="!is_invoice_load"
+          :detail-items="form.detail"
+          :form="form"
+          :equipmentInterchangeReceipt="equipmentInterchangeReceipt"
+          @remove-detail="removeDetail"
+          @add-item="addItem"
+          :invoice_no="form.invoice_no"
+          :invoice_id="form.id"
+        />
       </div>
       <div class="flex justify-end items-center mb-6">
         <button type="button" @click="updateInvoice" class="btn btn-primary w-full md:w-auto">
@@ -226,8 +320,13 @@
       <div class="modal-box">
         <h3 class="font-bold text-lg">เลือกชื่อลูกค้า</h3>
         <div class="h-48">
-          <Multiselect v-model="selectedCustomer" :options="clients" label="name" track-by="client_code"
-            placeholder="เลือกชื่อลูกค้า" />
+          <Multiselect
+            v-model="selectedCustomer"
+            :options="clients"
+            label="name"
+            track-by="client_code"
+            placeholder="เลือกชื่อลูกค้า"
+          />
         </div>
         <div class="modal-action">
           <button class="btn" @click="closeCustomerModal">ปิด</button>
@@ -436,15 +535,14 @@ const confirmCancelInvoice = () => {
   }).then((result) => {
     if (result.isConfirmed) {
       if (form.value.note) {
-        form.value.note += "\nยกเลิกเนื่องจาก: " + result.value;
+        form.value.note += '\nยกเลิกเนื่องจาก: ' + result.value
       } else {
-        form.value.note = "ยกเลิกเนื่องจาก: " + result.value;
+        form.value.note = 'ยกเลิกเนื่องจาก: ' + result.value
       }
       updateInvoiceStatus(5, 'ยกเลิก')
     }
   })
 }
-
 
 const updateInvoiceStatus = (status_id, status_text) => {
   form.value.status_id = status_id
@@ -482,7 +580,6 @@ const openCustomerModal = () => {
 const closeCustomerModal = () => {
   document.getElementById(`customerModal_${form.value.id}`).close()
 }
-
 
 const confirmCustomerChange = () => {
   if (selectedCustomer.value) {
