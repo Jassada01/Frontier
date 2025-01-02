@@ -1,7 +1,38 @@
 <template>
   <div class="eir-table p-4 overflow-x-auto">
-    <div class="flex justify-between items-center mb-4">
-      <h1 class="text-2xl font-bold">รายการ EIR</h1>
+    <div class="flex justify-between items-center mb-6">
+      <!-- Left Section -->
+      <div class="flex flex-col gap-4">
+        <h1 class="text-2xl font-bold">รายการ EIR</h1>
+
+        <div class="flex items-center gap-6">
+          <!-- Select Box สำหรับกรอง entry_type -->
+          <div class="form-control w-[120px]">
+            <select
+              v-model="selectedEntryType"
+              class="select select-sm select-bordered w-full"
+              @change="filterByEntryType"
+            >
+              <option value="">ทั้งหมด</option>
+              <option value="IN">IN</option>
+              <option value="OUT">OUT</option>
+            </select>
+          </div>
+
+          <!-- Checkbox สำหรับกรอง match_eir -->
+          <div class="form-control">
+            <label class="label cursor-pointer py-0 gap-2">
+              <input
+                type="checkbox"
+                v-model="showOnlyUnmatched"
+                @change="filterByMatchEir"
+                class="checkbox checkbox-primary checkbox-sm"
+              />
+              <span class="label-text text-sm">เฉพาะยังไม่ Match</span>
+            </label>
+          </div>
+        </div>
+      </div>
 
       <div class="relative inline-block text-left">
         <div class="flex">
@@ -48,21 +79,21 @@
     <div v-show="isDataTableInitialized" class="overflow-x-auto">
       <table id="eirTable" class="table table-zebra">
         <thead>
-          <tr>
-            <th class="p-4">ประเภท</th>
-            <th class="p-4">ตุ้ Drop</th>
-            <th class="p-4">เลขที่ EIR</th>
-            <th class="p-4">วันที่</th>
-            <th class="p-4">Agent</th>
-            <th class="p-4">ลูกค้า</th>
-            <th class="p-4">Booking/BL</th>
-            <th class="p-4">เบอร์ตู้</th>
-            <th class="p-4">ขนาด</th>
-            <th class="p-4">ทะเบียน</th>
-            <th class="p-4">ลาน</th>
-            <th class="p-4">Match EIR</th>
-            <th class="p-4">สถานะ</th>
-            <th class="p-4">EIR-Group</th>
+          <tr class="bg-base-200 text-base-content">
+            <th class="p-3 text-sm font-semibold tracking-wide text-center">ประเภท</th>
+            <th class="p-3 text-sm font-semibold tracking-wide text-center">ตู้ Drop</th>
+            <th class="p-3 text-sm font-semibold tracking-wide">เลขที่ EIR</th>
+            <th class="p-3 text-sm font-semibold tracking-wide">วันที่</th>
+            <th class="p-3 text-sm font-semibold tracking-wide">Agent</th>
+            <th class="p-3 text-sm font-semibold tracking-wide">ลูกค้า</th>
+            <th class="p-3 text-sm font-semibold tracking-wide">Booking/BL</th>
+            <th class="p-3 text-sm font-semibold tracking-wide">เบอร์ตู้</th>
+            <th class="p-3 text-sm font-semibold tracking-wide text-center">ขนาด</th>
+            <th class="p-3 text-sm font-semibold tracking-wide">ทะเบียน</th>
+            <th class="p-3 text-sm font-semibold tracking-wide">ลาน</th>
+            <th class="p-3 text-sm font-semibold tracking-wide text-center">Match EIR</th>
+            <th class="p-3 text-sm font-semibold tracking-wide text-center">สถานะ</th>
+            <th class="p-3 text-sm font-semibold tracking-wide">EIR-Group</th>
           </tr>
         </thead>
         <tbody>
@@ -97,9 +128,9 @@
                 <div v-if="eir.match_eir == eir.receipt_no" class="badge badge-ghost badge-outline">
                   X
                 </div>
-                <div v-else class="badge badge-secondary "><i class="fa fa-exchange text-base"></i>
-
-</div>
+                <div v-else class="badge badge-secondary">
+                  <i class="fa fa-exchange text-base"></i>
+                </div>
               </div>
             </td>
             <td class="p-4">
@@ -149,8 +180,40 @@ import 'datatables.net'
 const eirs = ref([])
 const router = useRouter()
 const isDataTableInitialized = ref(false)
-
 const openDropdown = ref(false)
+const selectedEntryType = ref('')
+const showOnlyUnmatched = ref(false)
+
+// Function สำหรับ filter ตาม entry_type
+const filterByEntryType = () => {
+  if (!isDataTableInitialized.value) return
+
+  const table = $('#eirTable').DataTable()
+  if (selectedEntryType.value) {
+    table.column(0).search(selectedEntryType.value).draw()
+  } else {
+    table.column(0).search('').draw()
+  }
+}
+
+// Function สำหรับ filter ตาม match_eir
+const filterByMatchEir = () => {
+  if (!isDataTableInitialized.value) return
+
+  const table = $('#eirTable').DataTable()
+  if (showOnlyUnmatched.value) {
+    // ใช้ Custom filtering function
+    $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
+      const row = eirs.value[dataIndex]
+      return row.match_eir === null
+    })
+    table.draw()
+  } else {
+    // ล้าง custom filter
+    $.fn.dataTable.ext.search.pop()
+    table.draw()
+  }
+}
 
 function toggleDropdown() {
   openDropdown.value = !openDropdown.value
@@ -175,7 +238,6 @@ onMounted(async () => {
 
     eirs.value = response.data
 
-    console.log(eirs.value)
     // Extend DataTables sorting for dates
     $.fn.dataTable.moment = function (format, locale) {
       var types = $.fn.dataTable.ext.type
@@ -197,47 +259,11 @@ onMounted(async () => {
     // Initialize DataTables
     setTimeout(() => {
       const table = $('#eirTable').DataTable({
-        pageLength: 100, // Set the number of rows to display per page
-        order: [[3, 'desc']], // Order by the fifth column (index 4) in descending order
+        pageLength: 100,
+        order: [[3, 'desc']],
         initComplete: function (settings, json) {
           isDataTableInitialized.value = true
         }
-      })
-
-      // Add event listener for the entry type filter
-      $('#entryTypeFilter').on('change', function () {
-        table.column(0).search(this.value).draw()
-      })
-
-      // Add event listener for the drop container filter
-      $('#dropContainerFilter').on('change', function () {
-        if (this.checked) {
-          table.column(1).search('Drop').draw()
-        } else {
-          table.column(1).search('').draw()
-        }
-      })
-
-      // Add event listener for the match EIR filter
-      $('#matchEirFilter').on('change', function () {
-        if (this.checked) {
-          table.column(11).search('^$', true, false).draw()
-        } else {
-          table.column(11).search('').draw()
-        }
-      })
-
-      // Add event listener for the active status filter
-      $('#activeStatusFilter').on('change', function () {
-        if (this.checked) {
-          table.column(12).search('^(?!.*ยกเลิก).*$', true, false).draw() // Filter out 'ยกเลิก'
-        } else {
-          table.column(12).search('').draw()
-        }
-      })
-
-      $('#eirGroupFilter').on('change', function () {
-        table.column(13).search(this.value).draw()
       })
 
       // Apply initial filter to exclude 'ยกเลิก'
