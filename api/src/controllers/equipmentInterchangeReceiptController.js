@@ -507,6 +507,7 @@ exports.getEquipmentInterchangeReceipts = (req, res) => {
     params.push(end_date);
   }
 
+  // query += ` Order by eir.date  DESC LIMIT 10 ` // Add for Debug
   db.query(query, params, (err, results) => {
     if (err) {
       res.status(500).send({
