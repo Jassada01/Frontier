@@ -916,7 +916,7 @@ const validateContainerNumber = async (index) => {
 const handleYardSelection = (yard) => {
   if (yard) {
     equipmentInterchangeReceipt.value.yard_id = yard.yard_id
-    equipmentInterchangeReceipt.value.yard = yard.yard_name
+    equipmentInterchangeReceipt.value.yard = yard.short_name
   } else {
     equipmentInterchangeReceipt.value.yard_id = null
     equipmentInterchangeReceipt.value.yard = ''
@@ -1220,6 +1220,13 @@ onMounted(async () => {
   await fetchYards()
   await fetchZones()
   await fetchConditions()
+  equipmentInterchangeReceipt.value.yard_id = 26
+  const defaultYard = yards.value.find((yard) => yard.yard_id === 26)
+  if (defaultYard) {
+    selectedYard.value = defaultYard
+    equipmentInterchangeReceipt.value.yard = defaultYard.short_name
+  }
+
   await fetchUserData()
 
   if (initialData) {

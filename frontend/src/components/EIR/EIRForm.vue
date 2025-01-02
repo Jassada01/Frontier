@@ -267,7 +267,7 @@ const validateContainerNumber = async () => {
 const handleYardSelection = (yard) => {
   if (yard) {
     equipmentInterchangeReceipt.value.yard_id = yard.yard_id
-    equipmentInterchangeReceipt.value.yard = yard.yard_name
+    equipmentInterchangeReceipt.value.yard = yard.short_name
   } else {
     equipmentInterchangeReceipt.value.yard_id = null
     equipmentInterchangeReceipt.value.yard = ''
@@ -734,8 +734,8 @@ const matchOut = () => {
     date: new Date(), // ตั้งค่าใหม่
     client_id: null,
     client_code: '',
-    yard_id: null,
-    yard: '',
+    //yard_id: null,
+    //yard: '',
     booking_bl: '',
     remark: '',
     status_id: 1,
@@ -894,6 +894,12 @@ onMounted(async () => {
       fetchZones()
       await fetchConditions()
       equipmentInterchangeReceipt.value.date = config.defaultDate
+      equipmentInterchangeReceipt.value.yard_id = 26
+      const defaultYard = yards.value.find(yard => yard.yard_id === 26)
+      if (defaultYard) {
+        selectedYard.value = defaultYard
+        equipmentInterchangeReceipt.value.yard = defaultYard.short_name
+      }
       conditions.value.forEach((condition) => {
         condition.checked = equipmentInterchangeReceipt.value.conditions.some(
           (c) => c.condition_id === condition.id

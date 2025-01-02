@@ -3,7 +3,9 @@ const db = require("../config/dbConfig");
 exports.getInvoice = (req, res) => {
   const { id, eir_id, start_date, end_date } = req.query;
 
-  let query = `SELECT a.*, b.receipt_no FROM invoice_header a Left join equipment_interchange_receipt b ON a.eir_id = b.id WHERE 1=1`;
+  let query = `SELECT a.*, b.receipt_no FROM invoice_header a 
+               Left join equipment_interchange_receipt b ON a.eir_id = b.id 
+               WHERE 1=1`;
   let params = [];
 
   if (id) {
@@ -21,12 +23,15 @@ exports.getInvoice = (req, res) => {
     params.push(start_date, end_date);
   }
 
-  // console.log(query);
+  // เพิ่ม ORDER BY ให้เรียงตามวันที่ล่าสุด
+  query += ` ORDER BY a.invoice_date DESC`;
+
   db.query(query, params, (err, headerResults) => {
     if (err) {
-      res
-        .status(500)
-        .send({ message: "Error retrieving invoice header", error: err });
+      res.status(500).send({
+        message: "Error retrieving invoice header",
+        error: err,
+      });
       return;
     }
 
@@ -35,19 +40,23 @@ exports.getInvoice = (req, res) => {
       return;
     }
 
-    const headerId = headerResults[0].id;
+    // รวบรวม id ทั้งหมดจาก header
+    const headerIds = headerResults.map((header) => header.id);
 
+    // query details ทั้งหมดที่มี header_id อยู่ในรายการที่เราต้องการ
     db.query(
-      `SELECT * FROM invoice_detail WHERE invoice_header_id = ?`,
-      [headerId],
+      `SELECT * FROM invoice_detail WHERE invoice_header_id IN (?)`,
+      [headerIds],
       (err, detailResults) => {
         if (err) {
-          res
-            .status(500)
-            .send({ message: "Error retrieving invoice details", error: err });
+          res.status(500).send({
+            message: "Error retrieving invoice details",
+            error: err,
+          });
           return;
         }
 
+        // map header แต่ละตัวและแนบ details ที่เกี่ยวข้อง
         const response = headerResults.map((header) => {
           return {
             ...header,

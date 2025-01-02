@@ -230,6 +230,12 @@ router.post(
  *                   update_datetime:
  *                     type: string
  *                     format: date-time
+ *                   group_id:
+ *                     type: integer
+ *                     description: The ID of the equipment interchange receipt group
+ *                   group_code:
+ *                     type: string
+ *                     description: The code of the equipment interchange receipt group
  *                   conditions:
  *                     type: array
  *                     items:
@@ -237,6 +243,14 @@ router.post(
  *                       properties:
  *                         condition_id:
  *                           type: integer
+ *                         condition_name_en:
+ *                           type: string
+ *                         condition_name_th:
+ *                           type: string
+ *                         position_x:
+ *                           type: number
+ *                         position_y:
+ *                           type: number
  *       500:
  *         description: Error retrieving equipment interchange receipts
  */
@@ -497,12 +511,11 @@ router.post(
   equipmentInterchangeReceiptController.createInvoiceDetailsForEquipment
 );
 
-
 /**
  * @swagger
  * /api/EIR/getAvailableContainers:
  *   get:
- *     summary: Get available containers for specific agent and size type
+ *     summary: Get available containers for specific agent with optional filters
  *     tags: [EquipmentInterchangeReceipt]
  *     parameters:
  *       - in: query
@@ -514,11 +527,18 @@ router.post(
  *         example: 1
  *       - in: query
  *         name: size_type
- *         required: true
+ *         required: false
  *         schema:
  *           type: string
- *         description: The size type of container (e.g., "40' HC")
+ *         description: Optional - The size type of container (e.g., "40' HC")
  *         example: "40' HC"
+ *       - in: query
+ *         name: drop_container
+ *         required: false
+ *         schema:
+ *           type: boolean
+ *         description: Optional - Filter by drop container status
+ *         example: false
  *     responses:
  *       200:
  *         description: List of available containers
@@ -532,99 +552,16 @@ router.post(
  *                   example: true
  *                 total:
  *                   type: integer
- *                   description: Total number of containers found
  *                   example: 2
  *                 data:
  *                   type: array
  *                   items:
- *                     type: object
- *                     properties:
- *                       id:
- *                         type: integer
- *                       entry_type:
- *                         type: string
- *                         enum: [IN]
- *                       drop_container:
- *                         type: boolean
- *                       receipt_no:
- *                         type: string
- *                       date:
- *                         type: string
- *                         format: date-time
- *                       agent_id:
- *                         type: integer
- *                       agent_code:
- *                         type: string
- *                       client_id:
- *                         type: integer
- *                       client_code:
- *                         type: string
- *                       booking_bl:
- *                         type: string
- *                       container:
- *                         type: string
- *                       container_color:
- *                         type: string
- *                       size_type:
- *                         type: string
- *                       seal_no:
- *                         type: string
- *                       vessel:
- *                         type: string
- *                       zone_id:
- *                         type: integer
- *                       zone:
- *                         type: string
- *                       path_map:
- *                         type: string
- *                       tare:
- *                         type: number
- *                       voyage:
- *                         type: string
- *                       yard_id:
- *                         type: integer
- *                       yard:
- *                         type: string
- *                       create_datetime:
- *                         type: string
- *                         format: date-time
- *                       update_datetime:
- *                         type: string
- *                         format: date-time
- *       400:
- *         description: Missing required parameters
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: "กรุณาระบุ agent_id และ size_type"
- *       500:
- *         description: Server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: "เกิดข้อผิดพลาดในการดึงข้อมูล"
- *                 error:
- *                   type: string
+ *                     $ref: '#/components/schemas/Container'
  */
 router.get(
   "/getAvailableContainers",
   equipmentInterchangeReceiptController.getAvailableContainers
 );
-
 
 /**
  * @swagger
@@ -673,7 +610,5 @@ router.get(
   "/getBookingOrContainerFiles",
   equipmentInterchangeReceiptController.getBookingOrContainerFiles
 );
-
-
 
 module.exports = router;

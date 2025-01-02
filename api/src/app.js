@@ -24,6 +24,8 @@ const requestContainerReturnRoutes = require("./routes/requestContainerReturnRou
 const lineGroupCombinedRoutes = require("./routes/lineGroupCombinedRoutes"); // เพิ่มบรรทัดนี้
 const requestContainerReceiveRoutes = require("./routes/requestContainerReceiveRoutes"); // เพิ่มบรรทัดนี้
 const eirTasksRoutes = require("./routes/eirTasksRoutes"); // เพิ่มบรรทัดนี้
+const firebaseUploadFileRoutes = require("./routes/firebaseUploadFileRoutes"); // เพิ่มบรรทัดนี้
+const groupEirRoutes = require("./routes/groupEirRoutes"); // เพิ่มบรรทัดนี้
 
 
 
@@ -60,6 +62,8 @@ app.use("/api/container-returns", requestContainerReturnRoutes); // เพิ่
 app.use("/api/line-groups", lineGroupCombinedRoutes); // เพิ่มบรรทัดนี้
 app.use("/api/container-receives", requestContainerReceiveRoutes); // เพิ่มบรรทัดนี้
 app.use("/api/tasks", eirTasksRoutes); // เพิ่มบรรทัดนี้
+app.use("/api/firebase-upload-file", firebaseUploadFileRoutes); // เพิ่มบรรทัดนี้
+app.use("/api/group-eir", groupEirRoutes); // เพิ่มบรรทัดนี้
 
 
 

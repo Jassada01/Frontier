@@ -464,7 +464,9 @@ exports.getEquipmentInterchangeReceipts = (req, res) => {
             ecm.condition_name_en,
             ecm.condition_name_th,
             ecm.position_x,
-            ecm.position_y
+            ecm.position_y,
+            gh.id AS group_id,
+            gh.group_code
         FROM equipment_interchange_receipt eir
         LEFT JOIN equipment_conditions ec ON eir.id = ec.equipment_interchange_receipt_id
         LEFT JOIN users user_c ON eir.create_user = user_c.id 
@@ -473,6 +475,8 @@ exports.getEquipmentInterchangeReceipts = (req, res) => {
         LEFT JOIN conditions ecm ON ec.condition_id = ecm.id
         LEFT JOIN eir_match_view eir_mva ON eir.id = eir_mva.eir_in
         LEFT JOIN eir_match_view eir_mvb ON eir.id = eir_mvb.eir_out
+        LEFT JOIN group_eir_detail gd ON eir.id = gd.eir_id
+        LEFT JOIN group_eir_header gh ON gd.group_id = gh.id
         WHERE 1=1
     `;
   let params = [];
@@ -528,7 +532,7 @@ exports.getEquipmentInterchangeReceipts = (req, res) => {
           client_code: row.client_code,
           booking_bl: row.booking_bl,
           container: row.container,
-          container_color: row.container_color, // เพิ่มฟิลด์ container_color
+          container_color: row.container_color,
           size_type: row.size_type,
           seal_no: row.seal_no,
           vessel: row.vessel,
@@ -556,6 +560,8 @@ exports.getEquipmentInterchangeReceipts = (req, res) => {
           update_user_name: row.update_user_name,
           match_eir: row.match_eir,
           match_eir_dt: row.match_eir_dt,
+          group_id: row.group_id,
+          group_code: row.group_code,
           conditions: [],
         };
       }
@@ -895,33 +901,55 @@ exports.createInvoiceDetailsForEquipment = async (req, res) => {
 
 exports.getAvailableContainers = async (req, res) => {
   try {
-    // รับค่า parameters จาก query string
+    // รับค่า parameters จาก query string และกำหนดค่า default ให้ drop_container เป็น 0
     const { agent_id, size_type } = req.query;
+    const drop_container = req.query.drop_container === "true" ? 1 : 0;
 
-    // ตรวจสอบว่ามีการส่งค่าที่จำเป็นมาครบหรือไม่
-    if (!agent_id || !size_type) {
-      return res.status(400).json({
-        success: false,
-        message: "กรุณาระบุ agent_id และ size_type",
+    // ตรวจสอบว่ามี agent_id หรือไม่
+    if (!agent_id) {
+      return res.status(200).json({
+        success: true,
+        total: 0,
+        data: [],
       });
     }
 
-    // สร้าง SQL query
-    const sqlQuery = `
-            SELECT * 
-            FROM equipment_interchange_receipt a 
-            WHERE a.agent_id = ?
-            AND a.size_type = ?
-            AND a.entry_type = 'IN'
-            AND a.drop_container = 0 
-            AND a.id NOT IN (SELECT eir_in FROM eir_match)
-            ORDER BY a.date DESC
-        `;
+    // สร้าง base query และเพิ่ม drop_container เข้าไปในเงื่อนไขเลย
+    let sqlQuery = `
+      SELECT * 
+      FROM equipment_interchange_receipt a 
+      WHERE a.agent_id = ?
+      AND a.entry_type = 'IN'
+      AND a.drop_container = ?
+      AND a.id NOT IN (SELECT eir_in FROM eir_match) 
+      AND a.status_id != 2
+    `;
+
+    // สร้าง array เก็บ parameters พร้อมค่า drop_container
+    const queryParams = [agent_id, drop_container];
+
+    // เพิ่มเงื่อนไข size_type ถ้ามีการระบุ
+    if (size_type) {
+      sqlQuery += ` AND a.size_type = ?`;
+      queryParams.push(size_type);
+    }
+
+    // เพิ่ม ORDER BY
+    sqlQuery += ` ORDER BY a.date DESC`;
 
     // execute query with parameters
-    const results = await query(sqlQuery, [agent_id, size_type]);
+    const results = await query(sqlQuery, queryParams);
 
-    // จัดการกับ datetime fields ให้อยู่ในรูปแบบที่เหมาะสม
+    // ถ้าไม่พบข้อมูล ให้ return empty array
+    if (!results || results.length === 0) {
+      return res.status(200).json({
+        success: true,
+        total: 0,
+        data: [],
+      });
+    }
+
+    // จัดการกับ datetime fields
     const formattedResults = results.map((record) => ({
       ...record,
       date: record.date ? new Date(record.date).toISOString() : null,
@@ -936,15 +964,16 @@ exports.getAvailableContainers = async (req, res) => {
     // ส่ง response กลับ
     res.status(200).json({
       success: true,
-      total: results.length,
+      total: formattedResults.length,
       data: formattedResults,
     });
   } catch (error) {
+    // กรณี error ก็ return empty array แทนที่จะเป็น error
     console.error("Error in getAvailableContainers:", error);
-    res.status(500).json({
-      success: false,
-      message: "เกิดข้อผิดพลาดในการดึงข้อมูล",
-      error: error.message,
+    return res.status(200).json({
+      success: true,
+      total: 0,
+      data: [],
     });
   }
 };

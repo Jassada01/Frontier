@@ -40,17 +40,20 @@ const uploadFile = (file) => {
   });
 };
 
-const uploadFileToSubfolder = (file) => {
+const uploadFileToSubfolder = (file, folderName = "") => {
   return new Promise((resolve, reject) => {
     if (!file) {
       return reject("No file uploaded.");
     }
 
-    //const suffix = generateRandomSuffix();
-    const suffix = '';
-    const fileName = `Upload_File_Attached/${
+    // Construct the full path including folder
+    const suffix = "";
+    const baseDir = "Upload_File_Attached";
+    const subFolder = folderName ? `/${folderName}` : ""; // Add subfolder if provided
+    const fileName = `${baseDir}${subFolder}/${
       path.parse(file.originalname).name
     }${suffix}${path.extname(file.originalname)}`;
+
     const blob = bucket.file(fileName);
     const blobStream = blob.createWriteStream({
       metadata: {
@@ -75,7 +78,6 @@ const uploadFileToSubfolder = (file) => {
     blobStream.end(file.buffer);
   });
 };
-
 module.exports = {
   uploadFile,
   uploadFileToSubfolder,

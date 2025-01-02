@@ -42,7 +42,7 @@ router.post("/upload", uploadMiddleware.single("file"), upload);
  * @swagger
  * /api/upload-to-subfolder:
  *   post:
- *     summary: Upload a file to Firebase Storage in the "Upload_File_Attached" subfolder
+ *     summary: Upload a file to Firebase Storage in a specific subfolder under "Upload_File_Attached"
  *     requestBody:
  *       required: true
  *       content:
@@ -53,6 +53,17 @@ router.post("/upload", uploadMiddleware.single("file"), upload);
  *               file:
  *                 type: string
  *                 format: binary
+ *               folder:
+ *                 type: string
+ *                 description: Subfolder name (e.g., invoice number) where the file will be stored
+ *                 example: "INV001"
+ *     parameters:
+ *       - in: query
+ *         name: folder
+ *         schema:
+ *           type: string
+ *         description: Alternative way to specify the subfolder name
+ *         example: "INV001"
  *     responses:
  *       200:
  *         description: File uploaded successfully to subfolder
@@ -63,6 +74,10 @@ router.post("/upload", uploadMiddleware.single("file"), upload);
  *               properties:
  *                 fileUrl:
  *                   type: string
+ *                   description: Public URL of the uploaded file
+ *                   example: "https://storage.googleapis.com/bucket-name/Upload_File_Attached/INV001/example.pdf"
+ *       400:
+ *         description: Bad request (e.g., no file uploaded)
  *       500:
  *         description: Internal server error
  */
