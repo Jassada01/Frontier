@@ -52,6 +52,7 @@ const equipmentInterchangeReceipt = ref({
   zone: '',
   path_map: '',
   tare: 0.0,
+  gross_weight: 0.0,
   voyage: '',
   truck_license: '',
   driver_id: null,
@@ -423,6 +424,7 @@ const fetchReceiptData = async (id) => {
   try {
     const response = await axios.get(`${CONFIG.API_SERVER}/api/EIR/get?id=${id}`)
     const receiptData = response.data[0]
+    console.log(receiptData);
     // แปลง tinyint(1) เป็น boolean
     receiptData.drop_container = receiptData.drop_container === 1
     Object.assign(equipmentInterchangeReceipt.value, receiptData)
@@ -1347,6 +1349,22 @@ onMounted(async () => {
                 id="voyage"
                 autocomplete="off"
               />
+            </div>
+            <div class="w-full md:w-1/3 px-2 mb-4">
+              <!-- Free Space -->
+            </div>
+            <div class="w-full md:w-1/3 px-2 mb-4">
+              <label class="block mb-2 text-sm" for="gross_weight">
+                น้ำหนักรวม/Gross Weight</label>
+              <label class="input input-bordered flex items-center gap-2">
+                <input
+                  v-model="equipmentInterchangeReceipt.gross_weight"
+                  type="text"
+                  id="gross_weight"
+                  autocomplete="off"
+                  class="grow" />
+                <span>Kg</span>
+              </label>
             </div>
           </div>
         </div>

@@ -11,64 +11,34 @@
 
       <template v-else>
         <!-- Header Section -->
-        <div
-          class="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-100 overflow-hidden relative"
-        >
-          <!-- Subtle Gradient Overlay -->
-          <div class="absolute inset-0 bg-gradient-to-r from-blue-50/50 to-indigo-50/50"></div>
-
-          <div class="relative p-8">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+          <div class="p-6 space-y-6">
+            <!-- Top Section: Title, Date, Export -->
             <div
-              class="flex flex-col md:flex-row justify-between items-start md:items-center gap-8"
+              class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
             >
-              <!-- Title and Date -->
-              <div class="space-y-3">
-                <div class="flex items-center gap-2">
-                  <span class="bg-blue-100 rounded-lg p-2">
-                    <span class="i-lucide-boxes h-5 w-5 text-blue-600"></span>
-                  </span>
-                  <h1 class="text-2xl md:text-3xl font-bold text-gray-900">
-                    {{ groupData.group_code }}
-                  </h1>
+              <!-- Title and Info -->
+              <div class="flex items-start gap-4">
+                <div class="bg-blue-100 rounded-xl p-2.5 shrink-0">
+                  <span class="i-lucide-boxes h-6 w-6 text-blue-600"></span>
                 </div>
-                <div class="flex flex-col gap-1">
-                  <p class="text-gray-600">{{ groupData.booking_bl }}</p>
-                  <p class="text-gray-500 flex items-center gap-2 text-sm">
-                    <span class="i-lucide-calendar h-4 w-4"></span>
-                    {{ formatDate(groupData.create_date) }}
-                  </p>
+                <div class="space-y-1">
+                  <h1 class="text-2xl font-bold text-gray-900">{{ groupData.group_code }}</h1>
+                  <div class="flex flex-wrap items-center gap-3 text-sm">
+                    <div class="flex items-center gap-1.5 text-gray-600">
+                      <span class="i-lucide-package h-4 w-4"></span>
+                      <span>{{ groupData.booking_bl }}</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 text-gray-600">
+                      <span class="i-lucide-calendar h-4 w-4"></span>
+                      <span>{{ formatDate(groupData.create_date) }}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <!-- Summary Stats -->
-              <div class="grid grid-cols-2 gap-6">
-                <div
-                  class="bg-gradient-to-br from-blue-50 to-blue-100/50 p-4 rounded-xl border border-blue-100"
-                >
-                  <div class="flex items-center gap-3 mb-2">
-                    <span class="i-lucide-container h-4 w-4 text-blue-600"></span>
-                    <p class="text-sm text-blue-700">จำนวนตู้ทั้งหมด</p>
-                  </div>
-                  <p class="text-2xl font-bold text-blue-900 flex items-baseline gap-1">
-                    {{ groupData.eirs.length }}
-                    <span class="text-base font-normal text-blue-700">ตู้</span>
-                  </p>
-                </div>
-                <div
-                  class="bg-gradient-to-br from-green-50 to-green-100/50 p-4 rounded-xl border border-green-100"
-                >
-                  <div class="flex items-center gap-3 mb-2">
-                    <span class="i-lucide-receipt h-4 w-4 text-green-600"></span>
-                    <p class="text-sm text-green-700">ยอดรวมทั้งหมด</p>
-                  </div>
-                  <p class="text-2xl font-bold text-green-900">
-                    {{ getTotalInvoiceAmount }}
-                  </p>
-                </div>
-              </div>
-
-              <!-- Export Button -->
-              <div class="flex items-center">
+              <!-- Export Buttons -->
+              <div class="flex items-center gap-3 md:ml-auto">
                 <ExportToPdf :items="completeEIRData">
                   <span class="i-lucide-file-text h-4 w-4"></span>
                   <span>Export PDF</span>
@@ -76,12 +46,103 @@
                 <ExportInvoiceToPDF :invoiceData="formattedInvoiceData" />
               </div>
             </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <!-- จำนวนตู้ -->
+              <div
+                class="bg-gradient-to-br from-blue-50 to-white p-4 rounded-xl border border-blue-100"
+              >
+                <div class="flex flex-col justify-between h-full">
+                  <div class="flex items-center gap-2 mb-3">
+                    <span class="i-lucide-container h-5 w-5 text-blue-600"></span>
+                    <p class="font-medium text-gray-700">จำนวนตู้ทั้งหมด</p>
+                  </div>
+                  <div class="flex items-baseline justify-end gap-2">
+                    <span class="text-3xl font-bold text-blue-900">{{
+                      groupData.eirs.length
+                    }}</span>
+                    <span class="text-blue-600 font-medium">ตู้</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ยอดรวม -->
+              <div
+                class="bg-gradient-to-br from-emerald-50 to-white p-4 rounded-xl border border-emerald-100"
+              >
+                <div class="flex flex-col justify-between h-full">
+                  <div class="flex items-center gap-2 mb-3">
+                    <span class="i-lucide-receipt h-5 w-5 text-emerald-600"></span>
+                    <p class="font-medium text-gray-700">ยอดรวมทั้งหมด</p>
+                  </div>
+                  <p class="text-2xl font-bold text-emerald-700 text-right">
+                    {{ formatAmount(getTotalInvoiceAmount) }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- ยอดหัก ณ ที่จ่าย -->
+              <div
+                class="bg-gradient-to-br from-orange-50 to-white p-4 rounded-xl border border-orange-100"
+              >
+                <div class="flex flex-col justify-between h-full">
+                  <div class="flex items-center gap-2 mb-3">
+                    <span class="i-lucide-percent h-5 w-5 text-orange-600"></span>
+                    <p class="font-medium text-gray-700">ยอดหัก ณ ที่จ่าย</p>
+                  </div>
+                  <p class="text-2xl font-bold text-orange-700 text-right">
+                    {{ formatAmount(getTotalWithholdingTax) }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- ยอดที่ต้องชำระ -->
+              <div
+                class="bg-gradient-to-br from-violet-50 to-white p-4 rounded-xl border border-violet-100"
+              >
+                <div class="flex flex-col justify-between h-full">
+                  <div class="flex items-center gap-2 mb-3">
+                    <span class="i-lucide-calculator h-5 w-5 text-violet-600"></span>
+                    <p class="font-medium text-gray-700">ยอดที่ต้องชำระ</p>
+                  </div>
+                  <p class="text-2xl font-bold text-violet-700 text-right">
+                    {{ formatAmount(getTotalNetAmount) }}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
         <!-- EIR Cards Grid -->
         <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3 auto-rows-fr">
-          <EIRTicketCard v-for="eir in groupData.eirs" :key="eir.id" :eir="eir" />
+          
+          <EIRTicketCard
+            v-for="eir in completeEIRData"
+            :key="eir[0].id"
+            :eir="{
+              id: eir[0].id,
+              receipt_no: eir[0].receipt_no,
+              container: eir[0].container,
+              size_type: eir[0].size_type,
+              vessel: eir[0].vessel,
+              voyage: eir[0].voyage,
+              status: {
+                th: eir[0].status_name_th,
+                en: eir[0].status_name_en
+              },
+              invoices: eir.invoices?.map((invoice) => ({
+                id: invoice.id,
+                invoice_no: invoice.invoice_no,
+                invoice_date: invoice.invoice_date,
+                total_amount: invoice.grand_total,
+                payment_total: invoice.payment_total,
+                total_with_holding_tax: invoice.total_with_holding_tax,
+                status: invoice.status
+              }))
+            }"/>
+
         </div>
       </template>
     </div>
@@ -121,21 +182,23 @@ const formattedInvoiceData = computed(() => {
   const allInvoices = []
 
   completeEIRData.value.forEach((eir) => {
+    const nowEIR = eir[0]
+
     if (eir.invoices && eir.invoices.length > 0) {
       eir.invoices.forEach((invoice) => {
         allInvoices.push({
           form: invoice,
           equipmentInterchangeReceipt: {
-            agent_code: eir.agent_code || 'NON',
-            client_code: eir.client_code || '',
-            booking_bl: eir.booking_bl || '',
-            container: eir.container_no || '',
-            size_type: eir.size_type || '',
-            vessel: eir.vessel || '',
-            voyage: eir.voyage || '',
-            truck_company: eir.truck_company || '',
-            driver_name: eir.driver_name || '',
-            truck_license: eir.truck_license || ''
+            agent_code: nowEIR.agent_code || 'NON',
+            client_code: nowEIR.client_code || '',
+            booking_bl: nowEIR.booking_bl || '',
+            container: nowEIR.container || '',
+            size_type: nowEIR.size_type || '',
+            vessel: nowEIR.vessel || '',
+            voyage: nowEIR.voyage || '',
+            truck_company: nowEIR.truck_company || '',
+            driver_name: nowEIR.driver_name || '',
+            truck_license: nowEIR.truck_license || ''
           }
         })
       })
@@ -145,18 +208,64 @@ const formattedInvoiceData = computed(() => {
   return allInvoices
 })
 
+// console.log(formattedInvoiceData);
+
 const completeEIRData = ref([])
 
 const getTotalInvoiceAmount = computed(() => {
-  const total = groupData.value.eirs.reduce((sum, eir) => {
+  if (!Array.isArray(completeEIRData.value)) return 0
+
+  return completeEIRData.value.reduce((sum, eir) => {
+    if (!eir || !Array.isArray(eir.invoices)) return sum
+
     return (
       sum +
-      (eir.invoices?.reduce((invoiceSum, invoice) => invoiceSum + (invoice.total_amount || 0), 0) ||
-        0)
+      eir.invoices.reduce((invoiceSum, invoice) => {
+        const grandTotal = typeof invoice?.grand_total === 'number' 
+          ? parseFloat(invoice.grand_total.toFixed(2)) 
+          : 0
+        return parseFloat((invoiceSum + grandTotal).toFixed(2))
+      }, 0)
     )
   }, 0)
-  return formatAmount(total)
 })
+
+const getTotalNetAmount = computed(() => {
+  if (!Array.isArray(completeEIRData.value)) return 0
+
+  return completeEIRData.value.reduce((sum, eir) => {
+    if (!eir || !Array.isArray(eir.invoices)) return sum
+
+    return (
+      sum +
+      eir.invoices.reduce((invoiceSum, invoice) => {
+        const paymentTotal = typeof invoice?.payment_total === 'number' 
+          ? parseFloat(invoice.payment_total.toFixed(2)) 
+          : 0
+        return parseFloat((invoiceSum + paymentTotal).toFixed(2))
+      }, 0)
+    )
+  }, 0)
+})
+
+const getTotalWithholdingTax = computed(() => {
+  if (!Array.isArray(completeEIRData.value)) return 0
+
+  return completeEIRData.value.reduce((sum, eir) => {
+    if (!eir || !Array.isArray(eir.invoices)) return sum
+
+    return (
+      sum +
+      eir.invoices.reduce((invoiceSum, invoice) => {
+        const withHoldingTax = typeof invoice?.total_with_holding_tax === 'number' 
+          ? parseFloat(invoice.total_with_holding_tax.toFixed(2)) 
+          : 0
+        return parseFloat((invoiceSum + withHoldingTax).toFixed(2))
+      }, 0)
+    )
+  }, 0)
+})
+
 
 // ปรับปรุงฟังก์ชัน fetchGroupDetails
 const fetchGroupDetails = async () => {
@@ -167,12 +276,13 @@ const fetchGroupDetails = async () => {
 
     if (response.data.success) {
       groupData.value = response.data.data
+      console.log(response.data.data)
 
       // ดึงข้อมูลเพิ่มเติมสำหรับแต่ละ EIR แบบ parallel
       const completeDataPromises = groupData.value.eirs.map((eir) => fetchCompleteEIRData(eir.id))
-
       const results = await Promise.all(completeDataPromises)
       completeEIRData.value = results.filter((result) => result !== null)
+
       console.log(completeEIRData.value)
     }
   } catch (error) {

@@ -22,6 +22,7 @@ exports.addEquipmentInterchangeReceipt = async (req, res) => {
     zone,
     path_map,
     tare,
+    gross_weight,
     voyage,
     truck_license,
     driver_id,
@@ -64,9 +65,9 @@ exports.addEquipmentInterchangeReceipt = async (req, res) => {
     const equipmentQuery = `
       INSERT INTO equipment_interchange_receipt (
         entry_type, drop_container, receipt_no, date, agent_id, agent_code, client_id, client_code, booking_bl, container, container_color,
-        size_type, seal_no, vessel, zone_id, zone, path_map, tare, voyage, truck_license, driver_id, driver_name,
+        size_type, seal_no, vessel, zone_id, zone, path_map, tare, gross_weight, voyage, truck_license, driver_id, driver_name,
         truck_company, tel, yard_id, yard, status_id, remark, driver_sign, receiver_sign, create_user, update_user
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     db.query(
@@ -90,6 +91,7 @@ exports.addEquipmentInterchangeReceipt = async (req, res) => {
         zone,
         path_map,
         tare,
+        gross_weight,
         voyage,
         truck_license,
         driver_id,
@@ -129,7 +131,14 @@ exports.addEquipmentInterchangeReceipt = async (req, res) => {
           });
         });
 
-        console.log(request_type);
+        if (entry_type === "IN" && !drop_container) {
+          await query(
+            "INSERT INTO eir_tasks (eir_id, task_name) VALUES (?, ?)",
+            [result.insertId, "ตรวจเช็ครับตู้เข้าลาน"]
+          );
+        }
+
+        // console.log(request_type);
 
         // Update incase request for return
         if (request_type === "Return") {
@@ -161,10 +170,10 @@ exports.addEquipmentInterchangeReceipt = async (req, res) => {
         }
 
         if (request_type === "Receive") {
-          console.log("Access Here");
-          console.log(equipmentId);
-          console.log(request_id);
-          console.log(request_detail_id);
+          //console.log("Access Here");
+          //console.log(equipmentId);
+          //console.log(request_id);
+          //console.log(request_detail_id);
           try {
             // อัพเดท relate_EIR ใน request_container_receive_detail
             await query(
@@ -241,10 +250,7 @@ const createInvoice = async (
 ) => {
   try {
     const InvoiceDate = new Date(date);
-    const invoice_no =
-      InvoiceDate.getMonth() + 1 >= 7 && InvoiceDate.getFullYear() >= 2024
-        ? await getRunningNo("INV", "GRT", InvoiceDate, 4)
-        : await getRunningNo("INV", "GRT", InvoiceDate);
+    const invoice_no = await getRunningNo("INV", "GRT", InvoiceDate, 4);
 
     const invoiceQuery = `
       INSERT INTO invoice_header (invoice_no, eir_id)
@@ -541,6 +547,7 @@ exports.getEquipmentInterchangeReceipts = (req, res) => {
           zone: row.zone,
           path_map: row.path_map,
           tare: row.tare,
+          gross_weight: row.gross_weight,
           voyage: row.voyage,
           truck_license: row.truck_license,
           driver_id: row.driver_id,
@@ -605,6 +612,7 @@ exports.updateEquipmentInterchangeReceipt = (req, res) => {
     zone,
     path_map,
     tare,
+    gross_weight,
     voyage,
     truck_license,
     driver_id,
@@ -626,7 +634,7 @@ exports.updateEquipmentInterchangeReceipt = (req, res) => {
         UPDATE equipment_interchange_receipt SET 
             entry_type = ?, drop_container = ?, receipt_no = ?, date = ?, agent_id = ?, agent_code = ?, client_id = ?, client_code = ?,
             booking_bl = ?, container = ?, container_color = ?, size_type = ?, seal_no = ?, vessel = ?, zone_id = ?, zone = ?, path_map = ?, tare = ?,
-            voyage = ?, truck_license = ?, driver_id = ?, driver_name = ?, truck_company = ?, tel = ?, yard_id = ?, yard = ?,
+            gross_weight = ?, voyage = ?, truck_license = ?, driver_id = ?, driver_name = ?, truck_company = ?, tel = ?, yard_id = ?, yard = ?,
             status_id = ?, remark = ?, driver_sign = ?, receiver_sign = ?, update_user = ?
         WHERE id = ?
     `;
@@ -652,6 +660,7 @@ exports.updateEquipmentInterchangeReceipt = (req, res) => {
       zone,
       path_map,
       tare,
+      gross_weight,
       voyage,
       truck_license,
       driver_id,

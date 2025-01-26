@@ -5,8 +5,9 @@
       <div class="flex flex-col gap-4">
         <h1 class="text-2xl font-bold">รายการ EIR</h1>
 
+        <!-- เพิ่ม HTML ส่วน filter ในส่วนที่อยู่ใกล้กับ filter อื่นๆ -->
         <div class="flex items-center gap-6">
-          <!-- Select Box สำหรับกรอง entry_type -->
+          <!-- Filter ที่มีอยู่เดิม -->
           <div class="form-control w-[120px]">
             <select
               v-model="selectedEntryType"
@@ -19,7 +20,35 @@
             </select>
           </div>
 
-          <!-- Checkbox สำหรับกรอง match_eir -->
+          <!-- เพิ่ม Filter Agent -->
+          <div class="form-control w-[200px]">
+            <select
+              v-model="selectedAgent"
+              class="select select-sm select-bordered w-full"
+              @change="filterByAgent"
+            >
+              <option value="">Agent ทั้งหมด</option>
+              <option v-for="agent in uniqueAgents" :key="agent" :value="agent">
+                {{ agent }}
+              </option>
+            </select>
+          </div>
+
+          <!-- เพิ่ม Filter ขนาด -->
+          <div class="form-control w-[120px]">
+            <select
+              v-model="selectedSize"
+              class="select select-sm select-bordered w-full"
+              @change="filterBySize"
+            >
+              <option value="">ขนาดทั้งหมด</option>
+              <option v-for="size in uniqueSizes" :key="size" :value="size">
+                {{ size }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Checkbox ที่มีอยู่เดิม -->
           <div class="form-control">
             <label class="label cursor-pointer py-0 gap-2">
               <input
@@ -165,7 +194,7 @@
 
 <script setup>
 'use strict'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import moment from 'moment'
@@ -183,6 +212,46 @@ const isDataTableInitialized = ref(false)
 const openDropdown = ref(false)
 const selectedEntryType = ref('')
 const showOnlyUnmatched = ref(false)
+// เพิ่ม ref ใหม่
+const selectedAgent = ref('')
+const selectedSize = ref('')
+
+// เพิ่ม computed properties สำหรับ unique values
+const uniqueAgents = computed(() => {
+  const agents = new Set(eirs.value.map(eir => eir.agent_code))
+  return Array.from(agents).filter(agent => agent).sort()
+})
+
+
+const uniqueSizes = computed(() => {
+  const sizes = new Set(eirs.value.map((eir) => eir.size_type))
+  return Array.from(sizes)
+    .filter((size) => size)
+    .sort()
+})
+
+// เพิ่ม filter functions
+const filterByAgent = () => {
+  if (!isDataTableInitialized.value) return
+
+  const table = $('#eirTable').DataTable()
+  if (selectedAgent.value) {
+    table.column(4).search(selectedAgent.value).draw()
+  } else {
+    table.column(4).search('').draw()
+  }
+}
+
+const filterBySize = () => {
+  if (!isDataTableInitialized.value) return
+
+  const table = $('#eirTable').DataTable()
+  if (selectedSize.value) {
+    table.column(8).search(selectedSize.value).draw()
+  } else {
+    table.column(8).search('').draw()
+  }
+}
 
 // Function สำหรับ filter ตาม entry_type
 const filterByEntryType = () => {

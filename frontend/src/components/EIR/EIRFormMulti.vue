@@ -199,8 +199,9 @@
                   <th>ขนาด/ประเภท *</th>
                   <th>หมายเลขซีล</th>
                   <th>เรือ</th>
-                  <th>น้ำหนักตู้เปล่า</th>
                   <th>เที่ยวเรือ</th>
+                  <th>น้ำหนักตู้เปล่า</th>
+                  <th>น้ำหนักรวม</th>
                   <th class="w-20">Actions</th>
                 </tr>
               </thead>
@@ -257,6 +258,10 @@
                     <input v-model="container.vessel" class="border rounded px-2 py-1 w-full" />
                   </td>
                   <td class="py-2">
+                    <input v-model="container.voyage" class="border rounded px-2 py-1 w-full" />
+                  </td>
+                  
+                  <td class="py-2">
                     <div class="flex items-center">
                       <input
                         v-model="container.tare"
@@ -269,8 +274,17 @@
                       <span class="ml-1">Kg</span>
                     </div>
                   </td>
+                  
                   <td class="py-2">
-                    <input v-model="container.voyage" class="border rounded px-2 py-1 w-full" />
+                    <div class="flex items-center">
+                      <input
+                        v-model="container.gross_weight"
+                        type="text"
+                        class="border rounded px-2 py-1 w-24"
+                        placeholder="ถ้ามี"
+                      />
+                      <span class="ml-1">Kg</span>
+                    </div>
                   </td>
                   <td class="py-2">
                     <button
@@ -534,6 +548,7 @@ const equipmentInterchangeReceipt = ref({
   zone: '',
   path_map: '',
   tare: 0.0,
+  gross_weight: 0.0,
   voyage: '',
   truck_license: '',
   driver_id: null,
@@ -620,6 +635,7 @@ watch(
           seal_no: '',
           vessel: '',
           tare: 0.0,
+          gross_weight: 0.0,
           voyage: ''
         }
       ]
@@ -638,6 +654,7 @@ const containers = ref([
     seal_no: '',
     vessel: '',
     tare: 0.0,
+    gross_weight: 0.0,
     voyage: '',
     matching_eir_id: null // เพิ่ม field matching_eir_id
   }
@@ -663,6 +680,7 @@ const addContainer = async () => {
       seal_no: '',
       vessel: '',
       tare: 0.0,
+      gross_weight: 0.0,
       voyage: '',
       matching_eir_id: null
     })
@@ -725,7 +743,8 @@ const confirmContainerSelection = () => {
       size_type: container.size_type,
       seal_no: '',
       vessel: '',
-      tare: null,
+      tare: container.tare,
+      gross_weight: container.gross_weight,
       voyage: '',
       matching_eir_id: container.id // เพิ่ม matching_eir_id สำหรับแต่ละตู้
     })
@@ -1146,6 +1165,7 @@ const createReceipt = async () => {
         seal_no: container.seal_no,
         vessel: container.vessel,
         tare: container.tare,
+        gross_weight: container.gross_weight,
         voyage: container.voyage
       }
 

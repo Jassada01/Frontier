@@ -20,6 +20,7 @@
           </svg>
           อินวอยซ์
         </button>
+
         <!-- ปุ่มแสดงเมนู -->
         <button @click="toggleDropdown" class="btn btn-ghost btn-sm join-item">
           <svg
@@ -61,7 +62,8 @@ import { ref } from 'vue'
 
 import font_config from '../../config/font_config'
 import moment from 'moment'
-import invoiceTemplateImage from '../../assets/media/pdf_template/invoice_template.png'
+// รูป background (A5 แนวนอน) ให้เปลี่ยน path ตามไฟล์ที่มี
+import invoiceTemplateImage from '../../assets/media/pdf_template/invoice_template_A5.png'
 import Swal from 'sweetalert2'
 
 const openDropdown = ref(false)
@@ -69,7 +71,6 @@ function toggleDropdown() {
   openDropdown.value = !openDropdown.value
 }
 
-// Define props to receive array of invoice data
 const props = defineProps({
   invoiceData: {
     type: Array,
@@ -86,7 +87,6 @@ const props = defineProps({
   }
 })
 
-// Format number to display with commas and decimal places
 function formatNumberValue(value, minimum_fix = 2) {
   if (!isNaN(value)) {
     return Number(value).toLocaleString('en-US', {
@@ -97,7 +97,6 @@ function formatNumberValue(value, minimum_fix = 2) {
   return ''
 }
 
-// Convert number to Thai baht text
 function convertToThaiBaht(amount) {
   const number = ['ศูนย์', 'หนึ่ง', 'สอง', 'สาม', 'สี่', 'ห้า', 'หก', 'เจ็ด', 'แปด', 'เก้า']
   const digit = ['', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน', 'ล้าน']
@@ -143,7 +142,6 @@ function convertToThaiBaht(amount) {
   return bahtText
 }
 
-// Convert number to English baht text
 function convertToEnglishBaht(amount) {
   const number = [
     'zero',
@@ -238,12 +236,10 @@ function convertToEnglishBaht(amount) {
   return bahtText.trim()
 }
 
-// Handle preview button click
 const handlePreviewInvoice = () => {
   generatePDF(true, true)
 }
 
-// Handle download button click
 const handleDownloadInvoice = () => {
   Swal.fire({
     title: 'Download Invoice',
@@ -262,24 +258,21 @@ const handleDownloadInvoice = () => {
   })
 }
 
-// Main function to generate PDF
+/**
+ * สร้าง PDF ตามเทมเพลต A5 แนวนอน
+ */
 const generatePDF = (includeCopy, isPreview = false) => {
-  const doc = new jsPDF('p', 'pt', 'a4', { LineHeightFactor: 1 })
+  const doc = new jsPDF('landscape', 'pt', 'a5', { LineHeightFactor: 1 })
   const image = new Image()
   image.src = invoiceTemplateImage
 
   image.onload = () => {
-    // Loop through each invoice data and create pages
     props.invoiceData.forEach((data, index) => {
       if (index > 0) {
         doc.addPage()
       }
-
-      // Create original page
       createInvoicePage(doc, image, '(ต้นฉบับ)', data.form, data.equipmentInterchangeReceipt)
-
       if (includeCopy) {
-        // Create copy page
         doc.addPage()
         createInvoicePage(doc, image, '(สำเนา)', data.form, data.equipmentInterchangeReceipt)
       }
@@ -296,124 +289,156 @@ const generatePDF = (includeCopy, isPreview = false) => {
   }
 }
 
-// Create individual invoice page
-const createInvoicePage = (doc, image, copyType, invoice, EIR) => {
-  // Add background template
-  doc.addImage(image, 'PNG', 0, 0, 595.28, 841.89)
+function createInvoicePage(doc, image, copyType, invoice, EIR) {
+  // ขนาด A5 แนวนอน ~ 595.28 (กว้าง) x 420.94 (สูง)
+  doc.addImage(image, 'PNG', 0, 0, 595.28, 420.94)
 
-  // Set up font
   doc.addFileToVFS('THSarabunNew.ttf', font_config.thSarabunBBase64)
   doc.addFont('THSarabunNew.ttf', 'THSarabunNew', 'normal')
   doc.setFont('THSarabunNew')
-  doc.setFontSize(14)
+  doc.setFontSize(12)
 
   const lang = invoice.invoice_language
 
-  // Add cancel watermark if status is 5
+  // ถ้าเป็นสถานะยกเลิก
   if (invoice.status_id === 5) {
-    doc.setFontSize(34)
-    doc.setTextColor(255, 29, 25) // แยกค่า RGB
-    doc.text('ยกเลิก', 450, 160)
-    doc.setTextColor(0, 0, 0) // reset to black
-    doc.setFontSize(14)
+    doc.setFontSize(24)
+    doc.setTextColor(255, 29, 25)
+    doc.text('ยกเลิก', 500, 40)
+    doc.setTextColor(0, 0, 0)
+    doc.setFontSize(12)
   }
 
-  // Add copy type text (Original/Copy)
+  // (ต้นฉบับ) หรือ (สำเนา)
   if (copyType) {
-    doc.setFontSize(28)
+    doc.setFontSize(18)
     if (copyType === '(ต้นฉบับ)') {
-      doc.setTextColor(40, 40, 244) // สีน้ำเงิน
+      doc.setTextColor(40, 40, 244)
     } else {
-      doc.setTextColor(150, 150, 150) // สีเทา
+      doc.setTextColor(150, 150, 150)
     }
-    doc.text(copyType, 560, 41, { align: 'right' })
-    doc.setTextColor(0, 0, 0) // reset to black
-    doc.setFontSize(14)
-  }
-
-  // Add header information
-  doc.text(invoice.invoice_no, 450, 107)
-  doc.text(moment(invoice.invoice_date).format('D/M/YYYY'), 450, 120)
-  doc.text(invoice.payment_method, 450, 133)
-
-  // Add customer information
-  const customerInfo =
-    invoice[`customer_name${lang === 'ENG' ? '_eng' : ''}`] +
-    ' (' +
-    invoice[`customer_address_branch${lang === 'ENG' ? '_eng' : ''}`] +
-    ')'
-
-  if (customerInfo.length > 30) {
+    doc.text(copyType, 575, 48, { align: 'right' })
+    doc.setTextColor(0, 0, 0)
     doc.setFontSize(12)
   }
-  doc.text(customerInfo, 85, 107, { maxWidth: 320, lineHeightFactor: 0.6 })
-  doc.setFontSize(14)
 
-  // Add remaining invoice details
-  doc.text(invoice[`customer_address${lang === 'ENG' ? '_eng' : ''}`], 60, 133, {
-    maxWidth: 350,
-    lineHeightFactor: 0.75
-  })
-  doc.text(invoice.tax_id, 133, 170)
+  // ข้อมูลเอกสาร (เลขที่เอกสาร / วันที่ / เงื่อนไข) มุมขวาบน
+  doc.text(invoice.invoice_no || '-', 515, 60, { align: 'left' })
+  doc.text(moment(invoice.invoice_date).format('D/M/YYYY'), 515, 71, { align: 'left' })
+  doc.text(invoice.payment_method || '-', 515, 82, { align: 'left' })
 
-  // Add equipment details
-  doc.text(EIR.agent_code === 'NON' ? '-' : EIR.agent_code, 95, 198)
+  // ---------------------------
+  // ข้อมูลลูกค้า (ซ้ายบน)
+  // ---------------------------
+  let customerNamePrint = invoice[`customer_name${lang === 'ENG' ? '_eng' : ''}`] || '-';
+  let customerBranchPrint = invoice[`customer_address_branch${lang === 'ENG' ? '_eng' : ''}`] || '-';
+  let customerName_and_Branch = `${customerNamePrint} (${customerBranchPrint}) `
+  doc.text(customerName_and_Branch, 85, 60)
+  // ที่อยู่
+  // ส่วนของการแสดงที่อยู่
+  const address = invoice[`customer_address${lang === 'ENG' ? '_eng' : ''}`] || '-'
+  const splitAddress = doc.splitTextToSize(address, 250)
 
-  const clientCode = EIR.client_code
-  if (clientCode.length > 30) {
-    doc.setFontSize(12)
-    doc.text(clientCode, 225, 194, { maxWidth: 180, lineHeightFactor: 0.6 })
+  // ถ้าที่อยู่เกิน 3 บรรทัด ให้รวมเป็นบรรทัดเดียว
+  let displayAddress
+  if (splitAddress.length > 3) {
+    displayAddress = [address.replace(/\s+/g, ' ')] // รวมทุกบรรทัดและกำจัด whitespace ที่ไม่จำเป็น
   } else {
-    doc.text(clientCode, 225, 198)
+    displayAddress = splitAddress
   }
-  doc.setFontSize(14)
 
-  // Add additional equipment details
-  doc.text(EIR.booking_bl, 440, 198)
-  doc.text(EIR.container, 95, 213)
-  doc.text(EIR.size_type, 225, 213)
-  doc.text(EIR.vessel, 306, 213)
-  doc.text(EIR.voyage, 440, 213)
-  doc.text(EIR.truck_company, 95, 228)
-  doc.text(EIR.driver_name, 306, 228)
-  doc.text(EIR.truck_license, 440, 228)
+  let yPos = 71
+  displayAddress.forEach((line) => {
+    doc.text(line, 85, yPos,{
+    maxWidth: 380
+  })
+    yPos += 10
+  })
+  // ---------------------------
+  // เลขผู้เสียภาษี (ถ้ามี)
+  // ---------------------------
+  doc.text(invoice.tax_id ? `${invoice.tax_id}` : '-', 125, 103)
 
-  // Add invoice items
-  invoice.detail.forEach((item, index) => {
-    const y = 290 + index * 15
-    doc.text(item[`description${lang === 'ENG' ? '_eng' : ''}`], 100, y)
-    doc.text(formatNumberValue(item.quantity, 0), 385, y, { align: 'right' })
-    doc.text(formatNumberValue(item.unit_price), 450, y, { align: 'right' })
-    doc.text(formatNumberValue(item.amount), 520, y, { align: 'right' })
+  // ---------------------------
+  // ข้อมูล EIR - แสดงต่อจากนั้น
+  // ตัวอย่างจัดแถวตามภาพคร่าว ๆ
+  // ---------------------------
+  // Liner Agent
+  doc.text(EIR.agent_code === 'NON' ? '-' : EIR.agent_code, 75, 115)
+  // Shipper
+  doc.text(EIR.client_code || '-', 190, 115)
+  // Booking/BL
+  doc.text(EIR.booking_bl || '-', 490, 115)
+
+  // LINE 2 ------------------
+  // Driver
+  doc.text(EIR.driver_name || '-', 270, 128)
+  // License
+  doc.text(EIR.truck_license || '-', 375, 128)
+  // truck_company
+  doc.setFontSize(10)
+  doc.text(EIR.truck_company || '-', 480, 128)
+
+  doc.setFontSize(12)
+  // Container
+  doc.text(EIR.container || '-', 75, 128)
+  // Size Type
+  doc.text(EIR.size_type || '-', 190, 128)
+  // (ถ้ามี vessel, voyage ก็ระบุเช่นเดียวกัน)
+
+  // ----------------------------------------------------
+  // ส่วนตารางรายการ (detail) เริ่มประมาณ y = 170-180
+  // ----------------------------------------------------
+  let startY = 171
+  invoice.detail.forEach((item, idx) => {
+    const rowY = startY + idx * 15
+    // คอลัมน์คำอธิบาย
+    doc.text(item[`description${lang === 'ENG' ? '_eng' : ''}`] || '-', 60, rowY)
+    // จำนวน
+    doc.text(formatNumberValue(item.quantity, 0), 390, rowY, { align: 'right' })
+    // ราคาต่อหน่วย
+    doc.text(formatNumberValue(item.unit_price), 460, rowY, { align: 'right' })
+    // รวม
+    doc.text(formatNumberValue(item.amount), 540, rowY, { align: 'right' })
   })
 
-  // Add note
-  doc.text(invoice.note || '', 95, 540)
+  // ---------------------------
+  // หมายเหตุ
+  // ---------------------------
+  doc.text(invoice.note || '-', 80, 300)
 
-  // Add totals
-  doc.text(formatNumberValue(invoice.total_amount), 520, 514, { align: 'right' })
+  // ---------------------------
+  // สรุปราคาต่าง ๆ (มุมขวาล่าง)
+  // ---------------------------
+  // ยอดรวม
+  doc.text(formatNumberValue(invoice.total_amount), 540, 280, { align: 'right' })
+  // ส่วนลด
   doc.text(
     invoice.total_discount ? '-' + formatNumberValue(invoice.total_discount) : '-',
-    520,
-    527,
+    540,
+    290,
     { align: 'right' }
   )
-  doc.text(formatNumberValue(invoice.vat_amount || '-'), 520, 540, { align: 'right' })
+  // VAT
+  doc.text(formatNumberValue(invoice.vat_amount || '-'), 540, 300, { align: 'right' })
+  // ยอดรวมทั้งหมด
+  doc.setFontSize(15)
+  doc.text(formatNumberValue(invoice.grand_total || '-'), 540, 315, { align: 'right' })
+  doc.setFontSize(12)
+  // ภาษีหัก ณ ที่จ่าย
+  doc.text(formatNumberValue(invoice.total_with_holding_tax || '-'), 540, 329, { align: 'right' })
+  // ยอดชำระ
+  doc.text(formatNumberValue(invoice.payment_total || '-'), 540, 338, { align: 'right' })
 
-  doc.setFontSize(18)
-  doc.text(formatNumberValue(invoice.grand_total || '-'), 520, 560, { align: 'right' })
-  doc.setFontSize(14)
-
-  doc.text(formatNumberValue(invoice.total_with_holding_tax || '-'), 520, 575, { align: 'right' })
-  doc.text(formatNumberValue(invoice.payment_total || '-'), 520, 588, { align: 'right' })
-
-  // Add amount in words
-  const thaiBahtText =
+  // ---------------------------
+  // จำนวนเงินเป็นตัวหนังสือ
+  // ---------------------------
+  const bahtText =
     '(' +
     (lang === 'ENG'
       ? convertToEnglishBaht(invoice.grand_total)
       : convertToThaiBaht(invoice.grand_total)) +
     ')'
-  doc.text(thaiBahtText, 80, 594)
+  doc.text(bahtText, 250, 340, { maxWidth: 300 })
 }
 </script>

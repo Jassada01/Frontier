@@ -2,8 +2,8 @@
   <div class="relative inline-block text-left">
     <div class="flex">
       <div class="join">
-      <!-- ปุ่ม Preview -->
-      <button @click="generatePDF(true)" class="btn btn-ghost btn-sm join-item">
+        <!-- ปุ่ม Preview -->
+        <button @click="generatePDF(true)" class="btn btn-ghost btn-sm join-item">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -20,20 +20,37 @@
           </svg>
           EIR
         </button>
-      <!-- ปุ่มแสดงเมนู -->
-      <button @click="toggleDropdown" class="btn btn-ghost btn-sm join-item">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-        </svg>
-      </button>
+
+        <!-- ปุ่มแสดงเมนู -->
+        <button @click="toggleDropdown" class="btn btn-ghost btn-sm join-item">
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            ></path>
+          </svg>
+        </button>
+      </div>
     </div>
-  </div>
 
     <!-- Dropdown Menu -->
-    <div v-if="openDropdown"
-      class="absolute right-0 z-10 w-44 mt-2 origin-top-right bg-white border border-gray-200 rounded-md shadow-lg">
-      <button @click="handleDownloadClick" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-        <i class="fa-solid fa-file-arrow-down text-xl"> </i>  ดาวน์โหลด PDF
+    <div
+      v-if="openDropdown"
+      class="absolute right-0 z-10 w-44 mt-2 origin-top-right bg-white border border-gray-200 rounded-md shadow-lg"
+    >
+      <button
+        @click="handleDownloadClick"
+        class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+      >
+        <i class="fa-solid fa-file-arrow-down text-xl"></i> ดาวน์โหลด PDF
       </button>
     </div>
   </div>
@@ -42,43 +59,47 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { jsPDF } from 'jspdf'
-import font_config from '../../config/font_config'
+// moment ถ้าไม่ต้องใช้ก็ลบออกได้ค่ะ
 import moment from 'moment'
-import eirTemplateImage from '../../assets/media/pdf_template/eir_template.png'
 
+// นำเข้าฟอนต์และ checkmark base64
+import font_config from '../../config/font_config'
+// ตรงนี้เปลี่ยนเป็น path ของรูป template ใหม่ A5 landscape
+import eirTemplateImage from '../../assets/media/pdf_template/eir_template_a5.png'
+
+// state ของ dropdown
 const openDropdown = ref(false)
 
+// Props รับข้อมูล container/tasks
 const props = defineProps({
   items: {
     type: [Object, Array],
     required: true,
     validator: (value) => {
       if (!Array.isArray(value)) {
-        return typeof value === 'object' && value !== null;
+        return typeof value === 'object' && value !== null
       }
-      return value.every(item => 
-        typeof item === 'object' && 
-        item !== null && 
-        '0' in item && 
-        'tasks' in item
-      );
+      return value.every(
+        (item) => typeof item === 'object' && item !== null && '0' in item && 'tasks' in item
+      )
     }
   }
-});
+})
 
-// แปลงข้อมูลให้อยู่ในรูปแบบที่ใช้งานได้
+// แปลงข้อมูลเป็นรูปแบบที่ใช้ได้ง่าย
 const processedItems = computed(() => {
   if (!Array.isArray(props.items)) {
     return {
       data: props.items['0'],
       tasks: props.items.tasks || []
-    };
+    }
   }
-  return props.items.map(item => ({
+  return props.items.map((item) => ({
     data: item['0'],
     tasks: item.tasks || []
-  }));
-});
+  }))
+})
+
 
 function toggleDropdown() {
   openDropdown.value = !openDropdown.value
@@ -88,9 +109,9 @@ function handleDownloadClick() {
   generatePDF(false)
 }
 
-function formatNumberValue(tareValue) {
-  if (!isNaN(tareValue)) {
-    return Number(tareValue).toLocaleString('en-US', {
+function formatNumberValue(numValue) {
+  if (!isNaN(numValue)) {
+    return Number(numValue).toLocaleString('en-US', {
       minimumFractionDigits: 0,
       maximumFractionDigits: 2
     })
@@ -99,99 +120,129 @@ function formatNumberValue(tareValue) {
   }
 }
 
+// check icon เป็น base64
 const checkSVGBase64 = `data:image/png;base64,${font_config.check_png}`
 
+// ฟังก์ชันเพิ่มเครื่องหมายถูก
 function generateCheckMarkObject(doc, entryType, dropContainer) {
+  // ตัวอย่างการวาง checkbox
+  doc.setFontSize(32)
+  doc.setFont('times', 'bold') // ใช้ Helvetica ตัวหนา
+
+  doc.text(entryType || '-', 85, 96, { align: 'center' })
+
+  /*
   if (entryType === 'IN') {
-    doc.addImage(checkSVGBase64, 'PNG', 65, 130, 15, 15)
+    // ตัวอย่างตำแหน่ง (x=40, y=60) ปรับตามเทมเพลตจริง
+    //doc.addImage(checkSVGBase64, 'PNG', 40, 60, 15, 15)
   } else if (entryType === 'OUT') {
-    doc.addImage(checkSVGBase64, 'PNG', 65, 160, 15, 15)
+    //doc.addImage(checkSVGBase64, 'PNG', 40, 86, 15, 15)
+    doc.text(entryType || '-', 85, 96, { align: 'center' })
   }
+  */
 
   if (dropContainer) {
-    doc.addImage(checkSVGBase64, 'PNG', 168, 160, 15, 15)
+    doc.addImage(checkSVGBase64, 'PNG', 63, 102, 15, 15)
   }
+  doc.setFont('THSarabunNew', 'normal')
 }
 
+// ฟังก์ชันสร้าง PDF สำหรับ container 1 ชุด
 const generateSinglePDF = (doc, data, tasks) => {
   const image = new Image()
   image.src = eirTemplateImage
 
-  const addPage = (pageType = "Original") => {
-    doc.addImage(image, 'PNG', 0, 0, 595.28, 841.89)
-
-    generateCheckMarkObject(doc, data.entry_type, data.drop_container)
+  const addPage = (pageType = 'Original') => {
+    // เพิ่มรูป template เต็มหน้ากระดาษ A5 (landscape)
+    // หน้ากระดาษ A5 แนวนอน: 595(width) x 420(height) โดยประมาณ
+    doc.addImage(image, 'PNG', 0, 0, 595, 420)
 
     // นำเข้าฟอนต์ TH Sarabun New
     doc.addFileToVFS('THSarabunNew.ttf', font_config.thSarabunBBase64)
     doc.addFont('THSarabunNew.ttf', 'THSarabunNew', 'normal')
     doc.setFont('THSarabunNew')
+    doc.setFontSize(14)
 
-    doc.setFontSize(35);
+    // เพิ่มเครื่องหมาย check ถ้าจำเป็น
+    generateCheckMarkObject(doc, data.entry_type, data.drop_container)
+    doc.setFontSize(14)
+    // มุมบนขวา ลองไว้เป็นเลขที่ / วันเวลา
+    /*
+    if (pageType === 'Original') {
+      doc.setTextColor(40, 40, 244)
+      doc.text('(ต้นฉบับ)', 535, 32)
+    } else if (pageType === 'Copy') {
+      doc.setTextColor(200, 200, 200)
+      doc.text('(สำเนา)', 535, 32)
+    }
+
+    */
 
     switch (pageType) {
       case 'Copy':
-        doc.setTextColor(200, 200, 200);
-        doc.text('(สำเนา)', 480, 60);
-        break;
+        doc.setTextColor(200, 200, 200)
+        doc.text('(สำเนา)', 535, 18)
+        break
       case 'Original':
-        doc.setTextColor(40, 40, 244);
-        doc.text('(ต้นฉบับ)', 480, 60);
-        break;
-      case 'Task Order':
-        doc.setTextColor(10, 10, 10);
-        doc.text('ใบสั่งงาน', 480, 60);
-        break;
+        doc.setTextColor(40, 40, 244)
+        doc.text('(ต้นฉบับ)', 535, 18)
+        break
+      case 'TaskOrder':
+        doc.setTextColor(200, 10, 10)
+        doc.setFontSize(26)
+        doc.text('ใบสั่งงาน', 535, 25, { align: 'center' })
+        break
     }
+    doc.setFontSize(12)
+    // Reset สีเป็นดำ
+    doc.setTextColor(0, 0, 0)
 
-    doc.setTextColor(0, 0, 0);
-    doc.setFontSize(16)
+    // ตัวอย่างวางข้อมูล Header
+    doc.text(`${data.receipt_no || ''}`, 480, 45)
+    doc.text(`${moment(data.date).format('DD/MM/YYYY HH:mm') || ''}`, 480, 60)
 
-    // Header
-    doc.text(data.receipt_no || '', 425, 142)
-    doc.text(moment(data.date).format('D/M/YYYY H:mm') || '', 425, 167)
-
-    // Info Line 1
-    doc.text(data.agent_code === "NON" ? "-" : (data.agent_code || ''), 105, 212)
-    doc.text(data.container || '', 265, 212)
-    doc.text(data.booking_bl || '', 470, 212)
-
-    if (data.status_id === 2) {
-      doc.setFontSize(34)
-      doc.setTextColor(255, 29, 25)
-      doc.text('ยกเลิก', 450, 120)
-      doc.setTextColor(0, 0, 0)
-      doc.setFontSize(14)
-    }
-
-    // Info Line 2
-    const dataClientCode = data.client_code || '';
-    if (dataClientCode.length > 40) {
-      doc.setFontSize(12)
-      doc.text(dataClientCode, 105, 230, { maxWidth: 200, lineHeightFactor: 0.6 })
+    // ตัวอย่างตำแหน่ง agent / shipper / seal
+    doc.text(data.agent_code === 'NON' ? '-' : data.agent_code || '-', 176, 85) // Liner Agent
+    // Set initial font size based on text length
+    const shipperText = data.client_code || '-'
+    if (shipperText.length > 32) {
+      doc.setFontSize(11)
     } else {
-      doc.text(dataClientCode, 105, 234, { maxWidth: 200, lineHeightFactor: 0.6 })
+      doc.setFontSize(12)
     }
+    doc.text(shipperText, 176, 100) // Shipper
+    doc.setFontSize(14)
+    doc.text(data.seal_no || '-', 176, 116) // Seal no
 
+    // ตัวอย่างตำแหน่ง container/size/tare
     doc.setFontSize(16)
-    doc.text(data.size_type || '', 365, 234)
-    doc.text(formatNumberValue(data.tare) || '', 470, 234)
+    doc.text(data.container || '-', 340, 85)
+    doc.setFontSize(14)
+    doc.text(data.size_type || '-', 420, 100)
+    doc.text(formatNumberValue(data.tare) || '-', 498, 102)
 
-    // Info Line 3
-    doc.text(data.seal_no || '', 105, 255)
-    doc.text(data.vessel || '', 265, 255)
-    doc.text(data.voyage || '', 470, 255)
+    // ตัวอย่างตำแหน่ง booking/ vessel / voyage
+    doc.text(data.booking_bl || '-', 480, 85)
+    doc.setFontSize(12)
+    doc.text(data.vessel || '-', 255, 115)
+    doc.text(data.voyage || '-', 393, 115)
+    doc.setFontSize(14)
+    doc.text(formatNumberValue(data.gross_weight) || '-', 498, 117)
 
-    // Driver Info 1
-    doc.text(data.truck_license || '', 108, 317)
-    doc.text(data.truck_company || '', 360, 317)
+    // driver info
+    doc.text(data.truck_license || '-', 176, 145)
+    doc.text(data.driver_name || '-', 176, 158)
+    doc.text(data.yard || '-', 176, 173) // yard
 
-    // Driver Info 2
-    doc.text(data.driver_name || '', 108, 340)
-    doc.text(data.tel || '', 360, 340)
+    doc.text(data.truck_company || '-', 365, 145)
+    doc.text(data.tel || '-', 365, 158)
 
-    // Original Yard
-    doc.text(data.yard || '', 108, 362)
+    //doc.addImage(checkSVGBase64, 'PNG', 278, 194, 15, 15)
+    //doc.addImage(checkSVGBase64, 'PNG', 278, 213, 15, 15)
+    //doc.addImage(checkSVGBase64, 'PNG', 278, 232, 15, 15)
+
+    //doc.addImage(checkSVGBase64, 'PNG', 365, 194, 15, 15)
+    //doc.addImage(checkSVGBase64, 'PNG', 452, 194, 15, 15)
 
     // Add conditions dynamically
     if (Array.isArray(data.conditions)) {
@@ -202,95 +253,94 @@ const generateSinglePDF = (doc, data, tasks) => {
       })
     }
 
-    // Color
+    // หมายเหตุ
     doc.setFontSize(10)
-    doc.text(data.container_color || '', 90, 670, { align: 'center' }, { maxWidth: 50 })
-    
-    // Remark
-    doc.setFontSize(12)
-    doc.text(data.remark || '', 330, 490, { maxWidth: 200 })
+    doc.text(data.remark || '-', 365, 278, { maxWidth: 150 })
 
-    if (pageType === "Task Order" && Array.isArray(tasks)) {
-      doc.setFontSize(14);
-      doc.text('รายการ:', 250, 520);
+    doc.setFontSize(8)
+    doc.text(data.container_color  || '-', 56, 338, { align: 'center' })
 
-      let yPosition = 540;
+    if (pageType === 'TaskOrder' && Array.isArray(tasks)) {
+      doc.setFontSize(14)
+      doc.text('รายการ:', 195, 260)
+
+      let yPosition = 275
       tasks.forEach((task) => {
-        const status = task.complete_datetime ? '✓' : '○';
-        const taskText = `${status} ${task.task_name || ''}`;
-        doc.text('[  ] ' + taskText, 260, yPosition);
-        yPosition += 17;
+        const status = task.complete_datetime ? '✓' : '○'
+        const taskText = `${status} ${task.task_name || ''}`
+        doc.text('[  ] ' + taskText, 210, yPosition)
+        yPosition += 13
 
         if (yPosition > 700) {
-          doc.text('...', 260, yPosition);
-          return;
+          doc.text('...', 200, yPosition)
+          return
         }
-      });
+      })
     }
 
-    // PIC Name
-    doc.setFontSize(16)
-    doc.text(data.update_user_name || '', 465, 735, { align: 'center' }, { maxWidth: 50 })
+    // เซ็นชื่อหรือผู้รับ
+    doc.setFontSize(12)
+    doc.text(data.update_user_name || '', 510, 382, { align: 'center' })
   }
 
-  // Add pages
-  addPage("Original")
+  // สร้างหน้า (ต้นฉบับ, สำเนา) ถ้าต้องการ
+  addPage('Original')
   doc.addPage()
-  addPage("Copy")
+  addPage('Copy')
 
+  // ถ้ามี tasks อยากออกใบสั่งงานด้วย ก็สามารถทำเพิ่ม
   if (tasks && tasks.length > 0) {
     doc.addPage()
-    addPage("Task Order")
+    addPage('TaskOrder')
+    // ใส่รายละเอียด tasks ต่างๆ เพิ่มได้
   }
 }
 
-// ฟังก์ชันสำหรับการ generate PDF แบบ batch
+// ฟังก์ชันสำหรับรวม PDF หากส่ง items มาเป็น array หลาย container
 const generateBatchPDF = (isPreview = true) => {
-  const doc = new jsPDF('p', 'pt', 'a4');
-  
+  // A5 landscape
+  const doc = new jsPDF('l', 'pt', 'a5')
+
   processedItems.value.forEach((item, index) => {
     if (index > 0) {
-      doc.addPage();
+      doc.addPage()
     }
-    generateSinglePDF(doc, item.data, item.tasks);
-  });
+    generateSinglePDF(doc, item.data, item.tasks)
+  })
 
   if (isPreview) {
-    const pdfBlob = doc.output('blob');
-    const blobUrl = URL.createObjectURL(pdfBlob);
-    window.open(blobUrl, '_blank');
-    setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
+    const pdfBlob = doc.output('blob')
+    const blobUrl = URL.createObjectURL(pdfBlob)
+    window.open(blobUrl, '_blank')
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 100)
   } else {
-    const firstReceiptNo = processedItems.value[0]?.data.receipt_no || 'batch';
-    doc.save(`${firstReceiptNo}.pdf`);
+    const firstReceiptNo = processedItems.value[0]?.data.receipt_no || 'batch'
+    doc.save(`${firstReceiptNo}.pdf`)
   }
-};
+}
 
-// ฟังก์ชันหลักสำหรับการสร้าง PDF
+// ฟังก์ชันสร้าง PDF หลัก (รองรับเดี่ยวและหลาย)
 const generatePDF = (isPreview = true) => {
   if (Array.isArray(props.items)) {
-    generateBatchPDF(isPreview);
+    generateBatchPDF(isPreview)
   } else {
-    const doc = new jsPDF('p', 'pt', 'a4');
-    generateSinglePDF(doc, processedItems.value.data, processedItems.value.tasks);
-    
+    // A5 landscape
+    const doc = new jsPDF('l', 'pt', 'a5')
+    generateSinglePDF(doc, processedItems.value.data, processedItems.value.tasks)
+
     if (isPreview) {
-      const pdfBlob = doc.output('blob');
-      const blobUrl = URL.createObjectURL(pdfBlob);
-      window.open(blobUrl, '_blank');
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
+      const pdfBlob = doc.output('blob')
+      const blobUrl = URL.createObjectURL(pdfBlob)
+      window.open(blobUrl, '_blank')
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 100)
     } else {
-      doc.save(`${processedItems.value.data.receipt_no}.pdf`);
+      doc.save(`${processedItems.value.data.receipt_no || 'eir'}.pdf`)
     }
   }
-};
+}
 </script>
 
 <style scoped>
-.example {
-  margin: 0 auto;
-}
-
 .pdf-preview {
   margin-top: 20px;
   border: 1px solid #ccc;
