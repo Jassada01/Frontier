@@ -503,13 +503,13 @@ exports.getEquipmentInterchangeReceipts = (req, res) => {
   }
 
   if (start_date && end_date) {
-    query += ` AND eir.date BETWEEN ? AND ?`;
+    query += ` AND (eir.date BETWEEN ? AND ? OR (eir_mva.eir_in IS NULL AND eir_mvb.eir_in_no IS NULL))`;
     params.push(start_date, end_date);
   } else if (start_date) {
-    query += ` AND eir.date >= ?`;
+    query += ` AND (eir.date >= ? OR (eir_mva.eir_in IS NULL AND eir_mvb.eir_in_no IS NULL))`;
     params.push(start_date);
   } else if (end_date) {
-    query += ` AND eir.date <= ?`;
+    query += ` AND (eir.date <= ? OR (eir_mva.eir_in IS NULL AND eir_mvb.eir_in_no IS NULL))`;
     params.push(end_date);
   }
 

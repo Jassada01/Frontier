@@ -100,7 +100,6 @@ const processedItems = computed(() => {
   }))
 })
 
-
 function toggleDropdown() {
   openDropdown.value = !openDropdown.value
 }
@@ -204,6 +203,7 @@ const generateSinglePDF = (doc, data, tasks) => {
     // ตัวอย่างตำแหน่ง agent / shipper / seal
     doc.text(data.agent_code === 'NON' ? '-' : data.agent_code || '-', 176, 85) // Liner Agent
     // Set initial font size based on text length
+    /*
     const shipperText = data.client_code || '-'
     if (shipperText.length > 32) {
       doc.setFontSize(11)
@@ -211,8 +211,54 @@ const generateSinglePDF = (doc, data, tasks) => {
       doc.setFontSize(12)
     }
     doc.text(shipperText, 176, 100) // Shipper
-    doc.setFontSize(14)
-    doc.text(data.seal_no || '-', 176, 116) // Seal no
+
+    */
+   const MAX_LINE_LENGTH = 50;
+    const shipperText = data.client_code || '-'
+    if (shipperText.length > MAX_LINE_LENGTH) {
+      doc.setFontSize(11)
+      // หาตำแหน่ง space ที่ใกล้ที่สุดกับตำแหน่งที่กำหนด
+      let splitIndex = MAX_LINE_LENGTH
+      // ค้นหา space ก่อนตำแหน่งที่กำหนด
+      const lastSpaceBeforeLimit = shipperText.lastIndexOf(' ', MAX_LINE_LENGTH)
+      // ค้นหา space หลังตำแหน่งที่กำหนด
+      const firstSpaceAfterLimit = shipperText.indexOf(' ', MAX_LINE_LENGTH)
+      
+      // ถ้ามี space ทั้งก่อนและหลัง ให้เลือกตำแหน่งที่ใกล้ที่สุด
+      if (lastSpaceBeforeLimit !== -1 && firstSpaceAfterLimit !== -1) {
+        const diffBefore = MAX_LINE_LENGTH - lastSpaceBeforeLimit
+        const diffAfter = firstSpaceAfterLimit - MAX_LINE_LENGTH
+        splitIndex = diffBefore <= diffAfter ? lastSpaceBeforeLimit : firstSpaceAfterLimit
+      } 
+      // ถ้ามีแค่ space ก่อนตำแหน่งที่กำหนด
+      else if (lastSpaceBeforeLimit !== -1) {
+        splitIndex = lastSpaceBeforeLimit
+      }
+      // ถ้ามีแค่ space หลังตำแหน่งที่กำหนด
+      else if (firstSpaceAfterLimit !== -1) {
+        splitIndex = firstSpaceAfterLimit
+      }
+      
+      const firstLine = shipperText.substring(0, splitIndex)
+      const secondLine = shipperText.substring(splitIndex + 1) // +1 เพื่อข้าม space
+      doc.text(firstLine, 176, 98)
+      doc.text(secondLine, 176, 105)
+    } else {
+      doc.setFontSize(12)
+      doc.text(shipperText, 176, 100)
+    }
+
+
+    // Adjust font size based on seal number length
+    const sealText = data.seal_no || '-'
+    if (sealText.length >= 12) {
+      doc.setFontSize(10)
+    } else if (sealText.length >= 10) {
+      doc.setFontSize(12)
+    } else {
+      doc.setFontSize(14)
+    }
+    doc.text(sealText, 176, 116) // Seal no
 
     // ตัวอย่างตำแหน่ง container/size/tare
     doc.setFontSize(16)
@@ -258,7 +304,7 @@ const generateSinglePDF = (doc, data, tasks) => {
     doc.text(data.remark || '-', 365, 278, { maxWidth: 150 })
 
     doc.setFontSize(8)
-    doc.text(data.container_color  || '-', 56, 338, { align: 'center' })
+    doc.text(data.container_color || '-', 56, 338, { align: 'center' })
 
     if (pageType === 'TaskOrder' && Array.isArray(tasks)) {
       doc.setFontSize(14)

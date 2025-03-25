@@ -302,9 +302,9 @@ function createInvoicePage(doc, image, copyType, invoice, EIR) {
 
   // ถ้าเป็นสถานะยกเลิก
   if (invoice.status_id === 5) {
-    doc.setFontSize(24)
-    doc.setTextColor(255, 29, 25)
-    doc.text('ยกเลิก', 500, 40)
+    doc.setFontSize(80)
+    doc.setTextColor(255, 190, 190)
+    doc.text('ยกเลิก', 240, 230)
     doc.setTextColor(0, 0, 0)
     doc.setFontSize(12)
   }

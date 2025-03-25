@@ -341,7 +341,7 @@ onMounted(async () => {
   } catch (error) {
     console.error('Error fetching EIRs:', error)
   }
-})
+});
 </script>
 
 <style scoped>
